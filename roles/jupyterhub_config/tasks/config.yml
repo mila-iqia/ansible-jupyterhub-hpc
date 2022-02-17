@@ -1,0 +1,42 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: install jupyterhub config file
+  template:
+    src: jupyterhub_config.py.j2
+    dest: "{{ jupyterhub_config_dir }}/jupyterhub_config.py"
+    owner: "{{ jupyter_username }}"
+    group: "{{ jupyter_username }}"
+    mode: 0644
+  become: true
+
+- name: install jupyterhub cookie secret
+  copy:
+    src: "../../../security/cookie_secret"
+    dest: "{{ jupyterhub_srv_dir }}/cookie_secret"
+    owner: "{{ jupyter_username }}"
+    group: "{{ jupyter_username }}"
+    mode: 0600
+  become: true
+
+- name: install CHP proxy auth token
+  copy:
+    src: "../../../security/proxy_auth_token"
+    dest: "{{ jupyterhub_srv_dir }}/proxy_auth_token"
+    owner: "{{ jupyter_username }}"
+    group: "{{ jupyter_username }}"
+    mode: 0600
+  become: true

@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+# Service file for jupyterhub.
+
+[Unit]
+Description="Service for launching Jupyterhub"
+After=syslog.target network.target
+
+[Service]
+Environment="PATH={{ jupyter_env_path }}/bin:$PATH"
+Environment="JUPYTERHUB_CRYPT_KEY={{ auth_state_crypt_keys }}"
+User=u'{{ jupyter_username }}'
+ExecStart=u'{{ jupyter_env_path }}/bin/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

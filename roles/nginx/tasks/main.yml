@@ -1,0 +1,96 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+# Install nginx web server and install certificates
+
+- name: install system nginx
+  yum:
+    name: nginx
+    state: present
+  become: true
+
+- name: make sure /etc/nginx/ssl exists
+  file:
+    path: "{{ ssl_path }}/"
+    state: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0700
+  become: true
+  with_items:
+    - directory
+    - touch
+
+- name: check if SSL key exists
+  stat:
+    path: "{{ ssl_key_src_path }}"
+  register: key_path
+
+- name: fail when key file does not exist
+  fail:
+   msg: ssl.key cannot be found.
+  when: key_path.stat.exists == false
+
+- name: check if SSL cert exists
+  stat:
+    path: "{{ ssl_cert_src_path }}"
+  register: cert_path
+
+- name: fail when cert file does not exist
+  fail:
+   msg: ssl.cert cannot be found.
+  when: cert_path.stat.exists == false
+
+- name: install SSL key
+  copy:
+    src: "{{ ssl_key_src_path }}"
+    dest: "{{ ssl_key_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  become: true
+
+- name: install SSL certificate
+  copy:
+    src: "{{ ssl_cert_src_path }}"
+    dest: "{{ ssl_cert_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  become: true
+
+- name: find notebook static directory
+  command: python3 -c 'import notebook; import os; print(os.path.join(notebook.__path__[0], "static"));'
+  register: notebook_static_directory
+
+- name: install nginx.conf
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: true
+  notify:
+    - reload nginx
+
+- name: start the nginx service
+  service: name=nginx state=started enabled=yes
+  become: true
+
+- name: reload nginx
+  service: name=nginx state=reloaded
+  become: true

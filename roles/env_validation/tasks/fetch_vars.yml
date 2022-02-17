@@ -1,0 +1,68 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# This playbook validates the ansible version in environment
+
+- name: check if vault_key exists
+  stat:
+    path: "{{ role_path }}/../../{{ config_vaultname }}"
+  register: vault_key_result
+
+- name: create ansible vault key if it does not exist
+  set_fact:
+    vault_key: "{{ lookup('password', '/dev/null chars=ascii_letters') }}"
+  when: not vault_key_result.stat.exists
+
+- name: save vault key
+  copy:
+    dest: "{{ role_path }}/../../{{ config_vaultname }}"
+    content: |
+      {{ vault_key }}
+    mode: '0600'
+  when: not vault_key_result.stat.exists
+
+- name: check if config file is encrypted
+  command: cat {{ role_path }}/../../{{ config_filename }}
+  changed_when: false
+  register: config_content
+  no_log: True
+
+- name: decrpyt config.yml
+  command: >-
+    ansible-vault decrypt {{ role_path }}/../../{{ config_filename }}
+    --vault-password-file {{ role_path }}/../../{{ config_vaultname }}
+  when: "'$ANSIBLE_VAULT;' in config_content.stdout"
+
+- name: include variable file config.yml
+  include_vars: "{{ role_path }}/../../{{ config_filename }}"
+  no_log: True
+
+- name: save input variables from file
+  set_fact:
+    jup_user_name: "{{ jupyter_usr_name }}"
+    jup_user_password: "{{ jupyter_usr_passwd }}"
+    conda_install_dir: "{{ conda_install_dir }}"
+    auth_state_crypt_keys: "{{ auth_state_crypt_keys }}"
+    juphub_ver: "{{ jupyterhub_version }}"
+    juplab_ver: "{{ jupyterlab_version }}"
+    jupntbk_ver: "{{ jupyternotebook_version }}"
+  no_log: True
+
+- name: encrypt input config file
+  command: >-
+    ansible-vault encrypt {{ role_path }}/../../{{ config_filename }}
+    --vault-password-file {{ role_path }}/../../{{ config_vaultname }}
+  changed_when: false
+  tags: always

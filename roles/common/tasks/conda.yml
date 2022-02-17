@@ -1,0 +1,51 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# This playbook installs common packages used on a UNIX/Linux system
+
+- name: check for installation of conda
+  stat:
+    path: "{{ miniconda_install_dir }}/bin/conda"
+  changed_when: false
+  register: conda_binary
+
+- when: not conda_binary.stat.exists
+  block:
+    - name: download installer
+      get_url:
+        url: "{{ conda_installer_url }}"
+        dest: "/tmp/{{ conda_installer_sh }}"
+        timeout: "{{ conda_timeout_seconds }}"
+        mode: 0755
+
+    - name: verify sha256sum of conda installer before execution.
+      fail:
+        msg: "conda installer checksum failed"
+      when: shell_stat.stat.checksum != "{{ conda_installer_checksum }}"
+
+    - name: install conda
+      command: "bash /tmp/{{ miniconda_installer_sh }} -b -p {{ conda_install_dir }}"
+      args:
+        creates: "{{ conda_install_dir }}"
+
+    - name: initialise conda
+      command: "{{ conda_install_dir }}/bin/conda init bash"
+
+  always:
+    - name: delete installer
+      file:
+        path: "/tmp/{{ conda_installer_sh }}"
+        state: absent

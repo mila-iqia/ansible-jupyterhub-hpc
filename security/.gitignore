@@ -1,0 +1,5 @@
+# Ignore files inside security folder
+# Typically they are certificates, keys and tokens
+*
+*/
+!.gitignore
