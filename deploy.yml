@@ -32,13 +32,20 @@
   roles:
     - common
   tags: common
-
-- name: Install jupyterhub servers
+  
+- name: Install jupyterhub
   hosts: jupyterhub_hosts
   gather_facts: no
   roles:
-    - jupyter
-  tags: jupyter
+    - install_jupyterhub
+  tags: install_jh
+
+- name: Configure jupyterhub
+  hosts: jupyterhub_hosts
+  gather_facts: no
+  roles:
+    - configure_jupyterhub
+  tags: config_jh
 
 - name: Install nginx
   hosts: jupyterhub_hosts
@@ -47,16 +54,9 @@
     - nginx
   tags: nginx
 
-- name: Configure jupyterhub
-  hosts: jupyterhub_hosts
-  gather_facts: no
-  roles:
-    - jupyterhub_config
-  tags: jh_config
-
 - name: Start jupyterhub service
   hosts: jupyterhub_hosts
   gather_facts: no
   roles:
-    - jupyterhub_start
-  tags: jh_start
+    - start_jupyterhub
+  tags: start_jh

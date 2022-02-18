@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-user www-data;
+user {{ nginx_service_user }} {{ nginx_service_user }};
 worker_processes {{ ansible_processor_count }};
 pid /run/nginx.pid;
 

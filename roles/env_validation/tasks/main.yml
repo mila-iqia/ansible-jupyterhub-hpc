@@ -16,4 +16,3 @@
 # This playbook validates the ansible version in environment
 
 - include_tasks: checks.yml
-- include_tasks: fetch_vars.yml

@@ -16,21 +16,17 @@
 
 dev_tools:
   - git
-  - gfortran
+  - gcc-gfortran
   - htop
   - nano
   - tree
 
-# jupyter_deps:
-#   - nodejs-legacy
-#   - npm
+conda_base_url: "https://repo.anaconda.com/pkgs/misc/rpmrepo/conda"
+conda_gpgkey: "https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc"
 
-jupyter_username: "{{ hostvars['127.0.0.1']['jup_user_name'] }}"
-jupyter_passwd: "{{ hostvars['127.0.0.1']['jup_user_password'] }}"
-conda_install_dir: "{{ hostvars['127.0.0.1']['conda_install_dir'] }}"
-jupyter_env_path: "{{ hostvars['127.0.0.1']['conda_install_dir'] }}/envs/jupyterhub-{{ hostvars['127.0.0.1']['juphub_ver'] }}"
-
-conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh"
-conda_installer_sh: "Miniconda3-py38_4.11.0-Linux-x86_64.sh"
-conda_installer_checksum: "4bb91089ecc5cc2538dece680bfe2e8192de1901e5e420f63d4e78eb26b0ac1a"
-conda_timeout_seconds: 60
+conda_config:
+  channels:
+    - conda-forge
+    - pytorch
+    - defaults
+  show_channel_urls: yes

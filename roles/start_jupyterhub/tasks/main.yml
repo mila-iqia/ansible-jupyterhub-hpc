@@ -14,8 +14,11 @@
 
 ---
 
-- name: load jupyterhub supervisor config
-  supervisorctl: name=jupyterhub state=present
+- name: install jupyterhub config file
+  template:
+    src: jupyterhub.service.j2
+    dest: /etc/systemd/system/jupyterhub.service
+  become: true
 
-- name: restart jupyterhub with supervisor
-  supervisorctl: name=jupyterhub state=restarted
+- name: start jupyterhub service
+  service: name=jupyterhub enabled=yes state=started

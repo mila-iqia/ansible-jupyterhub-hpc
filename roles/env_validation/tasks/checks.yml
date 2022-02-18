@@ -20,6 +20,6 @@
     that: (ansible_version.major, ansible_version.minor) >= (2, 1)
     msg: require ansible >= 2.1, found {{ansible_version.full}}
 
-- name: make sure we are running on CentOS/RHEL
-  fail: msg="This ansible setup only work on CentOS/RHEL"
-  when: ansible_distribution != 'CentOS' or ansible_distribution != 'RedHat'
+# - name: make sure we are running on CentOS/RHEL
+#   fail: msg="This ansible setup only work on CentOS/RHEL"
+#   when: ansible_distribution != 'CentOS' or ansible_distribution != 'RedHat'

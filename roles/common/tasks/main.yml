@@ -18,4 +18,4 @@
 
 - include_tasks: packages.yml
 - include_tasks: conda.yml
-- include_tasks: create_usr.yml
+- include_tasks: create_service_user.yml

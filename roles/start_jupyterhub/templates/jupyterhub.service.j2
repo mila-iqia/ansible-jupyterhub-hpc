@@ -2,14 +2,14 @@
 # Service file for jupyterhub.
 
 [Unit]
-Description="Service for launching Jupyterhub"
+Description=Service for launching Jupyterhub
 After=syslog.target network.target
 
 [Service]
-Environment="PATH={{ jupyter_env_path }}/bin:$PATH"
-Environment="JUPYTERHUB_CRYPT_KEY={{ auth_state_crypt_keys }}"
-User=u'{{ jupyter_username }}'
-ExecStart=u'{{ jupyter_env_path }}/bin/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py'
+Environment="PATH={{ conda_env_prefix }}/bin:$PATH"
+Environment="JUPYTERHUB_CRYPT_KEY=$(cat {{ jupyterhub_srv_dir }}/crypt_key)"
+User={{ jupyterhub_service_user }}
+ExecStart={{ conda_env_bin_dir }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py
 Restart=on-failure
 
 [Install]

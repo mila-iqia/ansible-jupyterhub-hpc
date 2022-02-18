@@ -35,7 +35,8 @@
 
 - name: check if SSL key exists
   stat:
-    path: "{{ ssl_key_src_path }}"
+    path: "{{ role_path }}/../../security/ssl.key"
+  delegate_to: localhost
   register: key_path
 
 - name: fail when key file does not exist
@@ -45,7 +46,8 @@
 
 - name: check if SSL cert exists
   stat:
-    path: "{{ ssl_cert_src_path }}"
+    path: "{{ role_path }}/../../security/ssl.crt"
+  delegate_to: localhost
   register: cert_path
 
 - name: fail when cert file does not exist
@@ -55,7 +57,7 @@
 
 - name: install SSL key
   copy:
-    src: "{{ ssl_key_src_path }}"
+    src: "{{ role_path }}/../../security/ssl.key"
     dest: "{{ ssl_key_path }}"
     owner: root
     group: root
@@ -64,15 +66,29 @@
 
 - name: install SSL certificate
   copy:
-    src: "{{ ssl_cert_src_path }}"
+    src: "{{ role_path }}/../../security/ssl.crt"
     dest: "{{ ssl_cert_path }}"
     owner: root
     group: root
     mode: 0600
   become: true
+  
+- name: grant jupyter and nginx service users to read key and cert files
+  ansible.posix.acl:
+    path: "{{ item[0] }}"
+    entity: "{{ item[1] }}"
+    etype: "{{ item[2] }}"
+    permissions: r
+    state: present
+  with_nested:
+    - [ "{{ ssl_key_path }}", "{{ ssl_cert_path }}" ]
+    - [ "{{ jupyterhub_service_user }}", "{{ nginx_service_user }}" ]
+    - [ "user", "group" ]
 
 - name: find notebook static directory
-  command: python3 -c 'import notebook; import os; print(os.path.join(notebook.__path__[0], "static"));'
+  shell: 
+    cmd: 'import notebook; import os; print(os.path.join(notebook.__path__[0], "static"));'
+    executable: "{{ conda_env_bin_dir }}/python3"
   register: notebook_static_directory
 
 - name: install nginx.conf
@@ -86,11 +102,12 @@
   become: true
   notify:
     - reload nginx
+    - restart nginx
 
-- name: start the nginx service
-  service: name=nginx state=started enabled=yes
-  become: true
-
-- name: reload nginx
-  service: name=nginx state=reloaded
-  become: true
+# - name: start the nginx service
+#   service: name=nginx state=started enabled=yes
+#   become: true
+#
+# - name: reload nginx
+#   service: name=nginx state=reloaded
+#   become: true

@@ -20,13 +20,13 @@
   yum:
     update_cache: yes
     state: present
-  become: yes
+  become: true
 
 - name: install build tools
   yum:
     name: "@Development tools"
     state: present
-  become: yes
+  become: true
 
 - name: install other developer tools
   yum:
@@ -35,18 +35,3 @@
   become: true
   with_items:
     - "{{ dev_tools }}"
-
-# - name: install jupyterhub dependencies
-#   yum:
-#     name: "{{ item }}"
-#     state: present
-#   become: true
-#   with_items:
-#     - "{{ jupyter_deps }}"
-#
-# - name: install npm package configurable-http-proxy
-#   npm:
-#     name: configurable-http-proxy
-#     global: yes
-#     state: present
-#   become: true
