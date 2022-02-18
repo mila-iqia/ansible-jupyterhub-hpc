@@ -1,0 +1,91 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+# These are global variables that are used across roles.
+
+# ---------------------------------------------------
+# Ansible
+# ---------------------------------------------------
+
+# Path of the Python 3 interpreter on the remote server
+ansible_python_interpreter: "/usr/bin/python3"
+
+# ---------------------------------------------------
+# conda related configuration
+# ---------------------------------------------------
+
+conda_prefix: "/opt/conda"
+conda_env_name: "jupyterhub"
+conda_env_prefix: "{{ conda_prefix }}/envs/{{ conda_env_name }}"
+conda_env_bin_dir: "{{ conda_env_prefix }}/bin"
+conda_env_py_version: "3.8"
+
+# ---------------------------------------------------
+# Jupyter components versions
+# ---------------------------------------------------
+
+# JupyterHub version to be installed
+jupyterhub_version: "2.1.1"
+# Jupyterlab version to be installed
+jupyterlab_version: "3.2.9"
+# JupyterHub version to be installed
+jupyternotebook_version: "6.4.8"
+
+# ---------------------------------------------------
+# JupyterHub service user
+# ---------------------------------------------------
+
+# Name of the user under which JupyterHub will be running. This user will be
+# added to sudoers group but the user will be allowed to use sudo for only
+# spawning the servers using batch spawner. By default this user will not have
+# login shell and home directory
+jupyterhub_service_user: "jupyter"
+
+# ---------------------------------------------------
+# nginx service user
+# ---------------------------------------------------
+
+nginx_service_user: "nginx"
+
+# ---------------------------------------------------
+# JupyterHub config directories
+# ---------------------------------------------------
+
+jupyterhub_srv_dir: "/srv/jupyterhub"
+jupyterhub_config_dir: "/etc/jupyterhub"
+jupyterhub_log_dir: "/var/log/jupyterhub"
+
+# ---------------------------------------------------
+# Jupyter config directories
+# ---------------------------------------------------
+
+jupyter_config_dir: "/etc/jupyter"
+jupyter_share_dir: "/usr/local/share/jupyter"
+jupyter_templates_dir: "{{jupyter_config_dir}}/templates"
+
+# ---------------------------------------------------
+# IPython config directory
+# ---------------------------------------------------
+
+ipython_config_dir: "/etc/ipython"
+
+# ---------------------------------------------------
+# Nginx configuration of SSL
+# ---------------------------------------------------
+
+# For externally provided SSL cert
+ssl_path: "/etc/nginx/ssl"
+ssl_key_path: "{{ ssl_path }}/ssl.key"
+ssl_cert_path: "{{ ssl_path }}/ssl.crt"

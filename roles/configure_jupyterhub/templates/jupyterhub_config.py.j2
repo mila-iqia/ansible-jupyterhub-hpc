@@ -1,0 +1,121 @@
+# {{ ansible_managed }}
+# Configuration file for jupyterhub.
+
+c = get_config() 
+
+## Allow named single-user servers per user
+c.JupyterHub.allow_named_servers = True
+
+## Maximum number of concurrent named servers that can be created by a user at a
+#  time.
+#
+#  Setting this can limit the total resources a user can consume.
+#
+#  If set to 0, no limit is enforced.
+c.JupyterHub.named_server_limit_per_user = 10
+
+## Class for authenticating users.
+c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+
+## Number of days for a login cookie to be valid. Default is two weeks.
+c.JupyterHub.cookie_max_age_days = 7
+
+# The command to start the http proxy.
+#
+# Only override if configurable-http-proxy is not on your PATH
+c.ConfigurableHTTPProxy.command = ['{{ conda_env_bin_dir }}/configurable-http-proxy']
+
+## File in which to store the cookie secret.
+c.JupyterHub.cookie_secret_file = '{{ jupyterhub_srv_dir }}/cookie_secret'
+c.ConfigurableHTTPProxy.auth_token = '{{ jupyterhub_srv_dir }}/proxy_auth_token'
+c.JupyterHub.debug_proxy = True
+
+## The location of jupyterhub data files (e.g. /usr/local/share/jupyterhub)
+c.JupyterHub.data_files_path = '{{ conda_env_prefix }}/share/jupyterhub'
+
+## url for the database. e.g. `sqlite:///jupyterhub.sqlite`
+c.JupyterHub.db_url = '{{ jupyterhub_srv_dir }}/jupyterhub.sqlite'
+
+## If named servers are enabled, default name of server to spawn or open, e.g. by
+#  user-redirect.
+c.JupyterHub.default_server_name = 'jupyter'
+
+## The location to store certificates automatically created by JupyterHub.
+#
+#  Use with internal_ssl
+c.JupyterHub.internal_certs_location = '{{ jupyterhub_srv_dir }}/internal-ssl'
+
+## Enable SSL for all internal communication
+#
+#  This enables end-to-end encryption between all JupyterHub components.
+#  JupyterHub will automatically create the necessary certificate authority and
+#  sign notebook certificates as they're created.
+c.JupyterHub.internal_ssl = True
+
+## File to write PID Useful for daemonizing JupyterHub.
+c.JupyterHub.pid_file = '{{ jupyterhub_srv_dir }}/pid'
+c.ConfigurableHTTPProxy.pid_file = '{{ jupyterhub_srv_dir }}/proxy_pid'
+
+## The class to use for spawning single-user servers.
+#
+#          Should be a subclass of :class:`jupyterhub.spawner.Spawner`.
+#
+#          .. versionchanged:: 1.0
+#              spawners may be registered via entry points,
+#              e.g. `c.JupyterHub.spawner_class = 'localprocess'`
+#
+#  Currently installed:
+#    - default: jupyterhub.spawner.LocalProcessSpawner
+#    - localprocess: jupyterhub.spawner.LocalProcessSpawner
+#    - simple: jupyterhub.spawner.SimpleLocalProcessSpawner
+c.JupyterHub.spawner_class = 'jupyterhub.spawner.LocalProcessSpawner'
+
+## Path to SSL certificate file for the public facing interface of the proxy
+#
+#  When setting this, you should also set ssl_key
+c.JupyterHub.ssl_cert = '{{ ssl_cert_path }}'
+
+## Path to SSL key file for the public facing interface of the proxy
+#
+#  When setting this, you should also set ssl_cert
+c.JupyterHub.ssl_key = '{{ ssl_key_path }}'
+
+#------------------------------------------------------------------------------
+# Authenticator(LoggingConfigurable) configuration
+#------------------------------------------------------------------------------
+
+## Base class for implementing an authentication provider for JupyterHub
+
+## Set of users that will have admin rights on this JupyterHub.
+#
+#  Note: As of JupyterHub 2.0, full admin rights should not be required, and more
+#  precise permissions can be managed via roles.
+#
+#  Admin users have extra privileges:
+#   - Use the admin panel to see list of users logged in
+#   - Add / remove users in some authenticators
+#   - Restart / halt the hub
+#   - Start / stop users' single-user servers
+#   - Can access each individual users' single-user server (if configured)
+#
+#  Admin access should be treated the same way root access is.
+#
+#  Defaults to an empty set, in which case no user has admin access.
+c.Authenticator.admin_users = set()
+
+## Enable persisting auth_state (if available).
+#
+#  auth_state will be encrypted and stored in the Hub's database. This can
+#  include things like authentication tokens, etc. to be passed to Spawners as
+#  environment variables.
+#
+#  Encrypting auth_state requires the cryptography package.
+#
+#  Additionally, the JUPYTERHUB_CRYPT_KEY environment variable must contain one
+#  (or more, separated by ;) 32B encryption keys. These can be either base64 or
+#  hex-encoded.
+#
+#  If encryption is unavailable, auth_state cannot be persisted.
+#
+#  New in JupyterHub 0.8
+c.Authenticator.enable_auth_state = True

@@ -1,0 +1,17 @@
+# Hidden files
+**/._*
+
+# Python cache directories and files
+**/__pycache__/
+**/*.py~
+**/*.pyc
+**/.idea
+
+# Jupyter lab and notebook files
+**/*.ipynb_checkpoints
+
+# MacOS folder attributes files
+**/*.DS_Store
+
+# Ignore hostfile
+hostfile
