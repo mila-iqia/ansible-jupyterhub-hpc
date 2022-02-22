@@ -16,8 +16,26 @@
 
 # Install JupyterHub, Jupyterlab and notebook servers
 
-- name: install jupyter server components inside conda env
+- name: install jupyterhub core components
   shell: "{{ conda_prefix }}/bin/conda install -n {{ conda_env_name }} -yq {{ item }}"
   become: true
   with_items:
     - "{{ jupyter_pkgs }}"
+  tags: "core"
+    
+- name: install jupyterhub extensions from pip
+  pip:
+    executable: "{{ conda_env_prefix }}/bin/pip"
+    name: "{{ item }}"
+    extra_args: "--no-cache-dir"
+  become: true
+  with_items:
+     - "{{ jupyter_pip_pkgs }}"
+  tags: "pip_extensions"
+  
+- name: install jupyterhub extensions using jupyter
+  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ conda_env_name }} && jupyter labextension install {{ item }}"
+  become: true
+  with_items:
+     - "{{ jupyterlab_extensions }}"
+  tags: "jl_extensions"

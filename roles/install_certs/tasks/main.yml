@@ -14,8 +14,5 @@
 
 ---
 
-jupyter_pkgs:
-  - "jupyterhub={{ jupyterhub_version }}"
-  - "jupyterlab={{ jupyterlab_version }}"
-  - "notebook={{ jupyternotebook_version }}"
-  - "cryptography"
+- include_tasks: directories.yml
+- include_tasks: config.yml

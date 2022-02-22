@@ -28,18 +28,6 @@
     - directory
     - touch
 
-- name: make sure /srv/jupyterhub exists
-  file:
-    path: "{{ jupyterhub_srv_dir }}/"
-    state: "{{ item }}"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
-    mode: 0700
-  become: true
-  with_items:
-    - directory
-    - touch
-
 - name: make sure /var/log/jupyterhub exists
   file:
     path: "{{ jupyterhub_log_dir }}/"

@@ -35,30 +35,30 @@
 
 - name: check if SSL key exists
   stat:
-    path: "{{ role_path }}/../../security/ssl.key"
+    path: "{{ role_path }}/../../security/{{ ssl_key_name }}"
   delegate_to: localhost
   register: key_path
 
 - name: fail when key file does not exist
   fail:
-   msg: ssl.key cannot be found.
+   msg: "ssl.key cannot be found."
   when: key_path.stat.exists == false
 
 - name: check if SSL cert exists
   stat:
-    path: "{{ role_path }}/../../security/ssl.crt"
+    path: "{{ role_path }}/../../security/{{ ssl_cert_name }}"
   delegate_to: localhost
   register: cert_path
 
 - name: fail when cert file does not exist
   fail:
-   msg: ssl.cert cannot be found.
+   msg: "ssl.cert cannot be found."
   when: cert_path.stat.exists == false
 
 - name: install SSL key
   copy:
-    src: "{{ role_path }}/../../security/ssl.key"
-    dest: "{{ ssl_key_path }}"
+    src: "{{ role_path }}/../../security/{{ ssl_key_name }}"
+    dest: "{{ ssl_path }}/{{ ssl_key_name }}"
     owner: root
     group: root
     mode: 0600
@@ -66,30 +66,12 @@
 
 - name: install SSL certificate
   copy:
-    src: "{{ role_path }}/../../security/ssl.crt"
-    dest: "{{ ssl_cert_path }}"
+    src: "{{ role_path }}/../../security/{{ ssl_cert_name }}"
+    dest: "{{ ssl_path }}/{{ ssl_cert_name }}"
     owner: root
     group: root
     mode: 0600
   become: true
-  
-- name: grant jupyter and nginx service users to read key and cert files
-  ansible.posix.acl:
-    path: "{{ item[0] }}"
-    entity: "{{ item[1] }}"
-    etype: "{{ item[2] }}"
-    permissions: r
-    state: present
-  with_nested:
-    - [ "{{ ssl_key_path }}", "{{ ssl_cert_path }}" ]
-    - [ "{{ jupyterhub_service_user }}", "{{ nginx_service_user }}" ]
-    - [ "user", "group" ]
-
-- name: find notebook static directory
-  shell: 
-    cmd: 'import notebook; import os; print(os.path.join(notebook.__path__[0], "static"));'
-    executable: "{{ conda_env_bin_dir }}/python3"
-  register: notebook_static_directory
 
 - name: install nginx.conf
   template:
@@ -103,11 +85,3 @@
   notify:
     - reload nginx
     - restart nginx
-
-# - name: start the nginx service
-#   service: name=nginx state=started enabled=yes
-#   become: true
-#
-# - name: reload nginx
-#   service: name=nginx state=reloaded
-#   become: true

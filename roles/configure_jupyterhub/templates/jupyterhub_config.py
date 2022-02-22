@@ -57,7 +57,7 @@
 #c.JupyterHub.admin_users = set()
 
 ## Allow named single-user servers per user
-c.JupyterHub.allow_named_servers = True
+# c.JupyterHub.allow_named_servers = True
 
 ## Answer yes to any questions (e.g. confirm overwrite)
 #c.JupyterHub.answer_yes = False

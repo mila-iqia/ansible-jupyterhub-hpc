@@ -13,13 +13,15 @@
 # limitations under the License.
 
 ---
-# This playbook validates the ansible version in environment
 
-- name: check if ansible version >= 2.1
-  assert:
-    that: (ansible_version.major, ansible_version.minor) >= (2, 1)
-    msg: require ansible >= 2.1, found {{ansible_version.full}}
-
-# - name: make sure we are running on CentOS/RHEL
-#   fail: msg="This ansible setup only work on CentOS/RHEL"
-#   when: ansible_distribution != 'CentOS' or ansible_distribution != 'RedHat'
+- name: reload jupyterhub
+  service: 
+    name: jupyterhub
+    enabled: yes
+    state: reloaded
+    
+- name: restart jupyterhub
+  service: 
+    name: jupyterhub
+    enabled: yes
+    state: restarted

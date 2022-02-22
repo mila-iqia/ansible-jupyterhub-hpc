@@ -16,9 +16,8 @@
 # This playbook deploys JupyterHub.
 
 - name: Validate environment
-  hosts: localhost
-  connection: local
-  gather_facts: no
+  hosts: jupyterhub_hosts
+  gather_facts: yes
   roles:
     - env_validation
   tags: always
@@ -46,6 +45,13 @@
   roles:
     - configure_jupyterhub
   tags: config_jh
+  
+- name: Install SSL keys and certificates
+  hosts: jupyterhub_hosts
+  gather_facts: no
+  roles:
+    - install_certs
+  tags: certs_jh
 
 - name: Install nginx
   hosts: jupyterhub_hosts

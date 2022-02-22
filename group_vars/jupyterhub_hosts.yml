@@ -33,15 +33,30 @@ conda_env_bin_dir: "{{ conda_env_prefix }}/bin"
 conda_env_py_version: "3.8"
 
 # ---------------------------------------------------
-# Jupyter components versions
+# Jupyter components list
 # ---------------------------------------------------
 
-# JupyterHub version to be installed
-jupyterhub_version: "2.1.1"
-# Jupyterlab version to be installed
-jupyterlab_version: "3.2.9"
-# JupyterHub version to be installed
-jupyternotebook_version: "6.4.8"
+# core jupyterhub components
+jupyter_pkgs:
+ - "jupyterhub=2.1.1"
+ - "jupyterlab=3.2.9"
+ - "notebook=6.4.8"
+ - "cryptography=36.0.0"
+ - "nodejs=17.4.0"
+ - "jupyter-server-proxy=3.2.1"
+ - "rstudio=1.1.456"
+  
+jupyter_pip_pkgs:
+ - "dask-labextension==5.2.0"
+ - "jupyterlab-git==0.34.2"
+ - "jupyter-resource-usage==0.6.1"
+ - "jupyterlab-topbar==0.6.1"
+ - "jupyterlab-system-monitor==0.8.0"
+ - "jupyter-rsession-proxy==2.0.1"
+ 
+jupyterlab_extensions:
+  - "jupyterlab-theme-toggle"
+ 
 
 # ---------------------------------------------------
 # JupyterHub service user
@@ -87,5 +102,5 @@ ipython_config_dir: "/etc/ipython"
 
 # For externally provided SSL cert
 ssl_path: "/etc/nginx/ssl"
-ssl_key_path: "{{ ssl_path }}/ssl.key"
-ssl_cert_path: "{{ ssl_path }}/ssl.crt"
+ssl_key_name: "jupyterhub.ssl.key"
+ssl_cert_name: "jupyterhub.ssl.crt"

@@ -1,0 +1,82 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+  
+- name: check if jupyterhub cookie secret exists
+  stat:
+    path: "{{ role_path }}/../../security/cookie_secret"
+  delegate_to: localhost
+  register: cookie_path
+
+- name: fail when cookie_path file does not exist
+  fail:
+   msg: cookie_secret cannot be found.
+  when: cookie_path.stat.exists == false
+
+- name: install jupyterhub cookie secret
+  copy:
+    src: "{{ role_path }}/../../security/cookie_secret"
+    dest: "{{ jupyterhub_srv_dir }}/cookie_secret"
+    owner: "{{ jupyterhub_service_user }}"
+    group: "{{ jupyterhub_service_user }}"
+    mode: 0600
+  become: true
+  
+- name: check if CHP proxy auth token exists
+  stat:
+    path: "{{ role_path }}/../../security/proxy_auth_token"
+  delegate_to: localhost
+  register: auth_token_path
+
+- name: fail when auth_token_path file does not exist
+  fail:
+   msg: CHP auth proxy token cannot be found.
+  when: auth_token_path.stat.exists == false
+
+- name: install CHP proxy auth token
+  copy:
+    src: "{{ role_path }}/../../security/proxy_auth_token"
+    dest: "{{ jupyterhub_srv_dir }}/proxy_auth_token"
+    owner: "{{ jupyterhub_service_user }}"
+    group: "{{ jupyterhub_service_user }}"
+    mode: 0600
+  become: true
+  
+- name: check if crypt keys exist
+  stat:
+    path: "{{ role_path }}/../../security/crypt_key"
+  delegate_to: localhost
+  register: crypt_key_path
+
+- name: fail when crypt_key file does not exist
+  fail:
+   msg: Crypt keys cannot be found.
+  when: crypt_key_path.stat.exists == false
+
+- name: install encryption keys
+  copy:
+    src: "{{ role_path }}/../../security/crypt_key"
+    dest: "{{ jupyterhub_srv_dir }}/crypt_key"
+    owner: "{{ jupyterhub_service_user }}"
+    group: "{{ jupyterhub_service_user }}"
+    mode: 0600
+  become: true
+  
+- name: generate certs for internal ssl
+  shell:
+    cmd: "{{ conda_env_bin_dir }}/jupyterhub --generate-certs --JupyterHub.internal_certs_location={{ jupyterhub_srv_dir }}/internal-ssl"
+    executable: "/usr/bin/bash"
+  become: true
+  become_user: "{{ jupyterhub_service_user }}"
