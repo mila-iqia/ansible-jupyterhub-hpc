@@ -14,9 +14,22 @@
 
 ---
 
-# This playbook installs common packages used on a UNIX/Linux system
+# This playbook installs adds xpra repository and installs it using RPMs
 
-- include_tasks: packages.yml
-- include_tasks: conda.yml
-- include_tasks: xpra.yml
-- include_tasks: create_service_user.yml
+- name: add repository configuration file for conda
+  yum_repository:
+    name: xpra
+    description: Xpra YUM repo
+    file: xpra
+    baseurl: "{{ xpra_base_url }}"
+    gpgcheck: yes
+    gpgkey: "{{ xpra_gpgkey }}"
+  become: true
+
+- name: install xpra
+  yum:
+    name: xpra
+    update_cache: yes
+    state: present
+  become: true
+  
