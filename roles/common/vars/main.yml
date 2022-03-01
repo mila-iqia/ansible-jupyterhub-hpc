@@ -16,10 +16,16 @@
 
 dev_tools:
   - git
-  - gcc-gfortran
   - htop
   - nano
   - tree
+  - libglvnd-opengl  # FIXME: Remove for production deployment
+
+# List of SLURM commands that we want jupyter user to be able to execute with sudo
+slurm_cmds:
+  - { name: 'SUBMIT_CMD', cmd: 'sbatch' }
+  - { name: 'QUERY_CMD', groups: 'squeue' }
+  - { name: 'CANCEL_CMD', groups: 'scancel' }
 
 conda_base_url: "https://repo.anaconda.com/pkgs/misc/rpmrepo/conda"
 conda_gpgkey: "https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc"
@@ -30,3 +36,6 @@ conda_config:
     - pytorch
     - defaults
   show_channel_urls: yes
+  
+xpra_base_url: "https://xpra.org/dists/{{ ansible_distribution }}/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}"
+xpra_gpgkey: "https://xpra.org/gpg.asc"
