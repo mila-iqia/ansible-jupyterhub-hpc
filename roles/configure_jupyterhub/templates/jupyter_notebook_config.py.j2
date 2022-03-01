@@ -75,3 +75,10 @@ c.FileContentsManager.allow_hidden = True
 
 # Show cpu usage on topbar
 c.ResourceUseDisplay.track_cpu_percent = True
+
+# Set total memory as memory limit (this will not enforce the limit)
+import psutil
+c.ResourceUseDisplay.mem_limit = psutil.virtual_memory().total
+
+# Warn the user that memory consumption is within this threshold limit
+c.ResourceUseDisplay.mem_warning_threshold = 0.1
