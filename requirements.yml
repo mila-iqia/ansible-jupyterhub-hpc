@@ -1,0 +1,4 @@
+# Ansible galaxy requirements for using this playbook
+
+# Install conda module
+- src: evandam.conda
