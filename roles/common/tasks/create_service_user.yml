@@ -24,23 +24,27 @@
     system: yes
   become: true
 
-- name: add command alias for batchspawner
+- name: add command alias for spawner command
   lineinfile:
     dest: /etc/sudoers
     state: present
-    regexp: "^Cmnd_Alias JUPYTER_CMD"
-    line: "Cmnd_Alias JUPYTER_CMD = {{ conda_env_prefix }}/bin/batchspawner"
+    regexp: "^Cmnd_Alias {{ item.name }}"
+    line: "Cmnd_Alias {{ item.name }} = {{ slurm_bin_path }}/{{ item.cmd }}"
     validate: "visudo -cf %s"
   become: true
+  with_items:
+    - "{{ slurm_cmds }}"
 
 - name: add line to give jupyter user permission to use sudo for batchspawner
   lineinfile:
     dest: /etc/sudoers
     state: present
     regexp: "^{{ jupyterhub_service_user }} ALL=(ALL)"
-    line: "{{ jupyterhub_service_user }} ALL=(ALL) NOPASSWD:JUPYTER_CMD"
+    line: "{{ jupyterhub_service_user }} ALL=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}
     validate: "visudo -cf %s"
   become: true
+  with_items:
+    - "{{ slurm_cmds }}"
   
 - name: grant jupyter service user permission to read /etc/shadow file (need for PAM auth to work)
   ansible.posix.acl:
