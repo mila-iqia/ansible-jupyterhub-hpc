@@ -15,9 +15,13 @@
 ---
 
 # Install JupyterHub, Jupyterlab and notebook servers
-
+  
 - name: install jupyterhub core components
-  shell: "{{ conda_prefix }}/bin/conda install -n {{ conda_env_name }} -yq {{ item }}"
+  conda:
+    name: "{{ item }}"
+    environment: "{{ conda_juphub_env_prefix }}"
+    state: present
+    executable: "{{ conda_prefix }}/bin/conda"
   become: true
   with_items:
     - "{{ jupyter_pkgs }}"
@@ -25,7 +29,7 @@
     
 - name: install jupyterhub extensions from pip
   pip:
-    executable: "{{ conda_env_prefix }}/bin/pip"
+    executable: "{{ conda_juphub_env_prefix }}/bin/pip"
     name: "{{ item }}"
     extra_args: "--no-cache-dir"
   become: true
@@ -33,9 +37,41 @@
      - "{{ jupyter_pip_pkgs }}"
   tags: "pip_extensions"
   
+- name: install jupyterlab server proxies from gitlab
+  pip:
+    executable: "{{ conda_juphub_env_prefix }}/bin/pip"
+    name: "{{ item }}"
+    extra_args: "--no-cache-dir"
+    state: forcereinstall  #FIXME: Remove this once we go to production 
+  become: true
+  with_items:
+     - "{{ jupyter_server_proxies }}"
+  tags: "jl_server_proxies"
+  no_log: true
+  
 - name: install jupyterhub extensions using jupyter
-  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ conda_env_name }} && jupyter labextension install {{ item }}"
+  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ conda_juphub_env_prefix }} && jupyter labextension install {{ item }}"
   become: true
   with_items:
      - "{{ jupyterlab_extensions }}"
   tags: "jl_extensions"
+  
+- name: install xeus cling in cling environment
+  conda:
+    name: xeus-cling
+    environment: "{{ conda_env_prefix }}/cling"
+    state: present
+    executable: "{{ conda_prefix }}/bin/conda"
+  become: true
+  tags: "kernels"
+  
+- name: install xeus cling kernels into jupyterhub environment
+  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ conda_juphub_env_prefix }} && jupyter kernelspec install {{ conda_env_prefix }}/cling/share/jupyter/kernels/{{ item }}"
+  become: true
+  with_items:
+     - "xcpp17"
+     # Provide only Cpp 17 for the moment
+     # - "xcpp14"
+     # I had problems when I tested this kernel
+     # - "xcpp11"
+  tags: "kernels"
