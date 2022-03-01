@@ -40,11 +40,9 @@
     dest: /etc/sudoers
     state: present
     regexp: "^{{ jupyterhub_service_user }} ALL=(ALL)"
-    line: "{{ jupyterhub_service_user }} ALL=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}
+    line: "{{ jupyterhub_service_user }} ALL=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
     validate: "visudo -cf %s"
   become: true
-  with_items:
-    - "{{ slurm_cmds }}"
   
 - name: grant jupyter service user permission to read /etc/shadow file (need for PAM auth to work)
   ansible.posix.acl:

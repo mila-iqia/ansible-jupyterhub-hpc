@@ -24,8 +24,8 @@ dev_tools:
 # List of SLURM commands that we want jupyter user to be able to execute with sudo
 slurm_cmds:
   - { name: 'SUBMIT_CMD', cmd: 'sbatch' }
-  - { name: 'QUERY_CMD', groups: 'squeue' }
-  - { name: 'CANCEL_CMD', groups: 'scancel' }
+  - { name: 'QUERY_CMD', cmd: 'squeue' }
+  - { name: 'CANCEL_CMD', cmd: 'scancel' }
 
 conda_base_url: "https://repo.anaconda.com/pkgs/misc/rpmrepo/conda"
 conda_gpgkey: "https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc"
