@@ -17,8 +17,22 @@ c.JupyterHub.allow_named_servers = True
 #  If set to 0, no limit is enforced.
 c.JupyterHub.named_server_limit_per_user = 10
 
+## The ip address for the Hub process to *bind* to.
+#
+#  By default, the hub listens on localhost only. This address must be accessible
+#  from the proxy and user servers. You may need to set this to a public ip or ''
+#  for all interfaces if the proxy or user servers are in containers or on a
+#  different host.
+#
+#  See `hub_connect_ip` for cases where the bind and connect address should
+#  differ, or `hub_bind_url` for setting the full bind URL.
+c.JupyterHub.hub_connect_ip = '{{ inventory_hostname }}'
+
 ## Class for authenticating users.
-c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+#c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+c.JupyterHub.authenticator_class = 'sshauthenticator.SSHAuthenticator'
+c.SSHAuthenticator.server_address = '{{ ssh_authenticator_hostname }}'
+c.SSHAuthenticator.server_port = '{{ ssh_authenticator_port | int }}'
 
 ## Number of days for a login cookie to be valid. Default is two weeks.
 c.JupyterHub.cookie_max_age_days = 7
@@ -26,15 +40,15 @@ c.JupyterHub.cookie_max_age_days = 7
 # The command to start the http proxy.
 #
 # Only override if configurable-http-proxy is not on your PATH
-c.ConfigurableHTTPProxy.command = ['{{ conda_env_bin_dir }}/configurable-http-proxy']
+c.ConfigurableHTTPProxy.command = ['{{ conda_juphub_env_bin_dir }}/configurable-http-proxy']
 
 ## File in which to store the cookie secret.
 c.JupyterHub.cookie_secret_file = '{{ jupyterhub_srv_dir }}/cookie_secret'
 c.ConfigurableHTTPProxy.auth_token = '{{ jupyterhub_srv_dir }}/proxy_auth_token'
-# c.JupyterHub.debug_proxy = True
+c.ConfigurableHTTPProxy.debug = True
 
 ## The location of jupyterhub data files (e.g. /usr/local/share/jupyterhub)
-c.JupyterHub.data_files_path = '{{ conda_env_prefix }}/share/jupyterhub'
+c.JupyterHub.data_files_path = '{{ conda_juphub_env_prefix }}/share/jupyterhub'
 
 ## url for the database. e.g. `sqlite:///jupyterhub.sqlite`
 c.JupyterHub.db_url = '{{ jupyterhub_srv_dir }}/jupyterhub.sqlite'
@@ -43,17 +57,17 @@ c.JupyterHub.db_url = '{{ jupyterhub_srv_dir }}/jupyterhub.sqlite'
 #  user-redirect.
 c.JupyterHub.default_server_name = 'jupyter'
 
-## The location to store certificates automatically created by JupyterHub.
-#
-#  Use with internal_ssl
-c.JupyterHub.internal_certs_location = '{{ jupyterhub_srv_dir }}/internal-ssl'
-
 ## Enable SSL for all internal communication
 #
 #  This enables end-to-end encryption between all JupyterHub components.
 #  JupyterHub will automatically create the necessary certificate authority and
 #  sign notebook certificates as they're created.
 c.JupyterHub.internal_ssl = True
+
+## The location to store certificates automatically created by JupyterHub.
+#
+#  Use with internal_ssl
+c.JupyterHub.internal_certs_location = '{{ jupyterhub_internal_certs_dir }}'
 
 ## File to write PID Useful for daemonizing JupyterHub.
 c.JupyterHub.pid_file = '{{ jupyterhub_srv_dir }}/pid'
@@ -81,18 +95,34 @@ c.JupyterHub.default_url = default_url_fn
 #    - default: jupyterhub.spawner.LocalProcessSpawner
 #    - localprocess: jupyterhub.spawner.LocalProcessSpawner
 #    - simple: jupyterhub.spawner.SimpleLocalProcessSpawner
-c.JupyterHub.spawner_class = 'jupyterhub.spawner.LocalProcessSpawner'
+import jupyter_jeanzay_spawner
+c.JupyterHub.spawner_class = 'jupyter_jeanzay_spawner.JeanZaySlurmSpawner'
 
-#------------------------------------------------------------------------------
-# Spawner(LoggingConfigurable) configuration
-#------------------------------------------------------------------------------
+# Path where jupyterhub binaries are installed
+c.JeanZaySlurmSpawner.req_jupyter_bin_path = '{{ conda_juphub_env_bin_dir }}'
 
-## Extra arguments to be passed to the single-user server.
+# Placeholder for home directory
+c.JeanZaySlurmSpawner.homedir_prefix = '{{ user_homedir }}'
+
+# Command to launch jupyterhub singleuser server
+c.SlurmSpawner.cmd = ['jupyterhub-singleuser']
+
+# Increase spawner timeout to be tolerant of longer queue wait times.
+c.SlurmSpawner.http_timeout = 300
+c.SlurmSpawner.start_timeout = 300
+
+## Maximum number of consecutive failures to allow before shutting down
+#  JupyterHub.
 #
-#  Some spawners allow shell-style expansion here, allowing you to use
-#  environment variables here. Most, including the default, do not. Consult the
-#  documentation for your spawner to verify!
-# c.LocalProcessSpawner.args = []
+#  This helps JupyterHub recover from a certain class of problem preventing
+#  launch in contexts where the Hub is automatically restarted (e.g. systemd,
+#  docker, kubernetes).
+#
+#  A limit of 0 means no limit and consecutive failures will not be tracked.
+c.SlurmSpawner.consecutive_failure_limit = 2
+
+## Enable debug-logging of the single-user server
+c.SlurmSpawner.debug = True
 
 #------------------------------------------------------------------------------
 # Authenticator(LoggingConfigurable) configuration
@@ -115,7 +145,15 @@ c.JupyterHub.spawner_class = 'jupyterhub.spawner.LocalProcessSpawner'
 #  Admin access should be treated the same way root access is.
 #
 #  Defaults to an empty set, in which case no user has admin access.
-c.Authenticator.admin_users = {'paipuri'}
+{% if jupyterhub_admin_users | length %}
+c.Authenticator.admin_users = {
+{%- for user in jupyterhub_admin_users[:-1] -%}
+'{{user}}',
+{%- endfor -%}
+'{{-jupyterhub_admin_users[-1]-}}'}
+{% else %}
+c.Authenticator.admin_users = set()
+{% endif %}
 
 ## Enable persisting auth_state (if available).
 #

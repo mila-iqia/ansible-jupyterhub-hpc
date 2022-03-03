@@ -76,7 +76,7 @@
   
 - name: generate certs for internal ssl
   shell:
-    cmd: "{{ conda_env_bin_dir }}/jupyterhub --generate-certs --JupyterHub.internal_certs_location={{ jupyterhub_srv_dir }}/internal-ssl"
+    cmd: "{{ conda_juphub_env_bin_dir }}/jupyterhub --generate-certs --JupyterHub.internal_certs_location={{ jupyterhub_srv_dir }}/internal-ssl"
     executable: "/usr/bin/bash"
   become: true
   become_user: "{{ jupyterhub_service_user }}"

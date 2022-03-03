@@ -21,10 +21,17 @@
   roles:
     - env_validation
   tags: always
+  
+- name: Conda role
+  hosts: jupyterhub_hosts
+  gather_facts: no
+  roles:
+    - evandam.conda
+  tags: always
 
 - name: Gather facts from all the nodes
   hosts: all
-
+  
 - name: Run common tasks
   hosts: jupyterhub_hosts
   gather_facts: no

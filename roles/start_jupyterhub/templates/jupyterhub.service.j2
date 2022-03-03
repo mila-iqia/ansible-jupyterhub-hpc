@@ -6,12 +6,12 @@ Description=Service for launching Jupyterhub
 After=syslog.target network.target
 
 [Service]
-Environment="PATH={{ conda_env_prefix }}/bin:$PATH"
+Environment="PATH={{ conda_juphub_env_prefix }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin"
 Environment="JUPYTERHUB_CRYPT_KEY=$(cat {{ jupyterhub_srv_dir }}/crypt_key)"
-# User={{ jupyterhub_service_user }}
-# Group={{ jupyterhub_service_user }}
-User=root
-ExecStart=/bin/sh -c '{{ conda_env_bin_dir }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py'
+User={{ jupyterhub_service_user }}
+Group={{ jupyterhub_service_user }}
+# User=root
+ExecStart=/bin/sh -c '{{ conda_juphub_env_bin_dir }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py'
 Restart=always
 RestartSec=120
 StandardOutput=append:/var/log/jupyterhub/access.log

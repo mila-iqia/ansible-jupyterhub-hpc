@@ -66,7 +66,7 @@
   tags: "kernels"
   
 - name: install xeus cling kernels into jupyterhub environment
-  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ conda_juphub_env_prefix }} && jupyter kernelspec install {{ conda_env_prefix }}/cling/share/jupyter/kernels/{{ item }}"
+  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ conda_juphub_env_prefix }} && jupyter kernelspec install {{ conda_env_prefix }}/cling/share/jupyter/kernels/{{ item }} --sys-prefix"
   become: true
   with_items:
      - "xcpp17"

@@ -23,14 +23,45 @@
 ansible_python_interpreter: "/usr/bin/python3"
 
 # ---------------------------------------------------
+# JupyterHub version
+# ---------------------------------------------------
+
+# We use version as conda env name for the jupyterhub
+# It helps us to move between different versions seamlessly
+jupyterhub_version: "2.1.1"
+
+# ---------------------------------------------------
 # conda related configuration
 # ---------------------------------------------------
 
 conda_prefix: "/opt/conda"
-conda_env_name: "jupyterhub"
-conda_env_prefix: "{{ conda_prefix }}/envs/{{ conda_env_name }}"
-conda_env_bin_dir: "{{ conda_env_prefix }}/bin"
+conda_env_prefix: "/gpfslocalsys/jupyter"
 conda_env_py_version: "3.8"
+
+conda_juphub_env_name: "jupyterhub-{{ jupyterhub_version }}"
+conda_juphub_env_prefix: "{{ conda_env_prefix }}/{{ conda_juphub_env_name }}"
+conda_juphub_env_bin_dir: "{{ conda_juphub_env_prefix }}/bin"
+
+# ---------------------------------------------------
+# JeanZay related configuration
+# ---------------------------------------------------
+
+# Path to SLURM binaries like sbatch, squeue, scancel
+# We need to add these binaries to jupyter service user sudoers entry so that
+# jupyter service user can spawn jupyter servers on the behalf of the users
+slurm_bin_path: "/usr/bin"
+
+# Users home directory placeholder. We need a placeholder to generate
+# the users home directory dynamically. We use this placeholder and
+# append it with username to get the path to user HOME directroy
+user_homedir: "/linkhome/idris/genidr/{username}"
+
+# If we are using SSH authenticator, we need to provide a hostname and
+# port so that JupyterHub will try to ssh to that node as user when 
+# trying to login. If ssh connection is succesful, the user can access
+# hub
+ssh_authenticator_hostname: "gros-50.nancy.grid5000.fr"
+ssh_authenticator_port: "22"
 
 # ---------------------------------------------------
 # Jupyter components list
@@ -38,24 +69,34 @@ conda_env_py_version: "3.8"
 
 # core jupyterhub components
 jupyter_pkgs:
- - "jupyterhub=2.1.1"
+ - "jupyterhub={{ jupyterhub_version }}"
  - "jupyterlab=3.2.9"
  - "notebook=6.4.8"
  - "cryptography=36.0.0"
  - "nodejs=17.4.0"
  - "jupyter-server-proxy=3.2.1"
- - "rstudio=1.1.456"
-  
+ - "tensorboard=2.8.0"
+ - "mlflow=1.23.1"
+ 
 jupyter_pip_pkgs:
+ - "batchspawner==1.1"
+ - "git+https://{{ gituser | urlencode }}:{{ gitpass | urlencode }}@gitlab.com/i2461/jupyter/jupyter-jean-zay-slurm-spawner.git@main"
+ - "git+https://github.com/andreas-h/sshauthenticator.git@v0.1"
  - "dask-labextension==5.2.0"
  - "jupyterlab-git==0.34.2"
  - "jupyter-resource-usage==0.6.1"
  - "jupyterlab-topbar==0.6.1"
  - "jupyterlab-system-monitor==0.8.0"
- - "jupyter-rsession-proxy==2.0.1"
  
 jupyterlab_extensions:
+  - "@jupyterlab/server-proxy"
   - "jupyterlab-theme-toggle"
+
+# FIXME: Tag the versions for production deployment
+jupyter_server_proxies:
+  - "git+https://{{ gituser | urlencode }}:{{ gitpass | urlencode }}@gitlab.com/i2461/jupyter/jupyter-tensorbaord-proxy.git@main"
+  - "git+https://{{ gituser | urlencode }}:{{ gitpass | urlencode }}@gitlab.com/i2461/jupyter/jupyter-mlflow-proxy.git@main"
+  - "git+https://{{ gituser | urlencode }}:{{ gitpass | urlencode }}@gitlab.com/i2461/jupyter/jupyter-xpra-html5-proxy.git@main"
  
 
 # ---------------------------------------------------
@@ -81,6 +122,7 @@ nginx_service_user: "nginx"
 jupyterhub_srv_dir: "/srv/jupyterhub"
 jupyterhub_config_dir: "/etc/jupyterhub"
 jupyterhub_log_dir: "/var/log/jupyterhub"
+jupyterhub_internal_certs_dir: "{{ jupyterhub_srv_dir }}/internal-ssl"
 
 # ---------------------------------------------------
 # Jupyter config directories
@@ -88,7 +130,7 @@ jupyterhub_log_dir: "/var/log/jupyterhub"
 
 jupyter_config_dir: "/etc/jupyter"
 jupyter_share_dir: "/usr/local/share/jupyter"
-jupyter_templates_dir: "{{jupyter_config_dir}}/templates"
+jupyter_templates_dir: "{{ jupyter_config_dir }}/templates"
 
 # ---------------------------------------------------
 # IPython config directory
@@ -104,3 +146,10 @@ ipython_config_dir: "/etc/ipython"
 ssl_path: "/etc/nginx/ssl"
 ssl_key_name: "jupyterhub.ssl.key"
 ssl_cert_name: "jupyterhub.ssl.crt"
+
+# ---------------------------------------------------
+# List of administrators
+# ---------------------------------------------------
+
+jupyterhub_admin_users:
+  - "scos830"

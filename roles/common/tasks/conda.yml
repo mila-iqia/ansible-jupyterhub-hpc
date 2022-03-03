@@ -20,7 +20,7 @@
   yum_repository:
     name: conda
     description: Conda YUM repo
-    file: conda.repo
+    file: conda
     baseurl: "{{ conda_base_url }}"
     gpgcheck: yes
     gpgkey: "{{ conda_gpgkey }}"
@@ -39,16 +39,20 @@
     dest: "{{ conda_prefix }}/.condarc"
   become: true
 
-- name: check for jupyterhub conda environment
-  stat:
-    path: "{{ conda_prefix }}/envs/{{ conda_env_name }}"
-  changed_when: false
-  register: conda_env
-  become: true
-
 - name: setup conda environment for jupyterhub
-  shell:
-    cmd: "{{ conda_prefix }}/bin/conda create -p {{ conda_env_prefix }} python={{ conda_env_py_version }} -y"
-    executable: "/usr/bin/bash"
-  when: not conda_env.stat.exists
+  conda:
+    name: python
+    version: "{{ conda_env_py_version }}"
+    environment: "{{ conda_juphub_env_prefix }}"
+    state: present
+    executable: "{{ conda_prefix }}/bin/conda"
+  become: true
+  
+- name: setup conda environment for xeus cling
+  conda:
+    name: python
+    version: "{{ conda_env_py_version }}"
+    environment: "{{ conda_env_prefix }}/cling"
+    state: present
+    executable: "{{ conda_prefix }}/bin/conda"
   become: true
