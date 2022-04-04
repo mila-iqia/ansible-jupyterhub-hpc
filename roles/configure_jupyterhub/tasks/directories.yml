@@ -20,8 +20,8 @@
   file:
     path: "{{ jupyterhub_config_dir }}/"
     state: "{{ item }}"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
+    # owner: "{{ jupyterhub_service_user }}"
+    # group: "{{ jupyterhub_service_user }}"
     mode: 0755
   become: true
   with_items:
@@ -44,8 +44,6 @@
   file:
     path: "{{ jupyter_templates_dir }}/"
     state: "{{ item }}"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
     mode: 0755
   become: true
   with_items:
@@ -56,8 +54,6 @@
   file:
     path: "{{ jupyter_config_dir }}"
     state: "{{ item }}"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
     mode: 0755
   become: true
   with_items:
@@ -66,10 +62,8 @@
 
 - name: make sure /etc/ipython exists
   file:
-    path: "{{ipython_config_dir}}"
+    path: "{{ ipython_config_dir }}"
     state: "{{ item }}"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
     mode: 0755
   become: true
   with_items:

@@ -14,5 +14,5 @@
 
 ---
 
-- include_tasks: directories.yml
-- include_tasks: config.yml
+- import_tasks: directories.yml
+- import_tasks: config.yml

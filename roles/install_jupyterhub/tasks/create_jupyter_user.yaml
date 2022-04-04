@@ -16,12 +16,22 @@
 
 # This playbook creates service user for jupyterhub
 
-- name: create jupyterhub service user
-  user:
+- name: create the jupyter group
+  group:
     name: "{{ jupyterhub_service_user }}"
     state: present
-    create_home: no
-    system: yes
+    system: true
+  become: true
+
+- name: create jupyter service user
+  user:
+    name: "{{ jupyterhub_service_user }}"
+    groups: "{{ jupyterhub_service_user }}"
+    append: true
+    state: present
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
   become: true
 
 - name: add command alias for spawner command
@@ -42,22 +52,4 @@
     regexp: "^{{ jupyterhub_service_user }} ALL=(ALL)"
     line: "{{ jupyterhub_service_user }} ALL=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
     validate: "visudo -cf %s"
-  become: true
-  
-- name: grant jupyter service user permission to read /etc/shadow file (need for PAM auth to work)
-  ansible.posix.acl:
-    path: "/etc/shadow"
-    entity: "{{ jupyterhub_service_user }}"
-    etype: "{{ item }}"
-    permissions: r
-    state: present
-  with_items:
-    - [ "user", "group" ]
-  
-- name: create nginx service user
-  user:
-    name: "{{ nginx_service_user }}"
-    state: present
-    create_home: no
-    system: yes
   become: true

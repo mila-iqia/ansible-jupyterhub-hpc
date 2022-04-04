@@ -21,17 +21,27 @@
     update_cache: yes
     state: present
   become: true
+  tags: "install_dev_tools"
 
 - name: install build tools
   yum:
     name: "@Development tools"
     state: present
   become: true
+  tags: "install_dev_tools"
 
 - name: install other developer tools
   yum:
     name: "{{ item }}"
     state: present
   become: true
+  tags: "install_dev_tools"
   with_items:
     - "{{ dev_tools }}"
+    
+- name: install nginx web server
+  yum:
+    name: nginx
+    state: present
+  become: true
+  tags: "install_dev_tools"

@@ -25,6 +25,7 @@
     gpgcheck: yes
     gpgkey: "{{ conda_gpgkey }}"
   become: true
+  tags: "conda"
 
 - name: install conda
   yum:
@@ -32,27 +33,14 @@
     update_cache: yes
     state: present
   become: true
+  tags: "conda"
   
 - name: add conda config
   copy:
     content: "{{ conda_config | to_yaml }}"
     dest: "{{ conda_prefix }}/.condarc"
+    owner: root
+    group: root
+    mode: 0644
   become: true
-
-- name: setup conda environment for jupyterhub
-  conda:
-    name: python
-    version: "{{ conda_env_py_version }}"
-    environment: "{{ conda_juphub_env_prefix }}"
-    state: present
-    executable: "{{ conda_prefix }}/bin/conda"
-  become: true
-  
-- name: setup conda environment for xeus cling
-  conda:
-    name: python
-    version: "{{ conda_env_py_version }}"
-    environment: "{{ conda_env_prefix }}/cling"
-    state: present
-    executable: "{{ conda_prefix }}/bin/conda"
-  become: true
+  tags: "conda"

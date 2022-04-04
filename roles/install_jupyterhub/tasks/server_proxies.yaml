@@ -11,10 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 
-# Install nginx web server and install certificates
-
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+# Install JupyterHub server proxies and web servers that will be proxied 
+  
+- name: install jupyterlab server proxies from gitlab
+  pip:
+    executable: "{{ jupyterhub_env_prefix }}/bin/pip"
+    name: "{{ item.repo }}"
+    extra_args: "--no-cache-dir"
+    state: forcereinstall  #FIXME: Remove this once we go to production 
+  become: true
+  when: item.install
+  with_items:
+     - "{{ jupyter_server_proxies }}"
+  tags: "proxies"
+  no_log: true

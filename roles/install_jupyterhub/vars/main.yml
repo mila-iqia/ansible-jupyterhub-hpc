@@ -14,5 +14,8 @@
 
 ---
 
-ssl_key_src_path: "../../../security/ssl.key"
-ssl_cert_src_path: "../../../security/ssl.crt"
+# List of SLURM commands that we want jupyter user to be able to execute with sudo
+slurm_cmds:
+  - { name: 'SUBMIT_CMD', cmd: 'sbatch' }
+  - { name: 'QUERY_CMD', cmd: 'squeue' }
+  - { name: 'CANCEL_CMD', cmd: 'scancel' }

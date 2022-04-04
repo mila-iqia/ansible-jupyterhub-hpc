@@ -15,6 +15,20 @@
 
 # Install nginx web server and install certificates
 
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+- name: create the nginx group
+  group:
+    name: "{{ nginx_service_user }}"
+    state: present
+    system: true
+  become: true
+  
+- name: create nginx service user
+  user:
+    name: "{{ nginx_service_user }}"
+    groups: "{{ nginx_service_user }}"
+    append: true
+    state: present
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+  become: true

@@ -14,22 +14,7 @@
 
 ---
 
-# This playbook installs adds xpra repository and installs it using RPMs
-
-- name: add repository configuration file for conda
-  yum_repository:
-    name: xpra
-    description: Xpra YUM repo
-    file: xpra
-    baseurl: "{{ xpra_base_url }}"
-    gpgcheck: yes
-    gpgkey: "{{ xpra_gpgkey }}"
-  become: true
-
-- name: install xpra
-  yum:
-    name: xpra
-    update_cache: yes
-    state: present
-  become: true
-  
+- import_tasks: directories.yml
+- import_tasks: tokens.yml
+- import_tasks: api.yml
+- import_tasks: ssl.yml

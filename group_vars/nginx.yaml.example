@@ -13,8 +13,18 @@
 # limitations under the License.
 ---
 
-# Install nginx web server and install certificates
+# ---------------------------------------------------
+# nginx service user
+# ---------------------------------------------------
 
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+# Name of the service user that will run the nginx reverse proxy server 
+nginx_service_user: "nginx"
+
+# ---------------------------------------------------
+# Nginx configuration for SSL
+# ---------------------------------------------------
+
+# Path to store the SSL certificates on remote machine 
+# where JupyterHub will be deployed.
+remote_path_nginx_proxy_ssl: "/etc/nginx/ssl"
+  

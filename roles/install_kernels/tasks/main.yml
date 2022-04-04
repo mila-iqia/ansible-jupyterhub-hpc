@@ -11,10 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 
-# Install nginx web server and install certificates
-
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+# Setup environments for different kernels that will be shipped with Jupyterhub and install them
+  
+- import_tasks: cling.yml
+  when: install_cpp_kernel
+  
+- import_tasks: julia.yml
+  when: install_julia_kernel
+  
+- import_tasks: rlang.yml
+  when: install_r_kernel
+  

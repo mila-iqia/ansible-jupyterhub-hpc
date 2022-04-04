@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 
-# Install nginx web server and install certificates
-
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+- import_tasks: create_jupyter_user.yaml
+- import_tasks: jupyterhub.yaml
+- import_tasks: extensions.yaml
+- import_tasks: server_proxies.yaml

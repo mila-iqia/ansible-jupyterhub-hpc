@@ -15,3 +15,12 @@
 
 # Ignore hostfile
 hostfile
+
+# Ignore vault password file
+.vault_pass
+
+# Ignore vault files
+**/*vault
+
+# Ignore encryption folder
+**/encryption

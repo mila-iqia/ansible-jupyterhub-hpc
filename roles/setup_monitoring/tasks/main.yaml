@@ -13,8 +13,11 @@
 # limitations under the License.
 ---
 
-# Install nginx web server and install certificates
+# This role sets up the nodes to deploy node_exporter, prometheus and grafana
+# stack.
 
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+- import_tasks: node_exporter.yaml
+- import_tasks: prometheus.yaml
+- import_tasks: grafana.yaml
+# - import_tasks: install_root_ca.yaml
+#   when: self_signed_certs

@@ -11,10 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
-
-# Install nginx web server and install certificates
-
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+  
+- name: generate certs for internal ssl
+  command: "{{ jupyterhub_env_bin_path }}/jupyterhub --generate-certs --JupyterHub.internal_certs_location={{ jupyterhub_srv_dir }}/internal-ssl -f {{ jupyterhub_config_dir }}/jupyterhub_config.py"
+  become: true
+  become_user: "{{ jupyterhub_service_user }}"
+  register: generate_certs
+  changed_when: "'Certificates written to directory' in generate_certs.stdout"

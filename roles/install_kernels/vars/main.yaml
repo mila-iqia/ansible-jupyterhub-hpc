@@ -11,10 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 
-# Install nginx web server and install certificates
+# Cling variables
+cling_env_name: "cling-{{ cling_version }}"
 
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+# Julia variables
+julia_bin_url: "https://julialang-s3.julialang.org/bin/linux/x64/{{ julia_version[:3] }}/julia-{{ julia_version }}-linux-x86_64.tar.gz"
+julia_bin_checksum: "sha256:b8fe23ee547254a2fe14be587284ed77c78c06c2d8e9aad5febce0d21cab8e2c"
+
+# R variables
+r_deps:
+  - "libxml2-devel"
+  - "openssl-devel"

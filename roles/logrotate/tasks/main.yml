@@ -11,10 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 
-# Install nginx web server and install certificates
+# This task sets log rotate for jupyterhub and nginx daemons
 
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-- import_tasks: configure_nginx.yml
+- name: create logrotate configs for jupyterhub and nginx
+  template:
+    src: logrotate.j2
+    dest: "/etc/logrotate.d/{{ item.service_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  with_items:
+    - "{{ logfiles_to_rotate }}"

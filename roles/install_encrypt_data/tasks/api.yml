@@ -13,9 +13,23 @@
 # limitations under the License.
 
 ---
+  
+- name: check if prometheus metrics API token exists
+  stat:
+    path: "{{ local_path_tokens }}/metrics_token"
+  delegate_to: localhost
+  register: metrics_token
 
-# This playbook installs common packages used on a UNIX/Linux system
+- name: fail when prometheus metrics API token does not exist
+  fail:
+   msg: Metrics API token cannot be found.
+  when: not metrics_token.stat.exists
 
-- import_tasks: packages.yml
-- import_tasks: conda.yml
-  when: install_conda
+- name: install prometheus metrics API token
+  copy:
+    src: "{{ local_path_tokens }}/metrics_token"
+    dest: "{{ jupyterhub_srv_dir }}/metrics_token"
+    owner: "{{ jupyterhub_service_user }}"
+    group: "{{ jupyterhub_service_user }}"
+    mode: 0600
+  become: true

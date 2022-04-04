@@ -14,5 +14,11 @@
 
 ---
 
-- include_tasks: directories.yml
-- include_tasks: config.yml
+# We will configure logrotate to rotate logs of nginx and
+# jupyterhub
+# List of log files to rotate. service_name is the name of
+# the service where and log_files are the files to rotate
+logfiles_to_rotate:
+  - { service_name: "jupyterhub", log_files: ["jupyterhub.log"] }
+  - { service_name: "nginx", log_files: ["access.log", "error.log"] }
+  - { service_name: "grafana", log_files: ["grafana.log"] }

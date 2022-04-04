@@ -18,8 +18,8 @@
   template:
     src: jupyterhub_config.py.j2
     dest: "{{ jupyterhub_config_dir }}/jupyterhub_config.py"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
+    # owner: "{{ jupyterhub_service_user }}"
+    # group: "{{ jupyterhub_service_user }}"
     mode: 0644
   become: true
   
@@ -27,7 +27,7 @@
   template:
     src: jupyter_notebook_config.py.j2
     dest: "{{ jupyter_config_dir }}/jupyter_notebook_config.py"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
+    # owner: "{{ jupyterhub_service_user }}"
+    # group: "{{ jupyterhub_service_user }}"
     mode: 0644
   become: true

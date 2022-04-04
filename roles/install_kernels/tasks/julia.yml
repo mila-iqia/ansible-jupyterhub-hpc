@@ -1,0 +1,85 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Setup Julia kernel
+    
+- name: check if julia installation exists
+  stat:
+   path: "{{ julia_pkg_path }}"
+  register: julia_pkg_prefix
+  become: yes
+  tags: "julia_kernel"
+  
+- when: not julia_pkg_prefix.stat.exists
+  block:
+    - name: download julia binaries
+      get_url:
+        url: "{{ julia_bin_url }}"
+        dest: "/tmp"
+        checksum: "{{ julia_bin_checksum }}"
+        mode: 0700
+      become: yes
+      tags: "julia_kernel"
+        
+    - name: extract julia binaries
+      unarchive:
+        src: "/tmp/julia-{{ julia_version }}-linux-x86_64.tar.gz"
+        dest: "{{ jupyter_env_prefix }}"
+        remote_src: yes
+        owner: root
+        group: root
+      become: yes
+      tags: "julia_kernel"
+        
+  always:
+    - name: delete downloaded julia archive
+      file:
+        path: "/tmp/julia-{{ julia_version }}-linux-x86_64.tar.gz"
+        state: absent
+      become: yes
+      tags: "julia_kernel"
+
+# Typically DEPOT_PATH has multiple paths where packages can
+# be installed. First one would be /root/.julia in our case
+# as root is installing julia. DEPOT_PATH[2] will be within
+# the environment we create. 
+# By default Julia will install them on /root/.julia folder
+# on host where jupyterhub is installed. This host might not
+# be accesible from compute nodes. 
+# So we delete DEPOT_PATH[1] and [3] to make sure we install 
+# packages within environment where all users have access.
+- name: install IJulia
+  shell: "{{ julia_pkg_path }}/bin/julia -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add(\"IJulia\"); Pkg.precompile()'"
+  become: true
+  register: ijulia
+  changed_when: "'error' not in ijulia.stderr"
+  tags: "julia_kernel"
+  
+- name: install julia packages
+  shell: "{{ julia_pkg_path }}/bin/julia -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add(\"{{ item }}\"); Pkg.precompile()'"
+  become: true
+  register: julia_pkgs
+  changed_when: "'error' not in julia_pkgs.stderr"
+  tags: "julia_kernel"
+  with_items:
+    - "{{ julia_packages }}"
+  
+- name: install julia kernels into jupyterhub environment
+  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ jupyterhub_env_prefix }} && jupyter kernelspec install /root/.local/share/jupyter/kernels/julia-{{ julia_version[:3] }} --sys-prefix"
+  become: true
+  register: julia_krnl
+  changed_when: "'error' not in julia_krnl.stderr"
+  tags: "julia_kernel"
