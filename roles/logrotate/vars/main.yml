@@ -18,7 +18,8 @@
 # jupyterhub
 # List of log files to rotate. service_name is the name of
 # the service where and log_files are the files to rotate
-logfiles_to_rotate:
+logfiles_to_rotate_default:
   - { service_name: "jupyterhub", log_files: ["jupyterhub.log"] }
   - { service_name: "nginx", log_files: ["access.log", "error.log"] }
-  - { service_name: "grafana", log_files: ["grafana.log"] }
+  
+logfiles_to_rotate: "{{ logfiles_to_rotate_default + [{'service_name': 'grafana', 'log_files': ['grafana.log'] }] if (install_mon_stack) else logfiles_to_rotate_default}}"

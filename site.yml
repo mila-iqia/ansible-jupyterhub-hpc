@@ -75,13 +75,6 @@
   roles:
     - nginx
   tags: nginx
-  
-- name: Set logrotate configs
-  hosts: jupyterhub
-  gather_facts: no
-  roles:
-    - logrotate
-  tags: logrotate
 
 - name: Start jupyterhub service
   hosts: jupyterhub
@@ -117,3 +110,10 @@
   roles: 
     - {role: cloudalchemy.grafana, when: install_mon_stack}
   tags: grafana, monitoring
+  
+- name: Set logrotate configs
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - logrotate
+  tags: logrotate
