@@ -88,7 +88,7 @@
   gather_facts: no
   roles: 
     - {role: setup_monitoring, when: install_mon_stack}
-  tags: monitoring
+  tags: setup_mon, monitoring
 
 - name: Deploy node_exporter
   hosts: node_exporter
