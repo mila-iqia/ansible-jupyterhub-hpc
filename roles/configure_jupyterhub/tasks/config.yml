@@ -22,6 +22,7 @@
     # group: "{{ jupyterhub_service_user }}"
     mode: 0644
   become: true
+  tags: "install_jh_config"
   
 - name: install jupyter config file
   template:
@@ -31,3 +32,4 @@
     # group: "{{ jupyterhub_service_user }}"
     mode: 0644
   become: true
+  tags: "install_jh_config"
