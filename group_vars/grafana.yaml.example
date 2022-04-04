@@ -1,0 +1,94 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Grafana related config
+grafana_port: "3000"
+grafana_address: "{{ inventory_hostname }}"
+grafana_url: "http://{{ grafana_address }}:{{ grafana_port }}"
+
+# Path to store the SSL certificates on remote machine
+remote_path_grafana_ssl: "/etc/grafana/ssl"
+
+# For some reason even after adding self signed
+# certificates to root CA is not enough for 
+# grafana to make requests to prometheus
+# We add CA add in the datasource config
+prometheus_ca_file: "{{ local_path_prometheus_ssl }}-ca/{{ ssl_cert_name_prometheus.split('.')[0] }}-ca.crt"
+
+# Additional options for grafana "server" section
+grafana_server:
+  protocol: "https"
+  cert_key: "{{ remote_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
+  cert_file: "{{ remote_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
+
+# Grafana admin username and password
+grafana_security:
+  admin_user: "{{ lookup('env','JP_GRAFANA_USER') }}"
+  admin_password: "{{ lookup('env','JP_GRAFANA_PASSWD') }}"
+  allow_embedding: true
+
+# Since grafana_datasources is a dict it seems we cannot really
+# use jinja2 templates to switch on/off few keys. For self signed
+# certificates we need to add tlsAuthWithCert key so that grafana
+# can get metric data from prometheus. For external certificates
+# there is no need to use it as they are part of root CA. So we define
+# two different dicts and select the one based on the type of
+# certificates we use
+
+# Grafana dashboards for self signed certificates
+grafana_datasources_self_signed_certs:
+ - name: "prometheus"
+   type: "prometheus"
+   url: "https://{{ prometheus_address }}:{{ prometheus_port }}"  # default prometheus port
+   basicAuth: true
+   basicAuthUser: "prometheus"
+   isDefault: true
+   jsonData:
+     tlsAuth: false
+     tlsAuthWithCACert: true
+     tlsSkipVerify: true
+   secureJsonData:
+     tlsCACert: "{{ lookup('file', prometheus_ca_file) }}"
+     basicAuthPassword: "{{ lookup('env','JP_PROMETHEUS_PASSWD') }}"
+
+# Grafana dashboards for external certificates
+grafana_datasources_ext_certs:
+ - name: "prometheus"
+   type: "prometheus"
+   url: "https://{{ prometheus_address }}:{{ prometheus_port }}"  # default prometheus port
+   basicAuth: true
+   basicAuthUser: "prometheus"
+   isDefault: true
+   jsonData:
+     tlsAuth: false
+     tlsAuthWithCACert: false
+     tlsSkipVerify: true
+   secureJsonData:
+     basicAuthPassword: "{{ lookup('env','JP_PROMETHEUS_PASSWD') }}"
+
+# Based on type of certificates, we load correct grafana_datasources dict
+grafana_datasources: "{{ lookup('vars','grafana_datasources_self_signed_certs') if (self_signed_certs) else lookup('vars','grafana_datasources_ext_certs')}}"
+
+
+# List of grafana dashboard
+grafana_dashboards:
+   # Node exporter dashboard
+ - dashboard_id: '1860'
+   revision_id: '26'
+   datasource: 'prometheus'
+   
+# Directory where JupyterHub dashboard is located
+grafana_dashboards_dir: "{{ lookup('env', 'PWD') }}/grafana-dashboards"

@@ -1,0 +1,102 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: create grafana system group
+  group:
+    name: grafana
+    system: true
+    state: present
+  become: true
+  tags: "setup_grafana"
+
+- name: create grafana system user
+  user:
+    name: grafana
+    system: true
+    shell: "/usr/sbin/nologin"
+    group: grafana
+    createhome: false
+  become: true
+  tags: "setup_grafana"
+
+- name: make sure /etc/grafana/ssl exists
+  file:
+    path: "{{ remote_path_grafana_ssl }}/"
+    state: "{{ item }}"
+    owner: grafana
+    group: grafana
+    mode: 0700
+  become: true
+  tags: "setup_grafana"
+  with_items:
+    - directory
+    - touch
+    
+- name: check if SSL key exists
+  stat:
+    path: "{{ local_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
+  delegate_to: localhost
+  register: key_path
+  tags: "setup_grafana"
+
+- name: fail when key file does not exist
+  fail:
+   msg: "ssl.key cannot be found."
+  when: not key_path.stat.exists
+  tags: "setup_grafana"
+
+- name: check if SSL cert exists
+  stat:
+    path: "{{ local_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
+  delegate_to: localhost
+  register: cert_path
+  tags: "setup_grafana"
+
+- name: fail when cert file does not exist
+  fail:
+   msg: "ssl.cert cannot be found."
+  when: not cert_path.stat.exists
+  tags: "setup_grafana"
+  
+- name: install SSL key
+  copy:
+    src: "{{ local_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
+    dest: "{{ remote_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
+    owner: grafana
+    group: grafana
+    mode: 0600
+  become: true
+  tags: "setup_grafana"
+
+- name: install SSL certificate
+  copy:
+    src: "{{ local_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
+    dest: "{{ remote_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
+    owner: grafana
+    group: grafana
+    mode: 0600
+  become: true
+  tags: "setup_grafana"
+  
+- name: install SSL CA certificate
+  copy:
+    src: "{{ local_path_grafana_ssl }}-ca/{{ ssl_cert_name_grafana.split('.')[0] }}-ca.crt"
+    dest: "{{ remote_path_ca_cert_ssl }}/{{ ssl_cert_name_grafana.split('.')[0] }}-ca.crt"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  when: self_signed_certs
+  tags: "setup_grafana"

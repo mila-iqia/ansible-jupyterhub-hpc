@@ -1,0 +1,7 @@
+# Ansible galaxy requirements for using this playbook
+
+# Install conda module
+- src: evandam.conda
+- src: cloudalchemy.prometheus
+- src: cloudalchemy.node_exporter
+- src: cloudalchemy.grafana

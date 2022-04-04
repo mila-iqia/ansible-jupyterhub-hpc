@@ -1,0 +1,15 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify.
+# Config file for logrotate.
+
+{% for log in item.log_files %}
+/var/log/{{ item.service_name }} is {{ log }}
+{% endfor %}
+{
+   weekly
+   rotate 4
+   size 10M
+   create
+   dateext
+   compress
+   delaycompress
+}

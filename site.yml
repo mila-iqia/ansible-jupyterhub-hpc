@@ -1,0 +1,119 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# This playbook deploys JupyterHub.
+
+- name: Gather facts from jupyterhub hosts
+  hosts: jupyterhub
+  gather_facts: yes
+  tags: always
+
+- name: Validate environment
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - env_validation
+  tags: always
+  
+- name: Conda role
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - evandam.conda
+  tags: always
+  
+- name: Run common tasks
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - common
+  tags: common
+  
+- name: Install jupyterhub
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - install_jupyterhub
+  tags: install_jh
+  
+- name: Install jupyter kernels
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - install_kernels
+  tags: install_kernels
+  
+- name: Configure jupyterhub
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - configure_jupyterhub
+  tags: config_jh
+  
+- name: Install SSL keys, auth and API tokens
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - install_encrypt_data
+  tags: encrypt
+
+- name: Install nginx
+  hosts: nginx
+  gather_facts: no
+  roles:
+    - nginx
+  tags: nginx
+  
+- name: Set logrotate configs
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - logrotate
+  tags: logrotate
+
+- name: Start jupyterhub service
+  hosts: jupyterhub
+  gather_facts: no
+  roles:
+    - start_jupyterhub
+  tags: start_jh
+  
+- name: Setup monitoring
+  hosts: node_exporter
+  gather_facts: no
+  roles: 
+    - {role: setup_monitoring, when: install_mon_stack}
+  tags: monitoring
+
+- name: Deploy node_exporter
+  hosts: node_exporter
+  gather_facts: no
+  roles: 
+    - {role: cloudalchemy.node_exporter, when: install_mon_stack}
+  tags: node_exporter, monitoring
+  
+- name: Install prometheus
+  hosts: prometheus
+  gather_facts: no
+  roles: 
+    - {role: cloudalchemy.prometheus, when: install_mon_stack}
+  tags: prometheus, monitoring
+
+- name: Deploy grafana
+  hosts: grafana
+  gather_facts: no
+  roles: 
+    - {role: cloudalchemy.grafana, when: install_mon_stack}
+  tags: grafana, monitoring

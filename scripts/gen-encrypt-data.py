@@ -1,0 +1,364 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+#!/usr/bin/env python
+
+"""This script generates all the security related data that will
+be needed to deploy jupyterhub. This includes token, passwords and
+self-signed certificates. All the generated information will be placed
+in the security/ directory from the root of the repository"""
+
+
+import os
+import sys
+import stat
+import logging
+import argparse
+import secrets
+import bcrypt
+import shlex
+import subprocess
+
+from ansible.parsing.dataloader import DataLoader
+from ansible.inventory.manager import InventoryManager
+from ansible.vars.manager import VariableManager
+
+from certipy import Certipy, CertNotFoundError, CertExistsError
+
+# Declare global variables
+# Get PATH to current script
+CURR_DIR = os.path.abspath(__file__)
+ROOT_DIR = os.path.dirname(os.path.dirname(CURR_DIR))
+DATA_DIR = os.path.join(
+    ROOT_DIR, 'encryption'
+)
+
+
+# Initialise logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    # Prevent logging from propagating to the root logger
+    logger.propagate = 0
+    console = logging.StreamHandler()
+    logger.addHandler(console)
+    formatter = logging.Formatter(
+        '[%(levelname).1s %(asctime)s.%(msecs)03d %(module)s %(funcName)s:%(lineno)d] %(message)s', 
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    console.setFormatter(formatter)
+
+
+class bColors:
+    """ Colors for terminal output """
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+class RawFormatter(argparse.HelpFormatter):
+    """
+    Class SmartFormatter prints help messages without any formatting
+    or unwanted line breaks, acivated when help starts with R|
+    """
+
+    def _split_lines(self, text, width):
+        if text.startswith('R|\n'):
+            text = text[3:].rstrip()
+            lines = text.splitlines()
+            first_indent = len(lines[0]) - len(lines[0].lstrip())
+            return [l[first_indent:] for l in lines]
+        elif text.startswith('R|'):
+            return [l.lstrip() for l in text[2:].strip().splitlines()]
+
+        # this is the RawTextHelpFormatter._split_lines
+        return argparse.HelpFormatter._split_lines(self, text, width)
+
+    
+def load_ansible_inventory():
+    """Load inventory data from ansible"""
+    # Path to inventory file
+    inventory_file_path = os.path.join(ROOT_DIR, 'hostfile')
+    loader = DataLoader()
+    # create inventory, use path to host config file 
+    # as source or hosts in a comma separated string
+    inventory = InventoryManager(loader=loader, 
+                                 sources=[inventory_file_path])
+
+    # variable manager takes care of merging all the 
+    # different sources to give you a unifed view of variables 
+    # available in each context
+    variable_manager = VariableManager(loader=loader, 
+                                       inventory=inventory)
+    return inventory, variable_manager
+
+
+def get_ansible_hosts(groups):
+    """Get hostnames for groups in ansible"""
+    # Get inventory data from ansible hostfile
+    inventory, _ = load_ansible_inventory()
+    # Add host from each group to hostnames
+    hostnames = []
+    for group in groups:
+        hostnames.append(inventory.get_groups_dict()[group][0])
+    hostnames = list(set(hostnames))
+    return hostnames
+
+
+def get_ansible_group_vars(group):
+    """Get groups vars for a group in ansible"""
+    # Get inventory data from ansible hostfile
+    inventory, variable_manager = load_ansible_inventory()
+    # Get host from group
+    hostname = inventory.get_groups_dict()[group][0]
+    ansible_host = inventory.get_host(hostname)
+    host_vars = variable_manager.get_vars(host=ansible_host)
+    return host_vars
+    
+    
+def generate_dhparam():
+    """Generate diffie-hellman-parameters keys"""
+    # Besides we will create diffie-hellman-parameters 
+    # to use for nginx reverse proxy
+    # I could not find a nicer and safer way to create these
+    # tokens using Python. So we will use openssl and subprocess
+    # module to do it. Hence we assume that openssl is installed
+    # on the host machine
+    
+    # Make directory to place certs
+    os.makedirs(DATA_DIR, exist_ok=True)
+    dhparam_file_path = os.path.join(DATA_DIR, 'nginx_proxy.dhparam.pem')
+    # Generating this key can take very long time. Generate only if existing
+    # key not found
+    if not os.path.exists(dhparam_file_path):
+        cmd=f'openssl dhparam -out {dhparam_file_path} 4096'
+        args = shlex.split(cmd)
+        try:
+            completed = subprocess.run(args=args, shell=False, check=True, capture_output=True)
+        except (subprocess.SubprocessError, subprocess.TimeoutExpired) as err:
+            logger.exception('Failed to generate diffie-hellman-parameters')
+            raise err
+
+        # Check return code of completed process
+        if completed.returncode != 0:
+            logger.warning('Process to create diffie-hellman-parameters exited with non-zero return code')
+            
+    
+def generate_passwords(remove_existing):
+    """Generate passwords that we will use for basic auth for monitoring infrastructure"""
+    # make a directory to place passwords
+    passwds_file = os.path.join(DATA_DIR, 'jp-adminrc')
+    # List of components that will need passwords
+    components = ['node_exporter', 
+                  'prometheus', 'grafana']
+    token_size = 32  # default token size
+    if remove_existing:
+        logger.info('Existing passwords will be removed and news one will be generated')
+        try:
+            os.remove(passwds_file)
+        except Exception:
+            pass
+    else:
+        # Check if passwds_file already exists
+        if os.path.exists(passwds_file):
+            logger.info('Passwords file already exists. Skipping password generation...')
+            return
+    passwds_file_content = '#!/bin/bash\n\n'
+    # generate passwords for each components
+    for component in components:
+        passwd = secrets.token_hex(token_size)
+        passwds_file_content += f'export JP_{component.upper()}_USER={component}\n'
+        passwds_file_content += f'export JP_{component.upper()}_PASSWD={passwd}\n'
+        passwds_file_content += f"export JP_{component.upper()}_PASSWD_HASH='{bcrypt.hashpw(passwd.encode(), bcrypt.gensalt()).decode()}'\n"
+    
+    # Write contents to a file
+    with open(passwds_file, 'w') as f:
+        f.write(passwds_file_content)
+        
+    # Make file executable
+    st = os.stat(passwds_file)
+    os.chmod(passwds_file, st.st_mode | stat.S_IEXEC)
+    
+    logger.info('Passwords generated for all components')
+    
+
+def generate_tokens(remove_existing):
+    """Generate different tokens that we will need to deploy jupyterhub"""
+    # make a directory to place tokens
+    tokens_location = os.path.join(DATA_DIR, 'tokens')
+    os.makedirs(tokens_location, exist_ok=True)
+    # List of components that will need tokens
+    components = ['cookie_secret', 'proxy_auth_token', 
+                  'crypt_key', 'metrics_token']
+    token_size = 32  # default token size
+    if remove_existing:
+        logger.info('Existing tokens will be removed and news one will be generated')
+    # generate token for each components
+    for component in components:
+        component_location = os.path.join(tokens_location, component)
+        if remove_existing:
+            try:
+                os.remove(component_location)
+            except Exception:
+                pass
+        try:
+            _ = open(component_location, 'r').read()
+            logger.info('Token for %s already exists', component)
+        except FileNotFoundError:
+            logger.info('Generating token for %s', component)
+            if component == 'crypt_key':
+                # For crypy_key we generate 5 tokens for key rotation
+                token = ''
+                for key in range(5):
+                    token += f'{secrets.token_hex(token_size)};'
+            else:
+                token = secrets.token_hex(token_size)
+            with open(component_location, 'w') as f:
+                f.write(token)
+                
+    logger.info('Tokens generated for all components')
+
+
+def generate_certs(remove_existing):
+    """Generate self signed certificates"""
+    # Make directory to place certs
+    certs_location = os.path.join(DATA_DIR, 'ssl')
+    os.makedirs(certs_location, exist_ok=True)
+    # Initialise certipy
+    certipy = Certipy(store_dir=certs_location, remove_existing=remove_existing)
+    
+    # We add all hosts in subject alternative names. This is just to
+    # make sure we will not have any trust issues when components
+    # like prometheus and grafana are deployed on different hosts
+    # other than the one where jupyterhub is deployed
+    groups = ['nginx', 'node_exporter', 'prometheus', 'grafana']
+    hostnames = get_ansible_hosts(groups)
+    
+    # List of components for which certs will be created
+    components = groups
+    # Subject Alternative names
+    default_alt_names = ['IP:127.0.0.1', 'DNS:localhost']
+    # Add Jupyterhub host name in SAN
+    trusted_alt_names = [f'DNS:{hostname}' for hostname in hostnames]
+    
+    # Create certs
+    for component in components:
+        ca_name = component + '-ca'
+        alt_names = default_alt_names + trusted_alt_names
+        # Create CA if not already done
+        try:
+            record = certipy.store.get_record(ca_name)
+        except CertNotFoundError:
+            logger.info(
+                "Generating CA for %s components", component
+            )
+            certipy.create_ca(ca_name, alt_names=alt_names)
+        
+        # Create key cert pair for each component
+        try:
+            record = certipy.store.get_record(component)
+        except CertNotFoundError:
+            logger.info(
+                "Generating signed pair for %s: %s",
+                component,
+                ';'.join(alt_names),
+            )
+            record = certipy.create_signed_pair(
+                component, ca_name, alt_names=alt_names
+            )
+        else:
+            logger.info("Using existing %s CA", component)
+
+
+def main():
+    """Entrypoint to the script"""
+    # create parser
+    parser = argparse.ArgumentParser(formatter_class=RawFormatter)
+    parser.add_argument(
+        '-c',
+        '--certs',
+        action='store_true',
+        help='''R|
+                Generate self-signed certificates for TLS.
+            ''',
+    )
+    parser.add_argument(
+        '-t',
+        '--tokens',
+        action='store_true',
+        help='''R|
+                Generate tokens for JupyterHub deployment.
+            ''',
+    )
+    parser.add_argument(
+        '-p',
+        '--passwords',
+        action='store_true',
+        help='''R|
+                Generate passwords for monitoring services.
+            ''',
+    )
+    parser.add_argument(
+        '-d',
+        '--dhparam',
+        action='store_true',
+        help='''R|
+                Generate diffie-hellman keys for nginx reverse proxy.
+            ''',
+    )
+    parser.add_argument(
+        '-r',
+        '--remove_existing',
+        action='store_true',
+        help='''R|
+                Remove existing data and generate new ones.
+            ''',
+    )
+    
+    # parse given arguments
+    args = parser.parse_args()
+    if (not args.certs and 
+        not args.tokens and 
+        not args.passwords and 
+        not args.dhparam):
+        print(f'{bColors.WARNING}Nothing to do. '
+              f'Exiting...{bColors.ENDC}')
+        sys.exit(0)
+    
+    # Convert args into dict
+    opts = vars(args)
+    
+    if opts['certs']:
+        generate_certs(remove_existing=opts['remove_existing'])
+        
+    if opts['tokens']:
+        generate_tokens(remove_existing=opts['remove_existing'])
+        
+    if opts['passwords']:
+        generate_passwords(remove_existing=opts['remove_existing'])
+        
+    if opts['dhparam']:
+        generate_dhparam()
+
+    
+
+if __name__ == '__main__':
+    main()

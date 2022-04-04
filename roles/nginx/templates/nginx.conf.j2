@@ -1,0 +1,75 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify.
+
+user {{ nginx_service_user }} {{ nginx_service_user }};
+worker_processes {{ ansible_processor_count }};
+pid /run/nginx.pid;
+
+events {
+    worker_connections   1024;
+}
+
+http {
+    include  /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Log format
+    log_format custom '"$request: $remote_addr - $remote_user $request_time" "$request" "$server_name" "$request_uri" "$scheme" $status $bytes_sent "$http_referer" "$http_user_agent" "$http_cookie"';
+    access_log /var/log/nginx/access.log custom;
+    error_log /var/log/nginx/error.log info;
+    
+    # top-level http config for websocket headers
+    # If Upgrade is defined, Connection = upgrade
+    # If Upgrade is empty, Connection = close
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name {{ inventory_hostname }};
+        
+        # Tell all requests to port 80 to be 302 redirected to HTTPS
+        return 302 https://$host$request_uri;
+    }
+
+    server {
+        listen 443;
+        client_max_body_size 50M;
+        server_name {{ inventory_hostname }};
+
+        ssl on;
+        ssl_certificate {{ remote_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }};
+        ssl_certificate_key {{ remote_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }};
+        ssl_dhparam {{ remote_path_nginx_proxy_ssl }}/{{ ssl_dhparam_name_nginx_proxy }};
+        ssl_ciphers "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!RC4:!PSK";
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_ecdh_curve secp384r1;
+        ssl_prefer_server_ciphers on;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_tickets off; 
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains";
+        add_header X-Content-Type-Options nosniff;
+        ssl_stapling on;
+        ssl_stapling_verify on;
+        resolver_timeout 5s;
+
+        location / {
+            proxy_pass http://{{ ansible_default_ipv4.address }}:8000;
+
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-NginX-Proxy true;
+            
+            # websocket headers
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_set_header X-Scheme $scheme;
+
+            proxy_buffering off;
+        }
+    }
+}

@@ -1,0 +1,111 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+# Install nginx web server and install certificates
+
+- name: make sure /etc/nginx/ssl exists
+  file:
+    path: "{{ remote_path_nginx_proxy_ssl }}/"
+    state: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0700
+  become: true
+  with_items:
+    - directory
+    - touch
+    
+- name: make sure /etc/ssl/ca exists
+  file:
+    path: "{{ remote_path_ca_cert_ssl }}/"
+    state: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  with_items:
+    - directory
+    - touch
+  when: self_signed_certs
+
+- name: check if SSL key exists
+  stat:
+    path: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
+  delegate_to: localhost
+  register: key_path
+
+- name: fail when key file does not exist
+  fail:
+   msg: "ssl.key cannot be found."
+  when: not key_path.stat.exists
+
+- name: check if SSL cert exists
+  stat:
+    path: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
+  delegate_to: localhost
+  register: cert_path
+
+- name: fail when cert file does not exist
+  fail:
+   msg: "ssl.cert cannot be found."
+  when: not cert_path.stat.exists
+  
+- name: check if Diffie-Hellman key exists
+  stat:
+    path: "{{ local_path_encryption_data }}/{{ ssl_dhparam_name_nginx_proxy }}"
+  delegate_to: localhost
+  register: dhparam_path
+
+- name: fail when Diffie-Hellman key does not exist
+  fail:
+   msg: "dhparam.pem cannot be found."
+  when: not dhparam_path.stat.exists
+
+- name: install SSL key
+  copy:
+    src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
+    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
+    owner: root
+    group: root
+    mode: 0600
+  become: true
+
+- name: install SSL certificate
+  copy:
+    src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
+    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
+    owner: root
+    group: root
+    mode: 0600
+  become: true
+  
+- name: install SSL CA certificate
+  copy:
+    src: "{{ local_path_nginx_proxy_ssl }}-ca/{{ ssl_cert_name_nginx_proxy.split('.')[0] }}-ca.crt"
+    dest: "{{ remote_path_ca_cert_ssl }}/{{ ssl_cert_name_nginx_proxy.split('.')[0] }}-ca.crt"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  when: self_signed_certs
+  
+- name: install Diffie-Hellman key
+  copy:
+    src: "{{ local_path_encryption_data }}/{{ ssl_dhparam_name_nginx_proxy }}"
+    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_dhparam_name_nginx_proxy }}"
+    owner: root
+    group: root
+    mode: 0600
+  become: true
