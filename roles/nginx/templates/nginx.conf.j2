@@ -13,7 +13,7 @@ http {
     default_type application/octet-stream;
     
     # Log format
-    log_format custom '"$request: $remote_addr - $remote_user $request_time" "$request" "$server_name" "$request_uri" "$scheme" $status $bytes_sent "$http_referer" "$http_user_agent" "$http_cookie"';
+    log_format custom '"$request_method: $remote_addr - $remote_user [$time_local]" "$request_method" "$server_name" "$request" "$args" "$scheme" $status $bytes_sent "$http_referer" "$http_user_agent" "$http_cookie"';
     access_log /var/log/nginx/access.log custom;
     error_log /var/log/nginx/error.log info;
     
