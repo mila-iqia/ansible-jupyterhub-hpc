@@ -49,7 +49,7 @@
   lineinfile:
     dest: /etc/sudoers
     state: present
-    regexp: "^{{ jupyterhub_service_user }} ALL=(ALL)"
-    line: "{{ jupyterhub_service_user }} ALL=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
+    regexp: "^{{ jupyterhub_service_user }} {{ ansible_hostname }}=(ALL)"
+    line: "{{ jupyterhub_service_user }} {{ ansible_hostname }}=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
     validate: "visudo -cf %s"
   become: true
