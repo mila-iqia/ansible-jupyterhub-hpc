@@ -27,4 +27,14 @@ nginx_service_user: "nginx"
 # Path to store the SSL certificates on remote machine 
 # where JupyterHub will be deployed.
 remote_path_nginx_proxy_ssl: "/etc/nginx/ssl"
+
+# HTTPS port that server will listen. By default we use 
+# standard 443 port. If the user wants to use non-standard
+# port, that can be configured here
+nginx_https_port: "443"
+
+# HTTP port that server will listen. By default we use 
+# standard 80 port. If the user wants to use non-standard
+# port, that can be configured here
+nginx_http_port: "80"
   

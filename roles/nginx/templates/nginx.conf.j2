@@ -26,16 +26,16 @@ http {
     }
 
     server {
-        listen 80;
-        listen [::]:80;
+        listen {{ nginx_http_port }};
+        listen [::]:{{ nginx_http_port }};
         server_name {{ inventory_hostname }};
         
-        # Tell all requests to port 80 to be 302 redirected to HTTPS
+        # Tell all requests to HTTP port to be 302 redirected to HTTPS
         return 302 https://$host$request_uri;
     }
 
     server {
-        listen 443;
+        listen {{ nginx_https_port }};
         client_max_body_size 50M;
         server_name {{ inventory_hostname }};
 
