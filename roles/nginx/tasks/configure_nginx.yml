@@ -24,7 +24,7 @@
     mode: 0644
     backup: yes
   become: true
-  tags: "configure_nginx"
+  tags: "install_nginx_config"
   notify:
     - reload nginx
     - restart nginx
