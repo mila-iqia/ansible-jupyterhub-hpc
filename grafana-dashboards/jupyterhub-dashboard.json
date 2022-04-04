@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [{
@@ -30,7 +30,7 @@
         "x": 0,
         "y": 0
       },
-      "id": null,
+      "id": 2,
       "panels": [],
       "title": "Quick Stats",
       "type": "row"
@@ -38,6 +38,7 @@
     {
       "description": "Current number of running servers",
       "editable": true,
+      "id": 3,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -96,10 +97,11 @@
     {
       "description": "Current number of active users",
       "editable": true,
+      "id": 4,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "thresholds": {
@@ -152,12 +154,13 @@
       "type": "stat"
     },
     {
-      "description": "Average time taken for spawning a server in last 5m. This should be taken too seriously as it includes the time taken by SLURM scheduler to allocate resources.",
+      "description": "Average time taken for spawning a server. This should be taken too seriously as it includes the time taken by SLURM scheduler to allocate resources.",
       "editable": true,
+      "id": 5,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "thresholds": {
@@ -211,12 +214,13 @@
       "type": "stat"
     },
     {
-      "description": "Average time taken for spawned servers to stop in last 5m",
+      "description": "Average time taken for spawned servers to stop",
       "editable": true,
+      "id": 6,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "thresholds": {
@@ -270,12 +274,13 @@
       "type": "stat"
     },
     {
-      "description": "Average time taken for adding user routes to proxy in last 5m",
+      "description": "Average time taken for adding user routes to proxy",
       "editable": true,
+      "id": 7,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "thresholds": {
@@ -329,12 +334,13 @@
       "type": "stat"
     },
     {
-      "description": "Average time taken for deleting user routes to proxy in last 5m",
+      "description": "Average time taken for deleting user routes to proxy",
       "editable": true,
+      "id": 8,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "thresholds": {
@@ -394,7 +400,7 @@
         "x": 16,
         "y": 1
       },
-      "id": 2,
+      "id": 9,
       "editable": true,
       "options": {
         "content": "# README \n\nJupyterHub exposes certain metrics in a way that prometheus can understand. More information\non the metrics exposed by JupyterHub can be found at [JupyterHub](https://jupyterhub.readthedocs.io/en/stable/reference/metrics.html) \nofficial documentation.\n\n-  All average metrics presented in the stats are average in the range selected in Grafana main dashboard\n- Nb running servers and Nb active users are current number of running servers and logged in hub users\n- Average server spawn and proxy metrics are the average time taken in the range selected.",
@@ -405,14 +411,16 @@
       "type": "text"
     },
     {
-      "description": "Average number of server spawns in last 5m by their status",
+      "description": "Average number of server spawns by their status",
       "editable": true,
+      "id": 10,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -463,14 +471,16 @@
       "type": "stat"
     },
     {
-      "description": "Average number of server stops in last 5m by their status",
+      "description": "Average number of server stops by their status",
       "editable": true,
+      "id": 11,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -523,10 +533,11 @@
     {
       "description": "Number of HTTP requests by method",
       "editable": true,
+      "id": 12,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "decimals": 0,
@@ -582,10 +593,11 @@
     {
       "description": "Number of HTTP requests by response code",
       "editable": true,
+      "id": 13,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
           "decimals": 0,
@@ -646,10 +658,11 @@
         "x": 0,
         "y": 16
       },
-      "id": null,
+      
       "panels": [{
           "description": "Time series plot of number of users",
           "editable": true,
+          "id": 14,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -700,7 +713,7 @@
             "x": 0,
             "y": 17
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -729,6 +742,7 @@
         {
           "description": "Time series plot of number of running servers",
           "editable": true,
+          "id": 15,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -784,7 +798,7 @@
             "x": 12,
             "y": 17
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -822,10 +836,11 @@
         "x": 0,
         "y": 27
       },
-      "id": null,
+      
       "panels": [{
           "description": "Time series plot of average server spawn duration",
           "editable": true,
+          "id": 16,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -878,7 +893,7 @@
             "x": 0,
             "y": 28
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -908,6 +923,7 @@
         {
           "description": "Time series plot of average server poll duration",
           "editable": true,
+          "id": 17,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -965,7 +981,7 @@
             "x": 8,
             "y": 28
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -995,6 +1011,7 @@
         {
           "description": "Average time taken to stop the spawned server",
           "editable": true,
+          "id": 18,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1047,7 +1064,7 @@
             "x": 16,
             "y": 28
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1086,10 +1103,11 @@
         "x": 0,
         "y": 38
       },
-      "id": null,
+      
       "panels": [{
           "description": "Time series plot of average duration for adding user routes to proxy",
           "editable": true,
+          "id": 19,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1142,7 +1160,7 @@
             "x": 0,
             "y": 39
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1172,6 +1190,7 @@
         {
           "description": "Time series plot of average duration for polling user routes from proxy",
           "editable": true,
+          "id": 20,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1224,7 +1243,7 @@
             "x": 8,
             "y": 39
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1254,6 +1273,7 @@
         {
           "description": "Time series plot of average duration for deleting user routes from proxy",
           "editable": true,
+          "id": 21,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1306,7 +1326,7 @@
             "x": 16,
             "y": 39
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1345,10 +1365,11 @@
         "x": 0,
         "y": 49
       },
-      "id": null,
+      
       "panels": [{
           "description": "Time series plot of average duration for HTTP requests by method",
           "editable": true,
+          "id": 22,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1401,7 +1422,7 @@
             "x": 0,
             "y": 50
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1431,6 +1452,7 @@
         {
           "description": "Time series plot of average duration for HTTP request by code",
           "editable": true,
+          "id": 23,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1483,7 +1505,7 @@
             "x": 8,
             "y": 50
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1513,6 +1535,7 @@
         {
           "description": "Time series plot of average duration for HTTP request by handler",
           "editable": true,
+          "id": 24,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1565,7 +1588,7 @@
             "x": 16,
             "y": 50
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1604,10 +1627,11 @@
         "x": 0,
         "y": 60
       },
-      "id": null,
+      
       "panels": [{
           "description": "Time series plot of average duration for jupyterhub to start",
           "editable": true,
+          "id": 25,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1660,7 +1684,7 @@
             "x": 0,
             "y": 61
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
@@ -1690,6 +1714,7 @@
         {
           "description": "Time series plot of average duration for spawner to initialise",
           "editable": true,
+          "id": 26,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1742,7 +1767,7 @@
             "x": 12,
             "y": 61
           },
-          "id": null,
+          
           "options": {
             "legend": {
               "calcs": [],
