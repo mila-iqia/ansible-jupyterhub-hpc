@@ -18,6 +18,17 @@ c.JupyterHub.allow_named_servers = True
 #  If set to 0, no limit is enforced.
 c.JupyterHub.named_server_limit_per_user = 10
 
+## Whether to shutdown single-user servers when the Hub shuts down.
+#
+#  Disable if you want to be able to teardown the Hub while leaving the single-
+#  user servers running.
+#
+#  If both this and cleanup_proxy are False, sending SIGINT to the Hub will only
+#  shutdown the Hub, leaving everything else running.
+#
+#  The Hub should be able to resume from database state.
+c.JupyterHub.cleanup_servers = False
+
 ## The ip address for the Hub process to *bind* to.
 #
 #  By default, the hub listens on localhost only. This address must be accessible
