@@ -1,28 +1,33 @@
 {
   "annotations": {
-    "list": [{
-      "builtIn": 1,
-      "datasource": "-- Grafana --",
-      "enable": true,
-      "hide": true,
-      "iconColor": "rgba(0, 211, 255, 1)",
-      "name": "Annotations & Alerts",
-      "target": {
-        "limit": 100,
-        "matchAny": false,
-        "tags": ["jupyterhub"],
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [
+            "jupyterhub"
+          ],
+          "type": "dashboard"
+        },
         "type": "dashboard"
-      },
-      "type": "dashboard"
-    }]
+      }
+    ]
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 3,
   "links": [],
   "liveNow": false,
-  "panels": [{
+  "panels": [
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -38,11 +43,10 @@
     {
       "description": "Current number of running servers",
       "editable": true,
-      "id": 3,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -53,7 +57,8 @@
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -63,6 +68,7 @@
         "x": 0,
         "y": 1
       },
+      "id": 3,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -97,11 +103,10 @@
     {
       "description": "Current number of active users",
       "editable": true,
-      "id": 4,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -112,7 +117,8 @@
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -122,6 +128,7 @@
         "x": 2,
         "y": 1
       },
+      "id": 4,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -156,11 +163,10 @@
     {
       "description": "Average time taken for spawning a server. This should be taken too seriously as it includes the time taken by SLURM scheduler to allocate resources.",
       "editable": true,
-      "id": 5,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -182,6 +188,7 @@
         "x": 4,
         "y": 1
       },
+      "id": 5,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -216,11 +223,10 @@
     {
       "description": "Average time taken for spawned servers to stop",
       "editable": true,
-      "id": 6,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -242,6 +248,7 @@
         "x": 7,
         "y": 1
       },
+      "id": 6,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -276,11 +283,10 @@
     {
       "description": "Average time taken for adding user routes to proxy",
       "editable": true,
-      "id": 7,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -302,6 +308,7 @@
         "x": 10,
         "y": 1
       },
+      "id": 7,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -336,11 +343,10 @@
     {
       "description": "Average time taken for deleting user routes to proxy",
       "editable": true,
-      "id": 8,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -362,6 +368,7 @@
         "x": 13,
         "y": 1
       },
+      "id": 8,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -394,6 +401,7 @@
       "type": "stat"
     },
     {
+      "editable": true,
       "gridPos": {
         "h": 15,
         "w": 8,
@@ -401,7 +409,6 @@
         "y": 1
       },
       "id": 9,
-      "editable": true,
       "options": {
         "content": "# README \n\nJupyterHub exposes certain metrics in a way that prometheus can understand. More information\non the metrics exposed by JupyterHub can be found at [JupyterHub](https://jupyterhub.readthedocs.io/en/stable/reference/metrics.html) \nofficial documentation.\n\n-  All average metrics presented in the stats are average in the range selected in Grafana main dashboard\n- Nb running servers and Nb active users are current number of running servers and logged in hub users\n- Average server spawn and proxy metrics are the average time taken in the range selected.",
         "mode": "markdown"
@@ -413,23 +420,23 @@
     {
       "description": "Average number of server spawns by their status",
       "editable": true,
-      "id": 10,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
-          "mappings": [],
           "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "white",
+                "color": "super-light-green",
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -439,8 +446,9 @@
         "x": 0,
         "y": 6
       },
+      "id": 10,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "vertical",
@@ -473,23 +481,23 @@
     {
       "description": "Average number of server stops by their status",
       "editable": true,
-      "id": 11,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
-          "mappings": [],
           "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "white",
+                "color": "super-light-red",
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -499,8 +507,9 @@
         "x": 13,
         "y": 6
       },
+      "id": 11,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "vertical",
@@ -533,23 +542,23 @@
     {
       "description": "Number of HTTP requests by method",
       "editable": true,
-      "id": 12,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
-          "mappings": [],
           "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "white",
+                "color": "super-light-purple",
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -559,8 +568,9 @@
         "x": 0,
         "y": 11
       },
+      "id": 12,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "vertical",
@@ -583,7 +593,7 @@
           "exemplar": true,
           "expr": "sum(increase(jupyterhub_request_duration_seconds_count{}[$__range])) by (method)",
           "interval": "",
-          "legendFormat": "{{method}}",
+          "legendFormat": "HTTP method={{method}}",
           "refId": "A"
         }
       ],
@@ -593,23 +603,23 @@
     {
       "description": "Number of HTTP requests by response code",
       "editable": true,
-      "id": 13,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-RdYlGr"
+            "mode": "thresholds"
           },
-          "mappings": [],
           "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "light-blue",
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -619,8 +629,9 @@
         "x": 4,
         "y": 11
       },
+      "id": 13,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "vertical",
@@ -643,7 +654,7 @@
           "exemplar": true,
           "expr": "sum(increase(jupyterhub_request_duration_seconds_count{}[$__range])) by (code)",
           "interval": "",
-          "legendFormat": "{{code}}",
+          "legendFormat": "HTTP code={{code}}",
           "refId": "A"
         }
       ],
@@ -658,11 +669,10 @@
         "x": 0,
         "y": 16
       },
-      
-      "panels": [{
+      "panels": [
+        {
           "description": "Time series plot of number of users",
           "editable": true,
-          "id": 14,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -699,10 +709,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               }
             },
             "overrides": []
@@ -713,7 +724,7 @@
             "x": 0,
             "y": 17
           },
-          
+          "id": 14,
           "options": {
             "legend": {
               "calcs": [],
@@ -725,24 +736,25 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "jupyterhub_total_users{}",
-            "interval": "",
-            "legendFormat": "Total number of users",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "jupyterhub_total_users{}",
+              "interval": "",
+              "legendFormat": "Total number of users",
+              "refId": "A"
+            }
+          ],
           "title": "Number of hub users",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of number of running servers",
           "editable": true,
-          "id": 15,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -779,9 +791,9 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                    "color": "green",
-                    "value": null
+                "steps": [
+                  {
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -798,7 +810,7 @@
             "x": 12,
             "y": 17
           },
-          
+          "id": 15,
           "options": {
             "legend": {
               "calcs": [],
@@ -810,17 +822,19 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "jupyterhub_running_servers{}",
-            "interval": "",
-            "legendFormat": "Total number of running servers",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "jupyterhub_running_servers{}",
+              "interval": "",
+              "legendFormat": "Total number of running servers",
+              "refId": "A"
+            }
+          ],
           "title": "Number of running servers",
           "type": "timeseries"
         }
@@ -834,13 +848,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 17
       },
-      
-      "panels": [{
+      "panels": [
+        {
           "description": "Time series plot of average server spawn duration",
           "editable": true,
-          "id": 16,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -878,10 +891,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -893,7 +907,7 @@
             "x": 0,
             "y": 28
           },
-          
+          "id": 16,
           "options": {
             "legend": {
               "calcs": [],
@@ -905,25 +919,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_server_spawn_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_server_spawn_duration_seconds_count{}[$__interval])) by (status)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{status}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_server_spawn_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_server_spawn_duration_seconds_count{}[$__interval])) by (status)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Server Spawn Duration",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of average server poll duration",
           "editable": true,
-          "id": 17,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -946,7 +961,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -961,9 +976,9 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                    "color": "green",
-                    "value": null
+                "steps": [
+                  {
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -981,7 +996,7 @@
             "x": 8,
             "y": 28
           },
-          
+          "id": 17,
           "options": {
             "legend": {
               "calcs": [],
@@ -993,25 +1008,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_server_poll_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_server_poll_duration_seconds_count{}[$__interval])) by (status)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{status}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_server_poll_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_server_poll_duration_seconds_count{}[$__interval])) by (status)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Server Poll Duration",
           "type": "timeseries"
         },
         {
           "description": "Average time taken to stop the spawned server",
           "editable": true,
-          "id": 18,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1034,7 +1050,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1049,10 +1065,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1064,7 +1081,7 @@
             "x": 16,
             "y": 28
           },
-          
+          "id": 18,
           "options": {
             "legend": {
               "calcs": [],
@@ -1076,18 +1093,20 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_server_stop_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_server_stop_duration_seconds_count{}[$__interval])) by (status)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{status}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_server_stop_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_server_stop_duration_seconds_count{}[$__interval])) by (status)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Server Stop Duration",
           "type": "timeseries"
         }
@@ -1101,13 +1120,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 18
       },
-      
-      "panels": [{
+      "panels": [
+        {
           "description": "Time series plot of average duration for adding user routes to proxy",
           "editable": true,
-          "id": 19,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1130,7 +1148,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1145,10 +1163,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1160,7 +1179,7 @@
             "x": 0,
             "y": 39
           },
-          
+          "id": 19,
           "options": {
             "legend": {
               "calcs": [],
@@ -1172,25 +1191,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_proxy_add_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_proxy_add_duration_seconds_count{}[$__interval])) by (status)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{status}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_proxy_add_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_proxy_add_duration_seconds_count{}[$__interval])) by (status)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for Adding User Routes to Proxy",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of average duration for polling user routes from proxy",
           "editable": true,
-          "id": 20,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1213,7 +1233,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1228,10 +1248,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1243,7 +1264,7 @@
             "x": 8,
             "y": 39
           },
-          
+          "id": 20,
           "options": {
             "legend": {
               "calcs": [],
@@ -1255,25 +1276,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_proxy_poll_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_proxy_poll_duration_seconds_count{}[$__interval])) by (status)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{status}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_proxy_poll_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_proxy_poll_duration_seconds_count{}[$__interval])) by (status)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for Polling User Routes from Proxy",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of average duration for deleting user routes from proxy",
           "editable": true,
-          "id": 21,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1296,7 +1318,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1311,10 +1333,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1326,7 +1349,7 @@
             "x": 16,
             "y": 39
           },
-          
+          "id": 21,
           "options": {
             "legend": {
               "calcs": [],
@@ -1338,18 +1361,20 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_proxy_delete_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_proxy_delete_duration_seconds_count{}[$__interval])) by (status)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{status}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_proxy_delete_duration_seconds_sum{}[$__interval])) by (status) / sum(rate(jupyterhub_proxy_delete_duration_seconds_count{}[$__interval])) by (status)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for Deleting User Routes from Proxy",
           "type": "timeseries"
         }
@@ -1363,13 +1388,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 19
       },
-      
-      "panels": [{
+      "panels": [
+        {
           "description": "Time series plot of average duration for HTTP requests by method",
           "editable": true,
-          "id": 22,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1392,7 +1416,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1407,10 +1431,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1422,7 +1447,7 @@
             "x": 0,
             "y": 50
           },
-          
+          "id": 22,
           "options": {
             "legend": {
               "calcs": [],
@@ -1434,25 +1459,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_request_duration_seconds_sum{}[$__interval])) by (method) / sum(rate(jupyterhub_request_duration_seconds_count{}[$__interval])) by (method)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{method}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_request_duration_seconds_sum{}[$__interval])) by (method) / sum(rate(jupyterhub_request_duration_seconds_count{}[$__interval])) by (method)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{method}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for HTTP Request by Method",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of average duration for HTTP request by code",
           "editable": true,
-          "id": 23,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1475,7 +1501,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1490,10 +1516,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1505,7 +1532,7 @@
             "x": 8,
             "y": 50
           },
-          
+          "id": 23,
           "options": {
             "legend": {
               "calcs": [],
@@ -1517,25 +1544,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_request_duration_seconds_sum{}[$__interval])) by (code) / sum(rate(jupyterhub_request_duration_seconds_count{}[$__interval])) by (code)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{code}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_request_duration_seconds_sum{}[$__interval])) by (code) / sum(rate(jupyterhub_request_duration_seconds_count{}[$__interval])) by (code)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{code}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for HTTP Request by code",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of average duration for HTTP request by handler",
           "editable": true,
-          "id": 24,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1558,7 +1586,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1573,10 +1601,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1588,7 +1617,7 @@
             "x": 16,
             "y": 50
           },
-          
+          "id": 24,
           "options": {
             "legend": {
               "calcs": [],
@@ -1600,18 +1629,20 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_request_duration_seconds_sum{}[$__interval])) by (handler) / sum(rate(jupyterhub_request_duration_seconds_count{}[$__interval])) by (handler)",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "{{handler}}",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_request_duration_seconds_sum{}[$__interval])) by (handler) / sum(rate(jupyterhub_request_duration_seconds_count{}[$__interval])) by (handler)",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "{{handler}}",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for HTTP Request by handler",
           "type": "timeseries"
         }
@@ -1625,13 +1656,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 20
       },
-      
-      "panels": [{
+      "panels": [
+        {
           "description": "Time series plot of average duration for jupyterhub to start",
           "editable": true,
-          "id": 25,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1654,7 +1684,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1669,10 +1699,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1684,7 +1715,7 @@
             "x": 0,
             "y": 61
           },
-          
+          "id": 25,
           "options": {
             "legend": {
               "calcs": [],
@@ -1696,25 +1727,26 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_hub_startup_duration_seconds_sum{}[$__interval])) / sum(rate(jupyterhub_hub_startup_duration_seconds_count{}[$__interval]))",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "hub startup",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_hub_startup_duration_seconds_sum{}[$__interval])) / sum(rate(jupyterhub_hub_startup_duration_seconds_count{}[$__interval]))",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "hub startup",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for JupyterHub to startup",
           "type": "timeseries"
         },
         {
           "description": "Time series plot of average duration for spawner to initialise",
           "editable": true,
-          "id": 26,
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1737,7 +1769,7 @@
                 "pointSize": 5,
                 "scaleDistribution": {
                   "log": 2,
-              "type": "log"
+                  "type": "log"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -1752,10 +1784,11 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                  "color": "green",
-                  "value": null
-                }]
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
               },
               "unit": "s"
             },
@@ -1767,7 +1800,7 @@
             "x": 12,
             "y": 61
           },
-          
+          "id": 26,
           "options": {
             "legend": {
               "calcs": [],
@@ -1779,18 +1812,20 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "P1809F7CD0C75ACF3"
-            },
-            "exemplar": true,
-            "expr": "sum(rate(jupyterhub_init_spawners_duration_seconds_sum{}[$__interval])) / sum(rate(jupyterhub_init_spawners_duration_seconds_count{}[$__interval]))",
-            "interval": "30s",
-            "intervalFactor": 1,
-            "legendFormat": "spawner init",
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "P1809F7CD0C75ACF3"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(jupyterhub_init_spawners_duration_seconds_sum{}[$__interval])) / sum(rate(jupyterhub_init_spawners_duration_seconds_count{}[$__interval]))",
+              "interval": "30s",
+              "intervalFactor": 1,
+              "legendFormat": "spawner init",
+              "refId": "A"
+            }
+          ],
           "title": "Average Duration for Spawners to initialise",
           "type": "timeseries"
         }
@@ -1815,6 +1850,6 @@
   "timezone": "",
   "title": "JupyterHub Stats",
   "uid": "Qlz9K8ynk",
-  "version": 13,
+  "version": 1,
   "weekStart": ""
 }
