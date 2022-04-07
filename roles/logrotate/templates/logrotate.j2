@@ -2,14 +2,20 @@
 # Config file for logrotate.
 
 {% for log in item.log_files %}
-/var/log/{{ item.service_name }} is {{ log }}
+/var/log/{{ item.service_name }}/{{ log }}
 {% endfor %}
 {
    weekly
    rotate 4
-   size 10M
-   create
+   size 50M
+   create {{ item.mode }} {{ item.user }} {{ item.group }}
    dateext
    compress
    delaycompress
+   missingok
+   notifempty
+   sharedscripts
+   postrotate
+    {{ item.postrotate }}
+ endscript
 }

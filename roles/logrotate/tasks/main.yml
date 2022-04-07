@@ -16,7 +16,7 @@
 
 # This task sets log rotate for jupyterhub and nginx daemons
 
-- name: create logrotate configs for jupyterhub and nginx
+- name: create logrotate configs for nginx
   template:
     src: logrotate.j2
     dest: "/etc/logrotate.d/{{ item.service_name }}"
@@ -24,5 +24,30 @@
     group: root
     mode: 0644
   become: true
+  when: inventory_hostname in groups['nginx']
   with_items:
-    - "{{ logfiles_to_rotate }}"
+    - "{{ nginx_logfiles }}"
+    
+- name: create logrotate configs for jupyterhub
+  template:
+    src: logrotate.j2
+    dest: "/etc/logrotate.d/{{ item.service_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  when: inventory_hostname in groups['jupyterhub']
+  with_items:
+    - "{{ jupyterhub_logfiles }}"
+    
+- name: create logrotate configs for grafana
+  template:
+    src: logrotate.j2
+    dest: "/etc/logrotate.d/{{ item.service_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  when: inventory_hostname in groups['grafana'] and install_mon_stack
+  with_items:
+    - "{{ grafana_logfiles }}"

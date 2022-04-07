@@ -18,8 +18,17 @@
 # jupyterhub
 # List of log files to rotate. service_name is the name of
 # the service where and log_files are the files to rotate
-logfiles_to_rotate_default:
-  - { service_name: "jupyterhub", log_files: ["jupyterhub.log"] }
-  - { service_name: "nginx", log_files: ["access.log", "error.log"] }
-  
-logfiles_to_rotate: "{{ logfiles_to_rotate_default + [{'service_name': 'grafana', 'log_files': ['grafana.log'] }] if (install_mon_stack) else logfiles_to_rotate_default}}"
+
+# Instead, kill sends a specific signal "USR1" which for nginx has a 
+# specific meaning and tells the nginx master process to reopen it's log files.
+# This effectively means that nginx starts writing to the new log files.
+nginx_logfiles:
+  - { service_name: "nginx", log_files: ["*.log"], mode: '0644', user: 'root', group: 'root', postrotate: "kill -USR1 `cat {{ nginx_pid_file }}`" }
+
+jupyterhub_logfiles:
+  - { service_name: "jupyterhub", log_files: ["*.log"], mode: '0644', user: 'jupyter', group: 'jupyter', postrotate: "/bin/kill -HUP `cat {{ jupyterhub_srv_dir }}/pid` `cat {{ jupyterhub_srv_dir }}/proxy_pid` > /dev/null 2>/dev/null || true" }
+
+# grafana writes PID file in that directory. We can get
+# this info from grafana-server system service file
+grafana_logfiles:
+  - { service_name: "grafana", log_files: ["*.log"], mode: '0640', user: 'grafana', group: 'grafana', postrotate: "/bin/kill -HUP `cat /var/run/grafana/grafana-server.pid` > /dev/null 2>/dev/null || true" }
