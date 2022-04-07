@@ -1,0 +1,42 @@
+# WARNING: This file is {{ ansible_managed }}. Do not modify it
+
+auth_enabled: {{ loki_config_auth }}
+
+server:
+  http_listen_address: {{ loki_config_http_address }}
+  http_listen_port: {{ loki_config_http_port }}
+
+ingester:
+  wal:
+    enabled: true
+    dir: {{ loki_config_store }}/wal
+  lifecycler:
+    address: 127.0.0.1
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    final_sleep: 0s
+  chunk_idle_period: 5m
+  chunk_retain_period: 30s
+
+schema_config:
+  configs:
+  - from: 2020-05-15
+    store: boltdb
+    object_store: filesystem
+    schema: v11
+    index:
+      prefix: index_
+      period: {{ loki_config_period }}
+
+storage_config:
+  boltdb:
+    directory: {{ loki_config_store }}/index
+  filesystem:
+    directory: {{ loki_config_store }}/chunks
+
+limits_config:
+  enforce_metric_name: false
+  reject_old_samples: true
+  reject_old_samples_max_age: {{ loki_config_period }}
