@@ -14,11 +14,25 @@
 ---
 
 # These are global variables that are used across roles.
+#
+# ---------------------------------------------------
+# Monitoring
+# ---------------------------------------------------
+#
+# Bool to set if monitoring stack will be installed
+# This will install node exporter, prometheus and grafana stack
+# on the host where jupyterhub is installed
+# This will also install grafana loki and promtail to monitor
+# nginx reverse proxy. In the future support for jupyterhub 
+# logs might be added to this stack
+# If the user wants to install Prometheus and Grafana on a different
+# node it can be configured in the hostfile
+install_mon_stack: true
 
 # ---------------------------------------------------
 # SSL certificates configuration
 # ---------------------------------------------------
-
+#
 # Boolean. To be set to true if we are using self signed
 # certificates for all components which includes juoyterhub,
 # prometheus, grafana, node_exporter, nginx_exporter. If we 
@@ -38,7 +52,7 @@ remote_path_ca_cert_ssl: "/etc/ssl/ca"
 # ---------------------------------------------------
 # Local paths to find tokens, passwords and SSL stuff
 # ---------------------------------------------------
-
+#
 # Path to find the encryption related data
 local_path_encryption_data: "{{ lookup('env','PWD') }}/encryption"
 
@@ -52,7 +66,7 @@ local_path_tokens: "{{ local_path_encryption_data }}/tokens"
 # ---------------------------------------------------
 # Nginx SSL certs local path
 # ---------------------------------------------------
-
+#
 # Path where all certificates related to nginx reverse proxy
 # will be placed on local ansible host
 local_path_nginx_proxy_ssl: "{{ local_path_ssl }}/nginx"
@@ -67,7 +81,7 @@ ssl_dhparam_name_nginx_proxy: "{{ ssl_cert_key_prefix_nginx_proxy }}.dhparam.pem
 # ---------------------------------------------------
 # Node exporter SSL certs local path
 # ---------------------------------------------------
-
+#
 # Path where all certificates related to node exporter
 # will be placed on local ansible host
 local_path_node_exporter_ssl: "{{ local_path_ssl }}/node_exporter"
@@ -81,7 +95,7 @@ ssl_cert_name_node_exporter: "{{ ssl_cert_key_prefix_node_exporter }}.crt"
 # ---------------------------------------------------
 # Prometheus SSL certs local path
 # ---------------------------------------------------
-
+#
 # Path where all certificates related to prometheus SSL
 # will be placed on local ansible host
 local_path_prometheus_ssl: "{{ local_path_ssl }}/prometheus"
@@ -95,7 +109,7 @@ ssl_cert_name_prometheus: "{{ ssl_cert_key_prefix_prometheus }}.crt"
 # ---------------------------------------------------
 # Grafana SSL certs local path
 # ---------------------------------------------------
-
+#
 # Path where all certificates related to prometheus SSL
 # will be placed on local ansible host
 local_path_grafana_ssl: "{{ local_path_ssl }}/grafana"
