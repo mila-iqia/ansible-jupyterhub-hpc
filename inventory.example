@@ -2,7 +2,7 @@
 
 [jupyterhub]
 # Host where jupyterhub will be deployed
-node.example.com
+server.example.com
 
 [compute]
 # List of compute hostnames. We need this to add them as Subject Alternative Names for CA 
@@ -33,6 +33,16 @@ jupyterhub
 
 [prometheus:children]
 # Single node to host monitoring server. By default this will be same as jupyterhub host
+jupyterhub
+
+[promtail:children]
+# Same host as nginx host to monitor the nginx metrics and send them to loki for displaying
+# in grafana via dashboards
+nginx
+
+[grafana_loki:children]
+# Hosts to monitor for hardware and OS metrics. By default we monitor only the metrics of the
+# host where jupyterhub is deployed
 jupyterhub
 
 [grafana:children]
