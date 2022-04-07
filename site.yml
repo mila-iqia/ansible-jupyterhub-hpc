@@ -67,7 +67,7 @@
   gather_facts: no
   roles:
     - install_encrypt_data
-  tags: encrypt
+  tags: encrypt_jh
 
 - name: Install nginx
   hosts: nginx
@@ -103,6 +103,20 @@
   roles: 
     - {role: cloudalchemy.prometheus, when: install_mon_stack}
   tags: prometheus, monitoring
+  
+- name: Deploy grafana loki
+  hosts: grafana_loki
+  gather_facts: no
+  roles: 
+    - {role: grafana_loki, when: install_mon_stack}
+  tags: loki, monitoring
+  
+- name: Deploy promtail
+  hosts: promtail
+  gather_facts: no
+  roles: 
+    - {role: patrickjahns.promtail, when: install_mon_stack}
+  tags: promtail, monitoring
 
 - name: Deploy grafana
   hosts: grafana
