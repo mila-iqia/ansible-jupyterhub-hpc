@@ -40,39 +40,6 @@
     - touch
   when: self_signed_certs
 
-- name: check if SSL key exists
-  stat:
-    path: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
-  delegate_to: localhost
-  register: key_path
-
-- name: fail when key file does not exist
-  fail:
-   msg: "ssl.key cannot be found."
-  when: not key_path.stat.exists
-
-- name: check if SSL cert exists
-  stat:
-    path: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
-  delegate_to: localhost
-  register: cert_path
-
-- name: fail when cert file does not exist
-  fail:
-   msg: "ssl.cert cannot be found."
-  when: not cert_path.stat.exists
-  
-- name: check if Diffie-Hellman key exists
-  stat:
-    path: "{{ local_path_encryption_data }}/{{ ssl_dhparam_name_nginx_proxy }}"
-  delegate_to: localhost
-  register: dhparam_path
-
-- name: fail when Diffie-Hellman key does not exist
-  fail:
-   msg: "dhparam.pem cannot be found."
-  when: not dhparam_path.stat.exists
-
 - name: install SSL key
   copy:
     src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"

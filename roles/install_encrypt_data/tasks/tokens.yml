@@ -13,17 +13,6 @@
 # limitations under the License.
 
 ---
-  
-- name: check if jupyterhub cookie secret exists
-  stat:
-    path: "{{ local_path_tokens }}/cookie_secret"
-  delegate_to: localhost
-  register: cookie_path
-
-- name: fail when cookie_path file does not exist
-  fail:
-   msg: cookie_secret cannot be found.
-  when: not cookie_path.stat.exists
 
 - name: install jupyterhub cookie secret
   copy:
@@ -31,19 +20,8 @@
     dest: "{{ jupyterhub_srv_dir }}/cookie_secret"
     owner: "{{ jupyterhub_service_user }}"
     group: "{{ jupyterhub_service_user }}"
-    mode: 0600
+    mode: '0600'
   become: true
-  
-- name: check if CHP proxy auth token exists
-  stat:
-    path: "{{ local_path_tokens }}/proxy_auth_token"
-  delegate_to: localhost
-  register: auth_token_path
-
-- name: fail when auth_token_path file does not exist
-  fail:
-   msg: CHP auth proxy token cannot be found.
-  when: not auth_token_path.stat.exists
 
 - name: install CHP proxy auth token
   copy:
@@ -51,19 +29,8 @@
     dest: "{{ jupyterhub_srv_dir }}/proxy_auth_token"
     owner: "{{ jupyterhub_service_user }}"
     group: "{{ jupyterhub_service_user }}"
-    mode: 0600
+    mode: '0600'
   become: true
-  
-- name: check if crypt keys exist
-  stat:
-    path: "{{ local_path_tokens }}/crypt_key"
-  delegate_to: localhost
-  register: crypt_key_path
-
-- name: fail when crypt_key file does not exist
-  fail:
-   msg: Crypt keys cannot be found.
-  when: not crypt_key_path.stat.exists
 
 - name: install encryption keys
   copy:
@@ -71,5 +38,5 @@
     dest: "{{ jupyterhub_srv_dir }}/crypt_key"
     owner: "{{ jupyterhub_service_user }}"
     group: "{{ jupyterhub_service_user }}"
-    mode: 0600
+    mode: '0600'
   become: true
