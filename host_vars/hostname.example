@@ -55,20 +55,6 @@ dev_tools:
 install_cds_dashboards: true
 
 # ---------------------------------------------------
-# Monitoring
-# ---------------------------------------------------
-
-# Bool to set if monitoring stack will be installed
-# This will install node exporter, prometheus and grafana stack
-# on the host where jupyterhub is installed
-# This will also install grafana loki and promtail to monitor
-# nginx reverse proxy. In the future support for jupyterhub 
-# logs might be added to this stack
-# If the user wants to install Prometheus and Grafana on a different
-# node it can be configured in the hostfile
-install_mon_stack: true
-
-# ---------------------------------------------------
 # JupyterHub version
 # ---------------------------------------------------
 
