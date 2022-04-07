@@ -18,6 +18,7 @@
 
 - import_tasks: node_exporter.yaml
 - import_tasks: prometheus.yaml
+- import_tasks: promtail.yaml
 - import_tasks: grafana.yaml
 # - import_tasks: install_root_ca.yaml
 #   when: self_signed_certs
