@@ -28,6 +28,10 @@ nginx_service_user: "nginx"
 # where JupyterHub will be deployed.
 remote_path_nginx_proxy_ssl: "/etc/nginx/ssl"
 
+# Path to store the Geo IP data on remote machine. This
+# will be used in grafana dashboard monitoring
+remote_path_geoip_data: "/etc/nginx/geoip"
+
 # HTTPS port that server will listen. By default we use 
 # standard 443 port. If the user wants to use non-standard
 # port, that can be configured here
@@ -37,4 +41,7 @@ nginx_https_port: "443"
 # standard 80 port. If the user wants to use non-standard
 # port, that can be configured here
 nginx_http_port: "80"
-  
+
+# Path to save pid file. We use this in nginx config and
+# logrotate in postrotate script
+nginx_pid_file: "/run/nginx.pid"

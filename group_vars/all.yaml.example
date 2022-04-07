@@ -15,13 +15,6 @@
 
 # These are global variables that are used across roles.
 
-# Bool to set if monitoring stack will be installed
-# This will install node exporter, prometheus and grafana stack
-# on the host where jupyterhub is installed
-# If the user wants to install Prometheus and Grafana on a different
-# node it can be configured in the hostfile
-install_mon_stack: true
-
 # ---------------------------------------------------
 # SSL certificates configuration
 # ---------------------------------------------------

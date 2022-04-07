@@ -47,7 +47,7 @@ grafana_security:
 # there is no need to use it as they are part of root CA. So we define
 # two different dicts and select the one based on the type of
 # certificates we use
-
+#
 # Grafana dashboards for self signed certificates
 grafana_datasources_self_signed_certs:
  - name: "prometheus"
@@ -56,6 +56,7 @@ grafana_datasources_self_signed_certs:
    basicAuth: true
    basicAuthUser: "prometheus"
    isDefault: true
+   editable: false
    jsonData:
      tlsAuth: false
      tlsAuthWithCACert: true
@@ -63,6 +64,11 @@ grafana_datasources_self_signed_certs:
    secureJsonData:
      tlsCACert: "{{ lookup('file', prometheus_ca_file) }}"
      basicAuthPassword: "{{ lookup('env','JP_PROMETHEUS_PASSWD') }}"
+ - name: "loki"
+   type: "loki"
+   url: "http://{{ loki_config_http_address }}:{{ loki_config_http_port }}"
+   jsonData:
+     maxLines: 1000
 
 # Grafana dashboards for external certificates
 grafana_datasources_ext_certs:
@@ -72,23 +78,32 @@ grafana_datasources_ext_certs:
    basicAuth: true
    basicAuthUser: "prometheus"
    isDefault: true
+   editable: false
    jsonData:
      tlsAuth: false
      tlsAuthWithCACert: false
      tlsSkipVerify: true
    secureJsonData:
      basicAuthPassword: "{{ lookup('env','JP_PROMETHEUS_PASSWD') }}"
+ - name: "loki"
+   type: "loki"
+   url: "http://{{ loki_config_http_address }}:{{ loki_config_http_port }}"
+   jsonData:
+     maxLines: 1000
 
 # Based on type of certificates, we load correct grafana_datasources dict
 grafana_datasources: "{{ lookup('vars','grafana_datasources_self_signed_certs') if (self_signed_certs) else lookup('vars','grafana_datasources_ext_certs')}}"
 
-
 # List of grafana dashboard
 grafana_dashboards:
-   # Node exporter dashboard
+ # Node exporter dashboard
  - dashboard_id: '1860'
    revision_id: '26'
    datasource: 'prometheus'
+ # Nginx service mesh metrics
+ - dashboard_id: '12559'
+   revision_id: '11'
+   datasource: 'loki'
    
 # Directory where JupyterHub dashboard is located
 grafana_dashboards_dir: "{{ lookup('env', 'PWD') }}/grafana-dashboards"

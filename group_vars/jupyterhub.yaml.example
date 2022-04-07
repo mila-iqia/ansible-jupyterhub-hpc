@@ -16,15 +16,6 @@
 # These are global variables that are used across roles.
 
 # ---------------------------------------------------
-# NOTE:
-# ---------------------------------------------------
-
-# All the variables with prefix vault_ are considered as 
-# senstive and stored in vault file with encryption. The user
-# can look into the example vault file provided in the repository
-# to check how to define these variables
-
-# ---------------------------------------------------
 # conda related configuration
 # ---------------------------------------------------
 
@@ -85,7 +76,6 @@ user_homedir: "/home/{username}"
 
 # To reduce the brute force attacks we can check ths user names with regex
 # pattern before attempting to authenticate via SSH.
-# e.g. if usernames are composed of alphabets and numbers we can use r"[a-zA-Z0-9]*"
 valid_username_regex: ''
 
 # ---------------------------------------------------
