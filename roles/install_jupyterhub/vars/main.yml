@@ -17,5 +17,7 @@
 # List of SLURM commands that we want jupyter user to be able to execute with sudo
 slurm_cmds:
   - { name: 'SUBMIT_CMD', cmd: 'sbatch' }
-  - { name: 'QUERY_CMD', cmd: 'squeue' }
   - { name: 'CANCEL_CMD', cmd: 'scancel' }
+  
+# Path to file in sudoers.d for jupyter service user
+sudoers_file: "/etc/sudoers.d/jupyter"

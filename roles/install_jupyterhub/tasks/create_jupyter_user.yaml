@@ -33,10 +33,19 @@
     system: true
     create_home: false
   become: true
-
-- name: add command alias for spawner command
+  
+- name: create a config file in /etc/sudoers.d
+  file:
+    path: "{{ sudoers_file }}"
+    state: touch
+    owner: root
+    group: root
+    mode: 0440
+  become: true
+  
+- name: add command alias for spawner command in config file
   lineinfile:
-    dest: /etc/sudoers
+    dest: "{{ sudoers_file }}"
     state: present
     regexp: "^Cmnd_Alias {{ item.name }}"
     line: "Cmnd_Alias {{ item.name }} = {{ slurm_bin_path }}/{{ item.cmd }}"
@@ -45,11 +54,11 @@
   with_items:
     - "{{ slurm_cmds }}"
 
-- name: add line to give jupyter user permission to use sudo for batchspawner
+- name: add rules to give jupyter user privileges for using slurm commands
   lineinfile:
-    dest: /etc/sudoers
+    dest: "{{ sudoers_file }}"
     state: present
-    regexp: "^{{ jupyterhub_service_user }} {{ ansible_hostname }}=(ALL)"
-    line: "{{ jupyterhub_service_user }} {{ ansible_hostname }}=(ALL) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
+    regexp: "^{{ jupyterhub_service_user }} {{ ansible_hostname }}=(ALL, !root)"
+    line: "{{ jupyterhub_service_user }} {{ ansible_hostname }}=(ALL, !root) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
     validate: "visudo -cf %s"
   become: true
