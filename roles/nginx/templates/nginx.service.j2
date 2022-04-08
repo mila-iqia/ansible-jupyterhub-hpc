@@ -1,0 +1,84 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify it
+
+[Unit]
+Description=nginx
+After=network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+
+User={{ nginx_service_user }}
+Group={{ nginx_service_user }}
+
+RuntimeDirectory=nginx
+LogsDirectory=nginx
+CacheDirectory=nginx
+ConfigurationDirectory=nginx
+
+ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
+ExecReload=/usr/sbin/nginx -s reload
+
+Restart=on-failure
+RestartSec=10s
+
+# filesystem access
+# The idea of this hardening is that we start we empty file system
+# which is what TemporaryFileSystem is saying
+# And then we add read only paths to this empty file system that are
+# necessary for process to run. If process needs write access to certain
+# parts of file system, we add them to BindPaths directive.
+# Effectively, we are creating a container where process lives and is
+# isolated from the file system on the host
+#
+# Unfortunately, this seems to be not working in systemd 239 which comes
+# shipped with RHEL/CentOS 8. I tested it on Debian 11 which uses v248 (I guess)
+# and it worked like a charm.
+# TemporaryFileSystem=/:ro
+# BindReadOnlyPaths=/lib/ /lib64/ /usr/lib/ /usr/lib64/ /etc/ld.so.cache /etc/ld.so.conf /etc/ld.so.conf.d/ /etc/bindresvport.blacklist /usr/share/zoneinfo/ /usr/share/locale/ /etc/localtime /usr/share/common-licenses/ /etc/ssl/certs/
+# BindReadOnlyPaths=/dev/log /run/systemd/journal/socket /run/systemd/journal/stdout /run/systemd/notify
+# BindReadOnlyPaths=/usr/bin/ /usr/sbin/nginx
+# BindReadOnlyPaths=/run/ /etc/nginx/
+
+# Some explanations
+# RemoveIPC=true and PrivateTmp=true. These ensure that the lifetime of the IPC 
+# objects and temporary files created by the executed process is bound to the 
+# runtime of the service. Since /tmp and /var/tmp are usually the only world-writable 
+# directories on a system this ensures that the unit cannot leave files around 
+# after termination.
+#
+# NoNewPrivileges=true and RestrictSUIDSGID=true. These ensure that processes invoked 
+# cannot take benefit or create SUID/SGID files or directories.
+#
+# ProtectSystem=strict and ProtectHome=read-only prohibits the service from writing 
+# to anywhere in your filesystem (exceptions are /dev/ /proc/ and /sys/. 
+# In order to allow the service to write to certain directories, they have 
+# to be allow-listed using ReadWritePaths=.
+#
+# RuntimeDirectory= to assign a runtime directory to the service, which is owned 
+# by the service's user, and removed automatically when the system is terminated.
+#
+# Look into possible of using DynamicUser which creates transient users for process
+# and clean up everything after process dies. This can be used in conjunction with
+# ReadWritePaths if the process needs write access to some paths
+# More details here -> http://0pointer.net/blog/dynamic-users-with-systemd.html
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+
+ReadOnlyPaths=/etc/nginx
+
+# misc
+SystemCallArchitectures=native
+NoNewPrivileges=true
+RestrictRealtime=true
+MemoryDenyWriteExecute=true
+LockPersonality=true
+RemoveIPC=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
