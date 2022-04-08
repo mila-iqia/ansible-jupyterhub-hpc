@@ -15,35 +15,47 @@
 ---
 # This playbook validates the ansible version in environment
   
-- name: check if SSL key exists
+- name: check if SSL key for nginx exists
   delegate_to: localhost
   stat:
     path: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
   register: key_path
 
-- name: fail when key file does not exist
+- name: fail when key file for nginx does not exist
   fail:
    msg: "ssl.key cannot be found at {{ local_path_nginx_proxy_ssl }} directory. Please generate one by running gen-encrypt-data script"
   when: not key_path.stat.exists
 
-- name: check if SSL cert exists
+- name: check if SSL cert for nginx exists
   delegate_to: localhost
   stat:
     path: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
   register: cert_path
 
-- name: fail when cert file does not exist
+- name: fail when cert file for nginx does not exist
   fail:
    msg: "ssl.cert cannot be found at {{ local_path_nginx_proxy_ssl }} directory. Please generate one by running gen-encrypt-data script"
   when: not cert_path.stat.exists
   
-- name: check if Diffie-Hellman key exists
+- name: check if Diffie-Hellman key for nginx exists
   delegate_to: localhost
   stat:
     path: "{{ local_path_encryption_data }}/{{ ssl_dhparam_name_nginx_proxy }}"
   register: dhparam_path
 
-- name: fail when Diffie-Hellman key does not exist
+- name: fail when Diffie-Hellman key for nginx does not exist
   fail:
    msg: "dhparam.pem cannot be found at {{ local_path_encryption_data }} directory. Please generate one by running gen-encrypt-data script"
   when: not dhparam_path.stat.exists
+  
+- name: check nginx http port number
+  assert:
+    that: nginx_http_port | int > 1024
+    msg: "nginx_http_port must be greater than 1024 when nginx_run_as_service_user is turned on"
+  when: nginx_run_as_service_user
+  
+- name: check nginx https port number
+  assert:
+    that: nginx_https_port | int > 1024
+    msg: "nginx_https_port must be greater than 1024 when nginx_run_as_service_user is turned on"
+  when: nginx_run_as_service_user
