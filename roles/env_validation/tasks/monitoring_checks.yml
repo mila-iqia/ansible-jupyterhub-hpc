@@ -14,74 +14,72 @@
 
 ---
 # This playbook validates the ansible version in environment
-  
-- name: check SSL files for node_exporter
+
+- name: check SSL files for monitoring stack
   block:
-   - name: check if SSL key exists
+   - name: check if SSL key for node exporter exists
      stat:
        path: "{{ local_path_node_exporter_ssl }}/{{ ssl_key_name_node_exporter }}"
-     delegate_to: localhost
      register: key_path
 
-   - name: fail when key file does not exist
+   - name: fail when key file for node exporter does not exist
      fail:
        msg: "ssl.key cannot be found for node exporter"
      when: not key_path.stat.exists
 
-   - name: check if SSL cert exists
+   - name: check if SSL cert for node exporter exists
+     delegate_to: localhost
      stat:
        path: "{{ local_path_node_exporter_ssl }}/{{ ssl_cert_name_node_exporter }}"
-     delegate_to: localhost
      register: cert_path
 
-   - name: fail when cert file does not exist
+   - name: fail when cert file for node exporter does not exist
      fail:
        msg: "ssl.cert cannot be found for node exporter"
      when: not cert_path.stat.exists
      
-   - name: check if SSL key exists
+   - name: check if SSL key for prometheus exists
      stat:
        path: "{{ local_path_prometheus_ssl }}/{{ ssl_key_name_prometheus }}"
-     delegate_to: localhost
+     #delegate_to: localhost
      register: key_path
 
-   - name: fail when key file does not exist
+   - name: fail when key file for prometheus does not exist
      fail:
        msg: "ssl.key cannot be found for prometheus"
      when: not key_path.stat.exists
 
-   - name: check if SSL cert exists
+   - name: check if SSL cert for prometheus exists
      stat:
         path: "{{ local_path_prometheus_ssl }}/{{ ssl_cert_name_prometheus }}"
-     delegate_to: localhost
+     #delegate_to: localhost
      register: cert_path
 
-   - name: fail when cert file does not exist
+   - name: fail when cert file for prometheus does not exist
      fail:
        msg: "ssl.cert cannot be found for prometheus"
      when: not cert_path.stat.exists
      
-   - name: check if SSL key exists
+   - name: check if SSL key for grafana exists
      stat:
        path: "{{ local_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
-     delegate_to: localhost
+     #delegate_to: localhost
      register: key_path
 
-   - name: fail when key file does not exist
+   - name: fail when key file for grafana does not exist
      fail:
        msg: "ssl.key cannot be found for grafana"
      when: not key_path.stat.exists
 
-   - name: check if SSL cert exists
+   - name: check if SSL cert for grafana exists
      stat:
        path: "{{ local_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
-     delegate_to: localhost
-    register: cert_path
+     #delegate_to: localhost
+     register: cert_path
 
-   - name: fail when cert file does not exist
+   - name: fail when cert file for grafana does not exist
      fail:
        msg: "ssl.cert cannot be found for grafana"
      when: not cert_path.stat.exists
-      
+  delegate_to: localhost
   when: install_mon_stack
-  become: true
