@@ -19,14 +19,41 @@
   file:
     path: "{{ remote_path_nginx_proxy_ssl }}/"
     state: "{{ item }}"
-    owner: root
-    group: root
+    owner: "{{ ssl_certs_owner }}"
+    group: "{{ ssl_certs_owner }}"
     mode: 0700
   become: true
   with_items:
     - directory
     - touch
-    
+
+- name: install SSL key
+  copy:
+    src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
+    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
+    owner: "{{ ssl_certs_owner }}"
+    group: "{{ ssl_certs_owner }}"
+    mode: 0600
+  become: true
+
+- name: install SSL certificate
+  copy:
+    src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
+    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
+    owner: "{{ ssl_certs_owner }}"
+    group: "{{ ssl_certs_owner }}"
+    mode: 0600
+  become: true
+  
+- name: install Diffie-Hellman key
+  copy:
+    src: "{{ local_path_encryption_data }}/{{ ssl_dhparam_name_nginx_proxy }}"
+    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_dhparam_name_nginx_proxy }}"
+    owner: "{{ ssl_certs_owner }}"
+    group: "{{ ssl_certs_owner }}"
+    mode: 0600
+  become: true
+  
 - name: make sure /etc/ssl/ca exists
   file:
     path: "{{ remote_path_ca_cert_ssl }}/"
@@ -39,40 +66,13 @@
     - directory
     - touch
   when: self_signed_certs
-
-- name: install SSL key
-  copy:
-    src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
-    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }}"
-    owner: root
-    group: root
-    mode: 0600
-  become: true
-
-- name: install SSL certificate
-  copy:
-    src: "{{ local_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
-    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }}"
-    owner: root
-    group: root
-    mode: 0600
-  become: true
   
 - name: install SSL CA certificate
   copy:
     src: "{{ local_path_nginx_proxy_ssl }}-ca/{{ ssl_cert_name_nginx_proxy.split('.')[0] }}-ca.crt"
     dest: "{{ remote_path_ca_cert_ssl }}/{{ ssl_cert_name_nginx_proxy.split('.')[0] }}-ca.crt"
-    owner: root
-    group: root
+    owner: "{{ nginx_service_user }}"
+    group: "{{ nginx_service_user }}"
     mode: 0644
   become: true
   when: self_signed_certs
-  
-- name: install Diffie-Hellman key
-  copy:
-    src: "{{ local_path_encryption_data }}/{{ ssl_dhparam_name_nginx_proxy }}"
-    dest: "{{ remote_path_nginx_proxy_ssl }}/{{ ssl_dhparam_name_nginx_proxy }}"
-    owner: root
-    group: root
-    mode: 0600
-  become: true
