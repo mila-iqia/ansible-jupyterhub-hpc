@@ -1,0 +1,60 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# This playbook validates the ansible version in environment
+  
+- name: check if jupyterhub cookie secret exists
+  delegate_to: localhost
+  stat:
+    path: "{{ local_path_tokens }}/cookie_secret"
+  register: cookie_path
+
+- name: fail when cookie_path file does not exist
+  fail:
+   msg: "jupyterhub cookie_secret cannot be found in {{ local_path_tokens }} directory. Please generate one by running gen-encrypt-data script"
+  when: not cookie_path.stat.exists
+  
+- name: check if CHP proxy auth token exists
+  delegate_to: localhost
+  stat:
+    path: "{{ local_path_tokens }}/proxy_auth_token"
+  register: auth_token_path
+
+- name: fail when auth_token_path file does not exist
+  fail:
+   msg: "CHP auth proxy token cannot be found in {{ local_path_tokens }} directory. Please generate one by running gen-encrypt-data script"
+  when: not auth_token_path.stat.exists
+  
+- name: check if crypt keys exist
+  delegate_to: localhost
+  stat:
+    path: "{{ local_path_tokens }}/crypt_key"
+  register: crypt_key_path
+
+- name: fail when crypt_key file does not exist
+  fail:
+   msg: "Crypt keys cannot be found in {{ local_path_tokens }} directory. Please generate one by running gen-encrypt-data script"
+  when: not crypt_key_path.stat.exists
+  
+- name: check if prometheus metrics API token exists
+  delegate_to: localhost
+  stat:
+    path: "{{ local_path_tokens }}/metrics_token"
+  register: metrics_token
+
+- name: fail when prometheus metrics API token does not exist
+  fail:
+   msg: "Metrics API token cannot be found in {{ local_path_tokens }} directory. Please generate one by running gen-encrypt-data script"
+  when: not metrics_token.stat.exists and install_mon_stack

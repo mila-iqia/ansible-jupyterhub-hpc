@@ -44,32 +44,6 @@
   with_items:
     - directory
     - touch
-    
-- name: check if SSL key exists
-  stat:
-    path: "{{ local_path_node_exporter_ssl }}/{{ ssl_key_name_node_exporter }}"
-  delegate_to: localhost
-  register: key_path
-  tags: "setup_node_exp"
-
-- name: fail when key file does not exist
-  fail:
-   msg: "ssl.key cannot be found."
-  when: not key_path.stat.exists
-  tags: "setup_node_exp"
-
-- name: check if SSL cert exists
-  stat:
-    path: "{{ local_path_node_exporter_ssl }}/{{ ssl_cert_name_node_exporter }}"
-  delegate_to: localhost
-  register: cert_path
-  tags: "setup_node_exp"
-
-- name: fail when cert file does not exist
-  fail:
-   msg: "ssl.cert cannot be found."
-  when: not cert_path.stat.exists
-  tags: "setup_node_exp"
   
 - name: install SSL key
   copy:

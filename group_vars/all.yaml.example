@@ -34,11 +34,12 @@ install_mon_stack: true
 # ---------------------------------------------------
 #
 # Boolean. To be set to true if we are using self signed
-# certificates for all components which includes juoyterhub,
+# certificates for all components which includes jupyterhub,
 # prometheus, grafana, node_exporter, nginx_exporter. If we 
 # use certificates from external CA, we need to set this to false
+#
 # CURRENTLY THERE IS NO SUPPORT TO USE SELF SIGNED CERTIFICATES
-# FOR SOME COMPONENTS AND CA CERTIFICATES FOR OTHERS. EITHER
+# FOR SOME COMPONENTS AND EXTERNAL CERTIFICATES FOR OTHERS. EITHER
 # USE ONE OR OTHER
 self_signed_certs: true
 
