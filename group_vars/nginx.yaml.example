@@ -32,6 +32,37 @@ remote_path_nginx_proxy_ssl: "/etc/nginx/ssl"
 # will be used in grafana dashboard monitoring
 remote_path_geoip_data: "/etc/nginx/geoip"
 
+# ---------------------------------------------------
+# Nginx systemd service configuration
+# ---------------------------------------------------
+
+# nginx gets shipped with a systemd service file to
+# launch the web server. Usually this systemd file is
+# configured to run as root and fork the processes which
+# actually run web servers as service users. The master 
+# process needs to be root to be able to bind to ports
+# less than 1024. We can avoid running as root by binding
+# to ports more than 1024 and then using iptables to redirect
+# the traffic to standard HTTP (80) and HTTPS (443) ports.
+#
+# Setting this variable to true will run nginx as service user
+# 
+# MAKE SURE WE SET nginx_https_port AND nginx_http_port to
+# values more than 1024 if we are running nginx as non root
+# user
+nginx_run_as_service_user: false
+
+# SSL certificates must be owned by the user which runs the service
+# In the case of running as root, these certificates must be
+# owned by root and in the case running as service user, these
+# must be owned by service user. Here we define the user that must
+# own the certificates folder and certificates
+ssl_certs_owner: "{{ lookup('vars','nginx_service_user') if (nginx_run_as_service_user) else 'root' }}"
+
+# ---------------------------------------------------
+# Nginx port configuration
+# ---------------------------------------------------
+
 # HTTPS port that server will listen. By default we use 
 # standard 443 port. If the user wants to use non-standard
 # port, that can be configured here
@@ -42,6 +73,16 @@ nginx_https_port: "443"
 # port, that can be configured here
 nginx_http_port: "80"
 
+# ---------------------------------------------------
+# Nginx runtime configuration
+# ---------------------------------------------------
+
+# nginx runtime directory for creating pid file
+nginx_runtime_dir: "{{ '/run/nginx' if (nginx_run_as_service_user) else '/run' }}"
+
 # Path to save pid file. We use this in nginx config and
 # logrotate in postrotate script
-nginx_pid_file: "/run/nginx.pid"
+nginx_pid_file: "{{ nginx_runtime_dir }}/nginx.pid"
+
+
+  
