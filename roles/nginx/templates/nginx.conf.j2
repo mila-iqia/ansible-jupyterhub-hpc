@@ -110,7 +110,7 @@ http {
             proxy_pass http://{{ ansible_default_ipv4.address }}:8000;
 
             proxy_set_header X-Real-IP $remote_addr;
-            {% if nginx_https_port == '443 '%}
+            {% if nginx_https_port == '443' %}
             proxy_set_header Host $host;
             {% else %}
             proxy_set_header Host $http_host;
