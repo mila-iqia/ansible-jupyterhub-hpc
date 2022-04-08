@@ -68,8 +68,8 @@
   copy:
     src: "{{ local_path_grafana_ssl }}-ca/{{ ssl_cert_name_grafana.split('.')[0] }}-ca.crt"
     dest: "{{ remote_path_ca_cert_ssl }}/{{ ssl_cert_name_grafana.split('.')[0] }}-ca.crt"
-    owner: root
-    group: root
+    owner: grafana
+    group: grafana
     mode: '0644'
   become: true
   when: self_signed_certs

@@ -37,8 +37,8 @@
     path: "{{ remote_path_node_exporter_ssl }}/"
     state: "{{ item }}"
     owner: "{{ _node_exporter_system_user }}"
-    group: "{{ _node_exporter_system_user }}"
-    mode: 0700
+    group: "{{ _node_exporter_system_group }}"
+    mode: '0700'
   become: true
   tags: "setup_node_exp"
   with_items:
@@ -49,9 +49,9 @@
   copy:
     src: "{{ local_path_node_exporter_ssl }}/{{ ssl_key_name_node_exporter }}"
     dest: "{{ remote_path_node_exporter_ssl }}/{{ ssl_key_name_node_exporter }}"
-    owner: "{{ _node_exporter_system_group }}"
+    owner: "{{ _node_exporter_system_user }}"
     group: "{{ _node_exporter_system_group }}"
-    mode: 0600
+    mode: '0600'
   become: true
   tags: "setup_node_exp"
 
@@ -59,9 +59,9 @@
   copy:
     src: "{{ local_path_node_exporter_ssl }}/{{ ssl_cert_name_node_exporter }}"
     dest: "{{ remote_path_node_exporter_ssl }}/{{ ssl_cert_name_node_exporter }}"
-    owner: "{{ _node_exporter_system_group }}"
+    owner: "{{ _node_exporter_system_user }}"
     group: "{{ _node_exporter_system_group }}"
-    mode: 0600
+    mode: '0600'
   become: true
   tags: "setup_node_exp"
   
@@ -69,9 +69,9 @@
   copy:
     src: "{{ local_path_node_exporter_ssl }}-ca/{{ ssl_cert_name_node_exporter.split('.')[0] }}-ca.crt"
     dest: "{{ remote_path_ca_cert_ssl }}/{{ ssl_cert_name_node_exporter.split('.')[0] }}-ca.crt"
-    owner: root
-    group: root
-    mode: 0644
+    owner: "{{ _node_exporter_system_user }}"
+    group: "{{ _node_exporter_system_group }}"
+    mode: '0644'
   become: true
   when: self_signed_certs
   tags: "setup_node_exp"
