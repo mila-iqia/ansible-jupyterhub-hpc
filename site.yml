@@ -16,19 +16,19 @@
 # This playbook deploys JupyterHub.
 
 - name: Gather facts from jupyterhub hosts
-  hosts: jupyterhub
+  hosts: jupyterstack
   gather_facts: yes
   tags: always
 
 - name: Validate environment
-  hosts: jupyterhub
+  hosts: jupyterstack
   gather_facts: no
   roles:
     - env_validation
   tags: always
   
 - name: Conda role
-  hosts: jupyterhub
+  hosts: jupyterstack
   gather_facts: no
   roles:
     - evandam.conda

@@ -48,3 +48,15 @@ jupyterhub
 [grafana:children]
 # Single node to host monitoring dashboards. By default this will be same as jupyterhub host
 jupyterhub
+
+[jupyterstack:children]
+# This group contains all hosts that will be used in jupyterhub deployment including monitoring
+# nodes EXCEPT compute and sshauth_node which are only used for configuring jupyterhub
+jupyterhub
+nginx
+node_exporter
+prometheus
+promtail
+grafana_loki
+grafana
+
