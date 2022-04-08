@@ -3,18 +3,47 @@
 
 [Unit]
 Description=Service for launching Jupyterhub
-After=syslog.target network.target
+After=network-online.target remote-fs.target local-fs.target nss-lookup.target
+Wants=network-online.target
 
 [Service]
 Environment="PATH={{ jupyterhub_env_prefix }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin"
 Environment="JUPYTERHUB_CRYPT_KEY=$(cat {{ jupyterhub_srv_dir }}/crypt_key)"
+
 User={{ jupyterhub_service_user }}
 Group={{ jupyterhub_service_user }}
-ExecStart=/bin/sh -c '{{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py'
+
+RuntimeDirectory=jupyterhub
+LogsDirectory=jupyterhub
+CacheDirectory=jupyterhub
+ConfigurationDirectory=jupyterhub
+
+ExecStart={{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py
+
 Restart=always
 RestartSec=5
+
 StandardOutput=file:{{ jupyterhub_log_dir }}/jupyterhub.log
 StandardError=file:{{ jupyterhub_log_dir }}/jupyterhub.log
+
+# ProtectHome=true
+# PrivateTmp=true
+# PrivateDevices=true
+# ProtectControlGroups=true
+# ProtectKernelModules=true
+# ProtectKernelTunables=true
+
+# ReadWritePaths={{ jupyterhub_srv_dir }} /var/log/
+# ReadOnlyPaths={{ jupyter_env_prefix }} /etc/jupyter/ /etc/jupyterhub/ /etc/ipython
+
+# misc
+# SystemCallArchitectures=native
+# NoNewPrivileges=true
+# RestrictRealtime=true
+# MemoryDenyWriteExecute=true
+# LockPersonality=true
+# RemoveIPC=true
+# RestrictSUIDSGID=true
 
 [Install]
 WantedBy=multi-user.target
