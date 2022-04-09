@@ -11,6 +11,9 @@ Type=exec
 User={{ nginx_service_user }}
 Group={{ nginx_service_user }}
 
+# RuntimeDirectory= to assign a runtime directory to the service, which is owned 
+# by the service's user, and removed automatically when the system is terminated.
+#
 RuntimeDirectory=nginx
 LogsDirectory=nginx
 CacheDirectory=nginx
@@ -34,6 +37,7 @@ RestartSec=10s
 # Unfortunately, this seems to be not working in systemd 239 which comes
 # shipped with RHEL/CentOS 8. I tested it on Debian 11 which uses v248 (I guess)
 # and it worked like a charm.
+#
 # TemporaryFileSystem=/:ro
 # BindReadOnlyPaths=/lib/ /lib64/ /usr/lib/ /usr/lib64/ /etc/ld.so.cache /etc/ld.so.conf /etc/ld.so.conf.d/ /etc/bindresvport.blacklist /usr/share/zoneinfo/ /usr/share/locale/ /etc/localtime /usr/share/common-licenses/ /etc/ssl/certs/
 # BindReadOnlyPaths=/dev/log /run/systemd/journal/socket /run/systemd/journal/stdout /run/systemd/notify
@@ -47,38 +51,87 @@ RestartSec=10s
 # directories on a system this ensures that the unit cannot leave files around 
 # after termination.
 #
+PrivateTmp=true
+RemoveIPC=true
+
 # NoNewPrivileges=true and RestrictSUIDSGID=true. These ensure that processes invoked 
 # cannot take benefit or create SUID/SGID files or directories.
 #
+NoNewPrivileges=true
+RestrictSUIDSGID=true
+
 # ProtectSystem=strict and ProtectHome=read-only prohibits the service from writing 
 # to anywhere in your filesystem (exceptions are /dev/ /proc/ and /sys/. 
 # In order to allow the service to write to certain directories, they have 
 # to be allow-listed using ReadWritePaths=.
 #
-# RuntimeDirectory= to assign a runtime directory to the service, which is owned 
-# by the service's user, and removed automatically when the system is terminated.
+ProtectSystem=strict
+ProtectHome=true
+
+# Paths listed in ReadWritePaths= are accessible from within the namespace with 
+# the same access modes as from outside of it.
 #
+# Paths listed in ReadOnlyPaths= are accessible for reading only, writing will 
+# be refused even if the usual file access controls would permit this.
+#
+# Paths listed in InaccessiblePaths= will be made inaccessible for processes 
+# inside the namespace along with everything below them in the file system 
+# hierarchy.
+#
+ReadOnlyPaths=/etc/nginx
+
 # Look into possible of using DynamicUser which creates transient users for process
 # and clean up everything after process dies. This can be used in conjunction with
 # ReadWritePaths if the process needs write access to some paths
 # More details here -> http://0pointer.net/blog/dynamic-users-with-systemd.html
-ProtectHome=true
-PrivateTmp=true
+
+# Sets up a new /dev mount for the executed processes and only adds API pseudo devices 
+# such as /dev/null, /dev/zero or /dev/random (as well as the pseudo TTY subsystem) 
+# to it, but no physical devices such as /dev/sda, system memory /dev/mem, system 
+# ports /dev/port and others.
+#
 PrivateDevices=true
+
+# If true, the Linux Control Groups (cgroups) hierarchies accessible through 
+# /sys/fs/cgroup will be made read-only to all processes of the unit.
+#
 ProtectControlGroups=true
+
+# Explicit module loading will be denied. This allows to turn off module load 
+# and unload operations on modular kernels
+#
 ProtectKernelModules=true
+
+# Kernel variables accessible through /proc/sys, /sys, /proc/sysrq-trigger, 
+# /proc/latency_stats, /proc/acpi, /proc/timer_stats, /proc/fs and /proc/irq 
+# will be made read-only to all processes of the unit
+#
 ProtectKernelTunables=true
 
-ReadOnlyPaths=/etc/nginx
-
-# misc
+# Selects from which architectures system calls may be invoked on this system
+#
 SystemCallArchitectures=native
-NoNewPrivileges=true
+
+# Any attempts to enable realtime scheduling in a process of the unit are 
+# refused
+#
 RestrictRealtime=true
+
+# attempts to create memory mappings that are writable and executable 
+# at the same time, or to change existing memory mappings to become 
+# executable, or mapping shared memory segments as executable are prohibited
+#
 MemoryDenyWriteExecute=true
+
+# Locks down the personality system call so that the kernel execution domain 
+# may not be changed from the default or the personality selected with 
+# Personality= directive
+#
 LockPersonality=true
-RemoveIPC=true
-RestrictSUIDSGID=true
+
+# Capabilities
+# To be able to bind to ports less than 1024
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy=multi-user.target

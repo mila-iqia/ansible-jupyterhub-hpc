@@ -48,14 +48,14 @@
    msg: "dhparam.pem cannot be found at {{ local_path_encryption_data }} directory. Please generate one by running gen-encrypt-data script"
   when: not dhparam_path.stat.exists
   
-- name: check nginx http port number
-  assert:
-    that: nginx_http_port | int > 1024
-    msg: "nginx_http_port must be greater than 1024 when nginx_run_as_service_user is turned on"
-  when: nginx_run_as_service_user
+# - name: check nginx http port number
+#   assert:
+#     that: nginx_http_port | int > 1024
+#     msg: "nginx_http_port must be greater than 1024 when nginx_run_as_service_user is turned on"
+#   when: nginx_run_as_service_user
   
-- name: check nginx https port number
-  assert:
-    that: nginx_https_port | int > 1024
-    msg: "nginx_https_port must be greater than 1024 when nginx_run_as_service_user is turned on"
-  when: nginx_run_as_service_user
+# - name: check nginx https port number
+#   assert:
+#     that: nginx_https_port | int > 1024
+#     msg: "nginx_https_port must be greater than 1024 when nginx_run_as_service_user is turned on"
+#   when: nginx_run_as_service_user
