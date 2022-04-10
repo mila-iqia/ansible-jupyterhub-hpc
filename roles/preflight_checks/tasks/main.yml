@@ -13,8 +13,9 @@
 # limitations under the License.
 
 ---
+# This playbook validates the ansible version in environment
 
-- import_tasks: directories.yml
-- import_tasks: tokens.yml
-- import_tasks: api.yml
-- import_tasks: ssl.yml
+- import_tasks: encryption_vars_checks.yml
+- import_tasks: jupyterhub_checks.yml
+- import_tasks: nginx_checks.yml
+- import_tasks: monitoring_checks.yml

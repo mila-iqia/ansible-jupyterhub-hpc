@@ -16,22 +16,22 @@
 # This playbook deploys JupyterHub.
 
 - name: Gather facts from jupyterhub hosts
-  hosts: jupyterstack
+  hosts: jupyterhubstack
   gather_facts: yes
   tags: always
 
 - name: Validate environment
-  hosts: jupyterstack
+  hosts: jupyterhubstack
   gather_facts: no
   roles:
     - env_validation
   tags: always
   
-- name: Conda role
-  hosts: jupyterstack
+- name: Preflight chekcs
+  hosts: localhost
   gather_facts: no
   roles:
-    - evandam.conda
+    - preflight_checks
   tags: always
   
 - name: Run common tasks
@@ -55,21 +55,14 @@
     - install_kernels
   tags: install_kernels
   
-- name: Configure jupyterhub
+- name: Setup jupyterhub environment
   hosts: jupyterhub
   gather_facts: no
   roles:
-    - configure_jupyterhub
-  tags: config_jh
-  
-- name: Install SSL keys, auth and API tokens
-  hosts: jupyterhub
-  gather_facts: no
-  roles:
-    - install_encrypt_data
-  tags: encrypt_jh
+    - setup_jupyterhub
+  tags: setup_jh
 
-- name: Install nginx
+- name: Setup nginx reverse proxy
   hosts: nginx
   gather_facts: no
   roles:

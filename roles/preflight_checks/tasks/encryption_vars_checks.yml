@@ -16,18 +16,16 @@
 # This playbook validates the ansible version in environment
 
 - name: check if jp-adminrc exists on ansible host
-  delegate_to: localhost
   stat:
-    path: "lookup('env', 'PWD')/encryption/jp-adminrc"
+    path: "{{ lookup('env', 'PWD') }}/encryption/jp-adminrc"
   register: rcfile_stat
-  
+
 - name: make sure jp-adminrc exists on ansible host
   fail: 
     msg: "jp-adminrc file not found in encryption/ folder. Please generate one by running gen-encrypt-data script"
-  when: ansible_os_family != 'RedHat'
+  when: not rcfile_stat.stat.exists
   
 - name: make sure we sourced jp-adminrc file
-  delegate_to: localhost
   assert:
     that: lookup('env', "JP_NODE_EXPORTER_USER") | length > 0
     msg: "Please source jp-adminrc file in encryption folder"

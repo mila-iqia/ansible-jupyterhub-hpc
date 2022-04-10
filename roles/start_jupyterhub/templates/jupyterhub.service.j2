@@ -23,8 +23,8 @@ ExecStart={{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }
 Restart=always
 RestartSec=5
 
-StandardOutput=file:{{ jupyterhub_log_dir }}/jupyterhub.log
-StandardError=file:{{ jupyterhub_log_dir }}/jupyterhub.log
+StandardOutput=append:{{ jupyterhub_log_dir }}/jupyterhub.log
+StandardError=append:{{ jupyterhub_log_dir }}/jupyterhub.log
 
 # ProtectHome=true
 # PrivateTmp=true

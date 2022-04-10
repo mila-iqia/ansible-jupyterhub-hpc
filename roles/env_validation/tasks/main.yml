@@ -15,8 +15,13 @@
 ---
 # This playbook validates the ansible version in environment
 
-- import_tasks: preflight_checks.yml
-- import_tasks: encryption_vars_checks.yml
-- import_tasks: jupyterhub_checks.yml
-- import_tasks: nginx_checks.yml
-- import_tasks: monitoring_checks.yml
+- name: check if ansible version >= 2.1
+  delegate_to: localhost
+  assert:
+    that: (ansible_version.major, ansible_version.minor) >= (2, 1)
+    msg: "require ansible >= 2.1, found {{ ansible_version.full }}"
+
+- name: make sure we are running on CentOS/RHEL
+  fail: 
+    msg: "This ansible setup only work on CentOS/RHEL"
+  when: ansible_os_family != 'RedHat'

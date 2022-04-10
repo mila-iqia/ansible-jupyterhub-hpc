@@ -14,7 +14,8 @@
 
 ---
 
-- import_tasks: create_jupyter_user.yaml
 - import_tasks: jupyterhub.yaml
 - import_tasks: extensions.yaml
 - import_tasks: server_proxies.yaml
+- import_tasks: directories.yaml
+- import_tasks: config.yaml

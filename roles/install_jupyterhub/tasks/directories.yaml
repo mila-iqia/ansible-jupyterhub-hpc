@@ -16,13 +16,43 @@
 
 # Create all the directories necessary for configuring JupyterHub
 
-- name: make sure /srv/jupyterhub exists
+- name: make sure /etc/jupyterhub exists
   file:
-    path: "{{ jupyterhub_srv_dir }}/"
+    path: "{{ jupyterhub_config_dir }}/"
     state: "{{ item }}"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
-    mode: 0700
+    # owner: "{{ jupyterhub_service_user }}"
+    # group: "{{ jupyterhub_service_user }}"
+    mode: 0755
+  become: true
+  with_items:
+    - directory
+    - touch
+
+- name: make sure /etc/jupyter/templates exists
+  file:
+    path: "{{ jupyter_templates_dir }}/"
+    state: "{{ item }}"
+    mode: 0755
+  become: true
+  with_items:
+    - directory
+    - touch
+
+- name: make sure /etc/jupyter exists
+  file:
+    path: "{{ jupyter_config_dir }}"
+    state: "{{ item }}"
+    mode: 0755
+  become: true
+  with_items:
+    - directory
+    - touch
+
+- name: make sure /etc/ipython exists
+  file:
+    path: "{{ ipython_config_dir }}"
+    state: "{{ item }}"
+    mode: 0755
   become: true
   with_items:
     - directory

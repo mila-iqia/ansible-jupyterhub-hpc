@@ -34,7 +34,6 @@
     group: root
     mode: 0644
   become: true
-  when: nginx_run_as_service_user
   tags: "install_nginx_config"
   notify:
     - reload nginx

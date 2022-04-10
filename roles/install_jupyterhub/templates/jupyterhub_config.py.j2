@@ -330,6 +330,11 @@ c.JupyterHub.load_roles = [
         ]
     },
 ]
+
+{% else %}
+
+c.JupyterHub.load_roles = []
+
 {% endif %}
 
 
