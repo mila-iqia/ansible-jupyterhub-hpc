@@ -14,8 +14,12 @@
 
 ---
 
-- import_tasks: create_jupyter_user.yml
-- import_tasks: directories.yml
-- import_tasks: tokens.yml
-- import_tasks: api.yml
-- import_tasks: create_nodelist.yml
+- name: create node list of compute nodes of HPC platform
+  template:
+    src: nodelist.txt.j2
+    dest: "{{ jupyterhub_srv_dir }}/nodelist.txt"
+    owner: "{{ jupyterhub_service_user }}"
+    group: "{{ jupyterhub_service_user }}"
+    mode: 0644
+  become: true
+  tags: "nodelist"

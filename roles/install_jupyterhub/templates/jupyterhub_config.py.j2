@@ -2,6 +2,7 @@
 # Configuration file for jupyterhub.
 
 import os
+import socket
 c = get_config()
 
 ## Set the log level by value or name.
@@ -38,7 +39,7 @@ c.JupyterHub.cleanup_servers = False
 #
 #  See `hub_connect_ip` for cases where the bind and connect address should
 #  differ, or `hub_bind_url` for setting the full bind URL.
-c.JupyterHub.hub_connect_ip = '{{ inventory_hostname }}'
+c.JupyterHub.hub_ip = socket.gethostname()
 
 ## Class for authenticating users.
 c.JupyterHub.authenticator_class = 'sshauthenticator.SSHAuthenticator'
@@ -47,7 +48,7 @@ c.SSHAuthenticator.default_group_name = "default"
 c.SSHAuthenticator.server_address = '{{ groups["sshauth_node"][0] }}'
 
 # Seems like jinja2 always returns string. We typecast it to int 
-c.SSHAuthenticator.server_port = {{ hostvars[groups['sshauth_node'][0]]['sshauth_port'] | int }}
+c.SSHAuthenticator.server_port = {{ sshauth_port | int }}
 c.SSHAuthenticator.valid_username_regex = {{ valid_username_regex }}
 
 ## Number of days for a login cookie to be valid. Default is two weeks.
@@ -76,7 +77,7 @@ c.JupyterHub.internal_ssl = True
 ## The location to store certificates automatically created by JupyterHub.
 #
 #  Use with internal_ssl
-c.JupyterHub.internal_certs_location = '{{ jupyterhub_internal_certs_dir }}'
+c.JupyterHub.internal_certs_location = '{{ jupyterhub_srv_dir }}/internal-certs'
 
 ## Names to include in the subject alternative name.
 #
@@ -85,16 +86,16 @@ c.JupyterHub.internal_certs_location = '{{ jupyterhub_internal_certs_dir }}'
 #  different hosts.
 #
 #  Use with internal_ssl
-{% if groups['compute'] | length %}
-c.JupyterHub.trusted_alt_names = [
-{%- for node in groups['compute'] -%}
-'DNS:{{ node }}',
-{%- endfor -%}
-'DNS:{{ inventory_hostname }}',
-'IP:{{ ansible_default_ipv4.address }}']
-{% else %}
-c.JupyterHub.trusted_alt_names = []
-{% endif %}
+nodelist_file = '{{ jupyterhub_srv_dir }}/nodelist.txt'
+alt_names = []
+with open(nodelist_file, 'r') as f:
+    content = f.read()
+for line in content.splitlines():
+    if not line.startswith('#'):
+        node = line.strip()
+        if node:
+            alt_names.append(node)
+c.JupyterHub.trusted_alt_names = alt_names
 
 ## File to write PID Useful for daemonizing JupyterHub.
 c.JupyterHub.pid_file = '{{ jupyterhub_srv_dir }}/pid'
@@ -156,7 +157,7 @@ c.JupyterHub.spawner_class = 'jupyter_slurm_spawner.JeanZaySlurmSpawner'
 c.JeanZaySlurmSpawner.req_jupyter_bin_path = '{{ jupyterhub_env_bin_path }}'
 
 # Location to store user spawning preferences as profiles in JSON format
-c.JeanZaySlurmSpawner.user_spawn_profiles_location = '{{ jupyterhub_user_spawn_profiles_dir }}'
+c.JeanZaySlurmSpawner.user_spawn_profiles_location = '{{ jupyterhub_srv_dir }}/user-spawn-profiles'
 
 # Path where Xeus Cling binaries are installed
 {% if install_cpp_kernel == true %}
