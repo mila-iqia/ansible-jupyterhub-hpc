@@ -19,9 +19,9 @@
     name: "jupyterhub"
     daemon_reload: yes
     enabled: yes
+    state: reloaded
     
 - name: restart jupyterhub
   service: 
     name: "jupyterhub"
-    enabled: yes
     state: restarted
