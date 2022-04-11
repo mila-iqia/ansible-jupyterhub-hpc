@@ -7,7 +7,8 @@ After=network-online.target remote-fs.target local-fs.target nss-lookup.target
 Wants=network-online.target
 
 [Service]
-Environment="PATH={{ jupyterhub_env_prefix }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin"
+Type=simple
+Environment="PATH={{ jupyterhub_env_bin_path }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin"
 Environment="JUPYTERHUB_CRYPT_KEY=$(cat {{ jupyterhub_srv_dir }}/crypt_key)"
 
 User={{ jupyterhub_service_user }}
@@ -18,13 +19,13 @@ LogsDirectory=jupyterhub
 CacheDirectory=jupyterhub
 ConfigurationDirectory=jupyterhub
 
-ExecStart={{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py
+ExecStart=/bin/bash -c '{{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py >> {{ jupyterhub_log_dir }}/jupyterhub.log 2>&1'
 
 Restart=always
 RestartSec=5
 
-StandardOutput=append:{{ jupyterhub_log_dir }}/jupyterhub.log
-StandardError=append:{{ jupyterhub_log_dir }}/jupyterhub.log
+# StandardOutput=append:{{ jupyterhub_log_dir }}/jupyterhub.log
+# StandardError=append:{{ jupyterhub_log_dir }}/jupyterhub.log
 
 # ProtectHome=true
 # PrivateTmp=true
