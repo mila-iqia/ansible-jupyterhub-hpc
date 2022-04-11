@@ -48,8 +48,8 @@ c.SSHAuthenticator.default_group_name = "default"
 c.SSHAuthenticator.server_address = '{{ groups["sshauth_node"][0] }}'
 
 # Seems like jinja2 always returns string. We typecast it to int 
-c.SSHAuthenticator.server_port = {{ sshauth_port | int }}
-c.SSHAuthenticator.valid_username_regex = {{ valid_username_regex }}
+c.SSHAuthenticator.server_port = {{ hostvars[groups['sshauth_node'][0]]['sshauth_port'] | int }}
+c.SSHAuthenticator.valid_username_regex = '{{ valid_username_regex }}'
 
 ## Number of days for a login cookie to be valid. Default is two weeks.
 c.JupyterHub.cookie_max_age_days = 7
