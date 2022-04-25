@@ -110,11 +110,6 @@ mkdir -p ${JUPYTER_LOG_DIR}
 
 { set -xeo pipefail;
   trap 'echo SIGTERM received' TERM;
-  
-  export _WORK_SYMLNK=$HOME/work;
-  export _SCRATCH_SYMLNK=$HOME/scratch;
-  if [ ! -z "${WORK}" ] && [ ! -L "${_WORK_SYMLNK}" ]; then ln -s ${WORK} ${_WORK_SYMLNK}; fi;
-  if [ ! -z "${SCRATCH}" ] && [ ! -L "${_SCRATCH_SYMLNK}" ]; then ln -s ${SCRATCH} ${_SCRATCH_SYMLNK}; fi;
 
   echo "=============================================================================="
   echo "SLURM job details: ";
