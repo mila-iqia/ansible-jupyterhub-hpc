@@ -40,3 +40,13 @@
     group: "{{ jupyterhub_service_user }}"
     mode: '0600'
   become: true
+  
+- name: install db password if postgresql database is used
+  copy:
+    src: "{{ local_path_tokens }}/db_passwd"
+    dest: "{{ jupyterhub_srv_dir }}/db_passwd"
+    owner: "{{ jupyterhub_service_user }}"
+    group: "{{ jupyterhub_service_user }}"
+    mode: '0600'
+  become: true
+  when: use_postgresql_db

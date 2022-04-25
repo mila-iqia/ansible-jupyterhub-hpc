@@ -18,7 +18,7 @@
 
 - name: check if PostgreSQL database is initialised
   stat:
-    path: "/var/lib/pgsql/data"
+    path: "/var/lib/pgsql/data/pg_hba.conf"
   register: pgsql_stat
   tags: "setup_db"
 
@@ -29,14 +29,6 @@
   when: not pgsql_stat.stat.exists
   notify:
    - enable postgresql
-
-- name: ensure the PostgreSQL service is running
-  service: 
-    name: postgresql 
-    state: started 
-    enabled: yes
-  become: true
-  tags: "setup_db"
   
 - name: create the database for jupyterhub
   postgresql_db: 
@@ -47,11 +39,18 @@
   become_user: postgres
   tags: "setup_db"
   
+- name: read the db passwd from /srv/jupyterhub folder
+  slurp:
+    src: "{{ jupyterhub_srv_dir }}/db_passwd"
+  become: true
+  register: db_passwd
+  tags: "setup_db"
+  
 - name: ensure user has access to the new database
   postgresql_user: 
      db: "{{ jupyterhub_db_name }}"
      name: "{{ jupyterhub_service_user }}"
-     password:  "{{ lookup('env','JP_DB_PASSWD') }}"
+     password: "{{ db_passwd['content'] | b64decode }}"
      priv: ALL
      state: present
   become: true

@@ -20,3 +20,4 @@
 - import_tasks: api.yml
 - import_tasks: create_nodelist.yml
 - import_tasks: setup_db.yml
+  when: use_postgresql_db

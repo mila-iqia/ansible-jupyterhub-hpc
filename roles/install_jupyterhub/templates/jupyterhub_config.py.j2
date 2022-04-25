@@ -61,7 +61,14 @@ c.JupyterHub.cookie_secret_file = '{{ jupyterhub_srv_dir }}/cookie_secret'
 c.JupyterHub.data_files_path = '{{ jupyterhub_env_prefix }}/share/jupyterhub'
 
 ## url for the database. We use PostgresSql on localhost at default port
-c.JupyterHub.db_url = 'postgresql://{{ jupyterhub_service_user }}:{{ lookup("env","JP_DB_PASSWD") }}@localhost:5432/{{ jupyterhub_db_name }}'
+{% if use_postgresql_db == true %}
+db_user = '{{ jupyterhub_service_user }}'
+db_passwd = open('{{ jupyterhub_srv_dir }}/db_passwd', 'r').read().strip()
+db_name = '{{ jupyterhub_db_name }}'
+c.JupyterHub.db_url = f'postgresql://{db_user}:{db_passwd}@localhost:5432/{db_name}'
+{% else %}
+c.JupyterHub.db_url = '{{ jupyterhub_srv_dir }}/jupyterhub.sqlite'
+{% endif %}
 
 ## If named servers are enabled, default name of server to spawn or open, e.g. by
 #  user-redirect.

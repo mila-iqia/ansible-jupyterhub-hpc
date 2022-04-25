@@ -98,8 +98,12 @@ jupyterhub_config_dir: "{{ jupyterhub_env_prefix }}/etc/jupyterhub"
 # JupyterHub Database configuration
 # ---------------------------------------------------
 
-# We will PostgresSql data base for jupyterhub. We will configure
-# the database name here
+# Type of database used for jupyterhub. By default jupyterhub
+# uses sqllite3. But for production deployments, they advise to
+# use PostgresSql. Bool to control the type of database
+use_postgresql_db: true
+
+# Set name of database if PostgresSql database is used for jupyterhub.
 jupyterhub_db_name: "jupyterhub"
 
 # ---------------------------------------------------
