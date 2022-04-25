@@ -60,8 +60,8 @@ c.JupyterHub.cookie_secret_file = '{{ jupyterhub_srv_dir }}/cookie_secret'
 ## The location of jupyterhub data files (e.g. /usr/local/share/jupyterhub)
 c.JupyterHub.data_files_path = '{{ jupyterhub_env_prefix }}/share/jupyterhub'
 
-## url for the database. e.g. `sqlite:///jupyterhub.sqlite`
-c.JupyterHub.db_url = '{{ jupyterhub_srv_dir }}/jupyterhub.sqlite'
+## url for the database. We use PostgresSql on localhost at default port
+c.JupyterHub.db_url = 'postgresql://{{ jupyterhub_service_user }}:{{ lookup("env","JP_DB_PASSWD") }}@localhost:5432/{{ jupyterhub_db_name }}'
 
 ## If named servers are enabled, default name of server to spawn or open, e.g. by
 #  user-redirect.
@@ -141,41 +141,35 @@ c.ConfigurableHTTPProxy.pid_file = '{{ jupyterhub_srv_dir }}/proxy_pid'
 
 
 {% if install_cds_dashboards == true %}
-from jupyter_slurm_spawner import JeanZaySlurmSpawner
+from custom_slurm_spawner import CustomSlurmSpawner
 from cdsdashboards.hubextension.spawners.variablemixin import VariableMixin, MetaVariableMixin
 
-class VariableSlurmSpawner(JeanZaySlurmSpawner, VariableMixin, metaclass=MetaVariableMixin):
+class VariableSlurmSpawner(CustomSlurmSpawner, VariableMixin, metaclass=MetaVariableMixin):
     pass
     
 c.JupyterHub.spawner_class = VariableSlurmSpawner
 {% else %}
-import jupyter_slurm_spawner
-c.JupyterHub.spawner_class = 'jupyter_slurm_spawner.JeanZaySlurmSpawner'
+import custom_slurm_spawner
+c.JupyterHub.spawner_class = 'custom_slurm_spawner.CustomSlurmSpawner'
 {% endif %}
 
 # Path where jupyterhub binaries are installed
-c.JeanZaySlurmSpawner.req_jupyter_bin_path = '{{ jupyterhub_env_bin_path }}'
-
-# Location to store user spawning preferences as profiles in JSON format
-c.JeanZaySlurmSpawner.user_spawn_profiles_location = '{{ jupyterhub_srv_dir }}/user-spawn-profiles'
+c.CustomSlurmSpawner.req_jupyter_bin_path = '{{ jupyterhub_env_bin_path }}'
 
 # Path where Xeus Cling binaries are installed
 {% if install_cpp_kernel == true %}
-c.JeanZaySlurmSpawner.req_cling_bin_path = '{{ cling_pkg_path }}/bin'
+c.CustomSlurmSpawner.req_cling_bin_path = '{{ cling_pkg_path }}/bin'
 {% endif %}
 
 # Path where julia binaries are installed
 {% if install_julia_kernel == true %}
-c.JeanZaySlurmSpawner.req_julia_bin_path = '{{ julia_pkg_path }}/bin'
+c.CustomSlurmSpawner.req_julia_bin_path = '{{ julia_pkg_path }}/bin'
 {% endif %}
 
 # Path where R binaries are installed
 {% if install_r_kernel == true %}
-c.JeanZaySlurmSpawner.req_r_bin_path = '{{ rlang_pkg_path }}/bin'
+c.CustomSlurmSpawner.req_r_bin_path = '{{ rlang_pkg_path }}/bin'
 {% endif %}
-
-# Placeholder for home directory
-c.JeanZaySlurmSpawner.homedir_prefix = '{{ user_homedir }}'
 
 # Command to launch jupyterhub singleuser server
 c.Spawner.cmd = ['jupyterhub-singleuser']

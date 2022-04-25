@@ -1,0 +1,3 @@
+# List of requirements
+
+batchspawner>=1.1

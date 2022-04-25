@@ -44,4 +44,13 @@
     name: nginx
     state: present
   become: true
-  tags: "install_dev_tools"
+  tags: "install_deps"
+  
+- name: install postgressql database
+  yum:
+    name: "{{ item }}"
+    state: present
+  become: true
+  tags: "install_deps"
+  with_items:
+    - "{{ postgressql_pkgs }}"

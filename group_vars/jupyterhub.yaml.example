@@ -60,20 +60,6 @@ jupyterhub_env_bin_path: "{{ jupyterhub_env_prefix }}/bin"
 # pose few issues depending on platforms. 
 slurm_bin_path: "/usr/bin"
 
-# Users home directory placeholder. We need a placeholder to generate
-# the users home directory dynamically. We use this placeholder and
-# append it with username to get the path to user HOME directory
-# This is especially useful when we cannot access users home directory
-# from the host where we deploy JupyterHub.
-#
-# For example if the users home is located at /home/<user>, we need
-# to set this variable as /home/{username} where the placeholder {username}
-# will be replaced the name of user
-# This is used only when we want to use customized SLURM spawner that is 
-# provided with this repo. If the user wants to use upstream batchspawner
-# this variable will be unused.
-user_homedir: "/home/{username}"
-
 # To reduce the brute force attacks we can check ths user names with regex
 # pattern before attempting to authenticate via SSH.
 valid_username_regex: ''
@@ -107,6 +93,14 @@ jupyterhub_user_spawn_profiles_dir: "{{ jupyterhub_srv_dir }}/user-spawn-profile
 
 # Directory where jupyterhub configuration files are placed
 jupyterhub_config_dir: "{{ jupyterhub_env_prefix }}/etc/jupyterhub"
+
+# ---------------------------------------------------
+# JupyterHub Database configuration
+# ---------------------------------------------------
+
+# We will PostgresSql data base for jupyterhub. We will configure
+# the database name here
+jupyterhub_db_name: "jupyterhub"
 
 # ---------------------------------------------------
 # Jupyter config directories

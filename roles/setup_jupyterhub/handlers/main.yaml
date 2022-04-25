@@ -14,17 +14,13 @@
 
 ---
 
-# Install JupyterHub server proxies and web servers that will be proxied 
+- name: enable postgresql
+  service: 
+    name: postgresql 
+    state: started 
+    enabled: yes
   
-- name: install jupyterlab server proxies from gitlab
-  pip:
-    executable: "{{ jupyterhub_env_prefix }}/bin/pip"
-    name: "{{ item.repo }}"
-    extra_args: "--no-cache-dir"
-    state: forcereinstall  #FIXME: Remove this once we go to production 
-  become: true
-  when: item.install
-  with_items:
-     - "{{ jupyter_server_proxies }}"
-  tags: "proxies"
-  no_log: true
+- name: restart postgresql
+  service: 
+    name: postgresql 
+    state: restarted

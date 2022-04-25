@@ -26,3 +26,7 @@ conda_config:
     - plotly
     - r
   show_channel_urls: yes
+
+postgressql_pkgs:
+  - "postgresql-server"
+  - "python3-psycopg2"

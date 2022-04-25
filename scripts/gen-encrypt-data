@@ -166,7 +166,7 @@ def generate_passwords(remove_existing):
     # make a directory to place passwords
     passwds_file = os.path.join(DATA_DIR, 'jp-adminrc')
     # List of components that will need passwords
-    components = ['node_exporter', 
+    components = ['db', 'node_exporter', 
                   'prometheus', 'grafana']
     token_size = 32  # default token size
     if remove_existing:

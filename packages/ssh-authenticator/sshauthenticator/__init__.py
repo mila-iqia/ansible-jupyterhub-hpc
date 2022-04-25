@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+"""Import all classes and functions"""
 
-- import_tasks: jupyterhub.yaml
-- import_tasks: extensions.yaml
-- import_tasks: directories.yaml
-- import_tasks: config.yaml
+from .sshauthenticator import *

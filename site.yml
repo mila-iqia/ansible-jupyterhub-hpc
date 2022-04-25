@@ -33,6 +33,13 @@
   roles:
     - preflight_checks
   tags: always
+
+- name: Conda role
+  hosts: jupyterhubstack
+  gather_facts: no
+  roles:
+    - evandam.conda
+  tags: always
   
 - name: Run common tasks
   hosts: jupyterhub
