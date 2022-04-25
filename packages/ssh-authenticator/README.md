@@ -2,13 +2,6 @@
 
 This project is the extension of basic SSH authenticator developed in https://github.com/andreas-h/sshauthenticator. Essentially, some sanity checks are included in the original authenticator developed by the author. Also, logging is enabled in the authenticator as it is necessary in production deployments to track the users that are trying to log into the hub.
 
-## Installation
-
-The authenticator can be installed using
-
-```
-pip install git+https://gitlab.com/i2461/jupyter/jupyter-ssh-authenticator.git
-```
 
 ## Configuration
 
