@@ -25,3 +25,14 @@
   service: 
     name: "jupyterhub"
     state: restarted
+
+- name: reload jupyterhub-proxy
+  service: 
+    name: "jupyterhub-proxy"
+    daemon_reload: yes
+    enabled: yes
+    
+- name: restart jupyterhub-proxy
+  service: 
+    name: "jupyterhub-proxy"
+    state: restarted

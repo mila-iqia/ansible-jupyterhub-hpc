@@ -117,21 +117,40 @@ def default_url_fn(handler):
     return '/hub/home'
 c.JupyterHub.default_url = default_url_fn
 
-# The command to start the http proxy.
+## Following configuration is needed to run hub separetely from HTTP proxy
+# This will allow us to restart hub without interupting the connected hub
+# users. Will be useful during updates
 #
-# Only override if configurable-http-proxy is not on your PATH
-c.ConfigurableHTTPProxy.command = ['{{ jupyterhub_env_bin_path }}/configurable-http-proxy']
+## Whether to shutdown single-user servers when the Hub shuts down.
+#
+#  Disable if you want to be able to teardown the Hub while leaving the single-
+#  user servers running.
+#
+#  If both this and cleanup_proxy are False, sending SIGINT to the Hub will only
+#  shutdown the Hub, leaving everything else running.
+#
+#  The Hub should be able to resume from database state.
+c.JupyterHub.cleanup_servers = False
+
+## Whether to start HTTP proxy when hub starts.
+#
+c.ConfigurableHTTPProxy.should_start = False
 
 ## Token for authenticating communication with the proxy
+#
+# We need to use the same token as an env variable while launching
+# proxy as systemd service
+#
 proxy_auth_token_file = '{{ jupyterhub_srv_dir }}/proxy_auth_token'
 proxy_auth_token = open(proxy_auth_token_file, 'r').read().strip()
 c.ConfigurableHTTPProxy.auth_token = proxy_auth_token
 
-## Debug level
-c.ConfigurableHTTPProxy.debug = True
-
 ## File to write PID Useful for daemonizing JupyterHub proxy.
 c.ConfigurableHTTPProxy.pid_file = '{{ jupyterhub_srv_dir }}/proxy_pid'
+
+## should be set to the URL which the hub uses to connect to the proxy’s API.
+#
+c.ConfigurableHTTPProxy.api_url = 'https://localhost:8001'
 
 ## The class to use for spawning single-user servers.
 #

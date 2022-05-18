@@ -14,6 +14,36 @@
 
 ---
 
+- name: create configurable http proxy environment file for systemd service
+  template:
+    src: jupyterhub-proxy.j2
+    dest: /etc/sysconfig/jupyterhub-proxy
+    owner: root
+    group: root
+    mode: 0640
+  become: true
+  
+- name: create jupyterhub environment file for systemd service
+  template:
+    src: jupyterhub.j2
+    dest: /etc/sysconfig/jupyterhub
+    owner: root
+    group: root
+    mode: 0640
+  become: true
+  
+- name: install jupyterhub-proxy system unit file
+  template:
+    src: jupyterhub-proxy.service.j2
+    dest: /etc/systemd/system/jupyterhub-proxy.service
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify:
+   - reload jupyterhub-proxy
+   - restart jupyterhub-proxy
+
 - name: install jupyterhub system unit file
   template:
     src: jupyterhub.service.j2

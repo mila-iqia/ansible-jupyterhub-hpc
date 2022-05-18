@@ -1,0 +1,32 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify it
+# Jupyterhub systemd service config
+
+[Unit]
+Description=Service for launching Jupyterhub HTTP proxy
+After=network-online.target remote-fs.target local-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+EnvironmentFile=/etc/sysconfig/jupyterhub-proxy
+
+User={{ jupyterhub_service_user }}
+Group={{ jupyterhub_service_user }}
+
+RuntimeDirectory=jupyterhub-proxy
+LogsDirectory=jupyterhub-proxy
+CacheDirectory=jupyterhub-proxy
+ConfigurationDirectory=jupyterhub-proxy
+
+ExecStart={{ jupyterhub_env_bin_path }}/configurable-http-proxy --ip '' --port 8000 --api-ip 127.0.0.1 --api-port 8001 --error-target https://127.0.0.1:8081/hub/error --log-level debug --api-ssl-key {{ jupyterhub_srv_dir }}/internal-ssl/proxy-api/proxy-api.key --api-ssl-cert {{ jupyterhub_srv_dir }}/internal-ssl/proxy-api/proxy-api.crt --api-ssl-ca {{ jupyterhub_srv_dir }}/internal-ssl/proxy-api-ca_trust.crt --api-ssl-request-cert --api-ssl-reject-unauthorized --client-ssl-key {{ jupyterhub_srv_dir }}/internal-ssl/proxy-client/proxy-client.key --client-ssl-cert {{ jupyterhub_srv_dir }}/internal-ssl/proxy-client/proxy-client.crt --client-ssl-ca {{ jupyterhub_srv_dir }}/internal-ssl/proxy-client-ca_trust.crt --client-ssl-request-cert --client-ssl-reject-unauthorized
+
+Restart=always
+RestartSec=5
+
+StandardOutput=append:{{ jupyterhub_log_dir }}/jupyterhub-proxy.log
+StandardError=append:{{ jupyterhub_log_dir }}/jupyterhub-proxy.log
+
+
+[Install]
+WantedBy=multi-user.target

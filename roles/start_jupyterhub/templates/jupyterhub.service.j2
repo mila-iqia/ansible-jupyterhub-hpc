@@ -1,5 +1,5 @@
-# WARNING: This file is {{ ansible_managed }}. Do not modify it
-# Service file for jupyterhub.
+# WARNING: This file is {{ ansible_managed }}, do not modify it
+# Jupyterhub systemd service config
 
 [Unit]
 Description=Service for launching Jupyterhub
@@ -8,8 +8,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-Environment="PATH={{ jupyterhub_env_bin_path }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin"
-Environment="JUPYTERHUB_CRYPT_KEY=$(cat {{ jupyterhub_srv_dir }}/crypt_key)"
+
+EnvironmentFile=/etc/sysconfig/jupyterhub
 
 User={{ jupyterhub_service_user }}
 Group={{ jupyterhub_service_user }}
@@ -19,32 +19,14 @@ LogsDirectory=jupyterhub
 CacheDirectory=jupyterhub
 ConfigurationDirectory=jupyterhub
 
-ExecStart=/bin/bash -c '{{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py >> {{ jupyterhub_log_dir }}/jupyterhub.log 2>&1'
+ExecStart={{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py
 
 Restart=always
 RestartSec=5
 
-# StandardOutput=append:{{ jupyterhub_log_dir }}/jupyterhub.log
-# StandardError=append:{{ jupyterhub_log_dir }}/jupyterhub.log
+StandardOutput=append:{{ jupyterhub_log_dir }}/jupyterhub.log
+StandardError=append:{{ jupyterhub_log_dir }}/jupyterhub.log
 
-# ProtectHome=true
-# PrivateTmp=true
-# PrivateDevices=true
-# ProtectControlGroups=true
-# ProtectKernelModules=true
-# ProtectKernelTunables=true
-
-# ReadWritePaths={{ jupyterhub_srv_dir }} /var/log/
-# ReadOnlyPaths={{ jupyter_env_prefix }} /etc/jupyter/ /etc/jupyterhub/ /etc/ipython
-
-# misc
-# SystemCallArchitectures=native
-# NoNewPrivileges=true
-# RestrictRealtime=true
-# MemoryDenyWriteExecute=true
-# LockPersonality=true
-# RemoveIPC=true
-# RestrictSUIDSGID=true
 
 [Install]
 WantedBy=multi-user.target
