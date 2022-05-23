@@ -27,8 +27,14 @@
   become: true
   tags: "setup_db"
   when: not pgsql_stat.stat.exists
-  notify:
-   - enable postgresql
+
+- name: enable postgresql
+  service: 
+    name: postgresql 
+    state: started 
+    enabled: yes
+  become: true
+  tags: "setup_db"
   
 - name: create the database for jupyterhub
   postgresql_db: 
@@ -77,5 +83,10 @@
   with_items:
     - { oldentry: "host    all             all             127.0.0.1/32            ident", newentry: "host    all             all             127.0.0.1/32            md5" }
     - { oldentry: "host    all             all             ::1/128                 ident", newentry: "host    all             all             ::1/128                 md5" }
-  notify:
-   - restart postgresql
+
+- name: restart postgresql
+  service: 
+    name: postgresql 
+    state: restarted
+  become: true
+  tags: "setup_db"
