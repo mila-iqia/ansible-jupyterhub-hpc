@@ -23,12 +23,14 @@
 # specific meaning and tells the nginx master process to reopen it's log files.
 # This effectively means that nginx starts writing to the new log files.
 nginx_logfiles:
-  - { service_name: "nginx", log_files: ["*.log"], mode: '0644', user: 'root', group: 'root', postrotate: "kill -USR1 `cat {{ nginx_pid_file }}`" }
+  - { service_name: "nginx", log_files: ["*.log"], mode: '0644', user: 'nginx', group: 'nginx', postrotate: "kill -USR1 `cat {{ nginx_pid_file }}`" }
 
 jupyterhub_logfiles:
-  - { service_name: "jupyterhub", log_files: ["*.log"], mode: '0644', user: 'jupyter', group: 'jupyter', postrotate: "/bin/kill -HUP `cat {{ jupyterhub_srv_dir }}/pid` `cat {{ jupyterhub_srv_dir }}/proxy_pid` > /dev/null 2>/dev/null || true" }
+  - { service_name: "jupyterhub", log_files: ["*.log"], mode: '0644', user: 'jupyter', group: 'jupyter', postrotate: "" }
+  - { service_name: "jupyterhub-proxy", log_files: ["*.log"], mode: '0644', user: 'jupyter', group: 'jupyter', postrotate: "" }
 
 # grafana writes PID file in that directory. We can get
 # this info from grafana-server system service file
 grafana_logfiles:
   - { service_name: "grafana", log_files: ["*.log"], mode: '0640', user: 'grafana', group: 'grafana', postrotate: "/bin/kill -HUP `cat /var/run/grafana/grafana-server.pid` > /dev/null 2>/dev/null || true" }
+
