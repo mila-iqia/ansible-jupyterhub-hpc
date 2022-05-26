@@ -20,7 +20,7 @@ prometheus_port: "9090"
 prometheus_address: "{{ inventory_hostname }}"
 prometheus_web_listen_address: "{{ prometheus_address }}:{{ prometheus_port }}"
 prometheus_storage_retention: "30d"
-prometheus_storage_retention_size: "10GB"  # FIXME: Get an estimate for production based on available disk size
+prometheus_storage_retention_size: "10GB"
 
 # Path to store the SSL certificates on remote machine
 remote_path_prometheus_ssl: "/etc/prometheus/ssl"
