@@ -13,13 +13,6 @@ server.example.com
 compute-0
 compute-1
 
-[sshauth_node]
-# If SSHAuthenticator is used, we need to provide a node FQDN for JupyterHub to authenticate
-# users. JupyterHub tries to ssh into the node using port defined as sshauth_port and 
-# if the ssh connection is succesful, the user is authenticated. Note that this node 
-# is used only to authenticate users and no softwares are installed here.
-login.example.com sshauth_port=22
-
 [nginx:children]
 # Host that will have nginx reverse proxy. It can be same as jupyterhub host or different
 # By default it is the same. If we want to use a different host, remove children from header
@@ -51,7 +44,7 @@ jupyterhub
 
 [jupyterhubstack:children]
 # This group contains all hosts that will be used in jupyterhub deployment including monitoring
-# nodes EXCEPT compute and sshauth_node which are only used for configuring jupyterhub
+# nodes EXCEPT compute which are only used for configuring jupyterhub
 jupyterhub
 nginx
 node_exporter
