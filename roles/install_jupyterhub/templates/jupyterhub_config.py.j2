@@ -42,14 +42,7 @@ c.JupyterHub.cleanup_servers = False
 c.JupyterHub.hub_ip = socket.gethostname()
 
 ## Class for authenticating users.
-c.JupyterHub.authenticator_class = 'sshauthenticator.SSHAuthenticator'
-c.Authenticator.manage_groups = True
-c.SSHAuthenticator.default_group_name = "default"
-c.SSHAuthenticator.server_address = '{{ groups["sshauth_node"][0] }}'
-
-# Seems like jinja2 always returns string. We typecast it to int 
-c.SSHAuthenticator.server_port = {{ hostvars[groups['sshauth_node'][0]]['sshauth_port'] | int }}
-c.SSHAuthenticator.valid_username_regex = '{{ valid_username_regex }}'
+c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
 
 ## Number of days for a login cookie to be valid. Default is two weeks.
 c.JupyterHub.cookie_max_age_days = 7
