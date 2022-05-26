@@ -1,5 +1,0 @@
-include *.md
-include LICENSE
-include requirements.txt
-include versioneer.py
-include sshauthenticator/_version.py

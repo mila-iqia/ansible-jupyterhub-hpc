@@ -1,3 +1,0 @@
-# List of requirements
-
-paramiko>=2.9.2
