@@ -41,16 +41,12 @@ remote_path_geoip_data: "/etc/nginx/geoip"
 # configured to run as root and fork the processes which
 # actually run web servers as service users. The master 
 # process needs to be root to be able to bind to ports
-# less than 1024. We can avoid running as root by binding
-# to ports more than 1024 and then using iptables to redirect
-# the traffic to standard HTTP (80) and HTTPS (443) ports.
+# less than 1024. We use capabilities to be able to bind
+# to ports less than 1024 even running as non-root
 #
 # Setting this variable to true will run nginx as service user
-# 
-# MAKE SURE WE SET nginx_https_port AND nginx_http_port to
-# values more than 1024 if we are running nginx as non root
-# user
-nginx_run_as_service_user: false
+#
+nginx_run_as_service_user: true
 
 # SSL certificates must be owned by the user which runs the service
 # In the case of running as root, these certificates must be
