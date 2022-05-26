@@ -21,7 +21,7 @@
   tags: always
 
 - name: Validate environment
-  hosts: jupyterhubstack
+  hosts: jupyterhub
   gather_facts: no
   roles:
     - env_validation
