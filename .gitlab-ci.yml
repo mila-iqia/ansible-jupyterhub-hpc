@@ -29,6 +29,7 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
+    - cat $HOME/.docker/config.json
     - docker info
     - echo "Compiling the code..."
     - echo "Compile complete."
