@@ -29,6 +29,7 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
+    - echo $NO_PROXY $no_proxy
     - cat $HOME/.docker/config.json
     - docker info
     - echo "Compiling the code..."
