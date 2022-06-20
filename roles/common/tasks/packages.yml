@@ -52,5 +52,6 @@
     state: present
   become: true
   tags: "install_deps"
+  when: use_postgresql_db
   with_items:
     - "{{ postgressql_pkgs }}"
