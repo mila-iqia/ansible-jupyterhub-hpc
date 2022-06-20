@@ -29,3 +29,5 @@
     mode: 0644
   become: true
   tags: "install_jh_config"
+  notify:
+    - restart jupyterhub

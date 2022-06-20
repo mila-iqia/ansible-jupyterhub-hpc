@@ -22,3 +22,4 @@
     group: "{{ jupyterhub_service_user }}"
     mode: 0600
   become: true
+  tags: "tokens"

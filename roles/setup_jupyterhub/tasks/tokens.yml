@@ -22,6 +22,7 @@
     group: "{{ jupyterhub_service_user }}"
     mode: '0600'
   become: true
+  tags: "tokens"
 
 - name: install CHP proxy auth token
   copy:
@@ -31,6 +32,7 @@
     group: "{{ jupyterhub_service_user }}"
     mode: '0600'
   become: true
+  tags: "tokens"
 
 - name: install encryption keys
   copy:
@@ -40,6 +42,7 @@
     group: "{{ jupyterhub_service_user }}"
     mode: '0600'
   become: true
+  tags: "tokens"
   
 - name: install db password if postgresql database is used
   copy:
@@ -49,4 +52,5 @@
     group: "{{ jupyterhub_service_user }}"
     mode: '0600'
   become: true
+  tags: "tokens"
   when: use_postgresql_db
