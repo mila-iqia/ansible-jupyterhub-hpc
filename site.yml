@@ -74,14 +74,14 @@
   gather_facts: no
   roles:
     - nginx
-  tags: nginx
+  tags: setup_nginx
 
-- name: Start jupyterhub service
+- name: Setup jupyterhub services
   hosts: jupyterhub
   gather_facts: no
   roles:
-    - start_jupyterhub
-  tags: start_jh
+    - setup_jupyterhub_services
+  tags: setup_jh_services
   
 - name: Setup monitoring
   hosts: node_exporter
