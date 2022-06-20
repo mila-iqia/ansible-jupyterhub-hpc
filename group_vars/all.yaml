@@ -30,6 +30,13 @@
 install_mon_stack: true
 
 # ---------------------------------------------------
+# CDS Dashboards
+# ---------------------------------------------------
+
+# Whether to install CDS dashboards in the jupyterhub environment
+install_cds_dashboards: true
+
+# ---------------------------------------------------
 # SSL certificates configuration
 # ---------------------------------------------------
 #

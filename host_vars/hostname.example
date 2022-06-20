@@ -45,13 +45,6 @@ dev_tools:
   - "htop"
   - "nano"
   - "tree"
-  
-# ---------------------------------------------------
-# CDS Dashboards
-# ---------------------------------------------------
-
-# Whether to install CDS dashboards in the jupyterhub environment
-install_cds_dashboards: true
 
 # ---------------------------------------------------
 # JupyterHub version
@@ -59,7 +52,7 @@ install_cds_dashboards: true
 
 # We use version as conda env name for the jupyterhub
 # It helps us to move between different versions seamlessly
-jupyterhub_version: "2.2"
+jupyterhub_version: "2.2.0"
 
 # ---------------------------------------------------
 # Jupyter components list
