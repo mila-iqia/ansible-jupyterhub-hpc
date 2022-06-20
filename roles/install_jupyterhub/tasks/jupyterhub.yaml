@@ -51,30 +51,30 @@
      - "{{ jupyterhub_deps }}"
   tags: "core"
   
-- name: copy custom packages to remote host
-  copy:
-    src: "{{ lookup('env', 'PWD') }}/packages/{{ item }}"
-    dest: "/tmp"
-    mode: 0770
-  become: true
-  tags: "core"
-  with_items:
-     - "{{ jupyterhub_custom_pkgs }}"
-  
-- name: install custom slurm spawner package
-  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ jupyterhub_env_prefix }} && cd /tmp/{{ item }} && pip install --no-cache-dir ."
-  become: true
-  register: install_custom_pkgs
-  changed_when: "'error' not in install_custom_pkgs.stderr"
-  tags: "core"
-  with_items:
-     - "{{ jupyterhub_custom_pkgs }}"
-  
-- name: delete package data from /tmp
-  file:
-    path: "/tmp/{{ item }}"
-    state: absent
-  become: yes
-  tags: "core"
-  with_items:
-     - "{{ jupyterhub_custom_pkgs }}"
+#- name: copy custom packages to remote host
+#  copy:
+#    src: "{{ lookup('env', 'PWD') }}/packages/{{ item }}"
+#    dest: "/tmp"
+#    mode: 0770
+#  become: true
+#  tags: "core"
+#  with_items:
+#     - "{{ jupyterhub_custom_pkgs }}"
+#
+#- name: install custom slurm spawner package
+#  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ jupyterhub_env_prefix }} && cd /tmp/{{ item }} && pip install --no-cache-dir ."
+#  become: true
+#  register: install_custom_pkgs
+#  changed_when: "'error' not in install_custom_pkgs.stderr"
+#  tags: "core"
+#  with_items:
+#     - "{{ jupyterhub_custom_pkgs }}"
+#
+#- name: delete package data from /tmp
+#  file:
+#    path: "/tmp/{{ item }}"
+#    state: absent
+#  become: yes
+#  tags: "core"
+#  with_items:
+#     - "{{ jupyterhub_custom_pkgs }}"

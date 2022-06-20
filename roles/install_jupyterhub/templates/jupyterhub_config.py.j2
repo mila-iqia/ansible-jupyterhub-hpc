@@ -157,19 +157,17 @@ c.ConfigurableHTTPProxy.api_url = 'https://localhost:8001'
 #    - default: jupyterhub.spawner.LocalProcessSpawner
 #    - localprocess: jupyterhub.spawner.LocalProcessSpawner
 #    - simple: jupyterhub.spawner.SimpleLocalProcessSpawner
-
-
 {% if install_cds_dashboards == true %}
-from custom_slurm_spawner import CustomSlurmSpawner
+from batchspawner import SlurmSpawner
 from cdsdashboards.hubextension.spawners.variablemixin import VariableMixin, MetaVariableMixin
 
-class VariableSlurmSpawner(CustomSlurmSpawner, VariableMixin, metaclass=MetaVariableMixin):
+class VariableSlurmSpawner(SlurmSpawner, VariableMixin, metaclass=MetaVariableMixin):
     pass
     
 c.JupyterHub.spawner_class = VariableSlurmSpawner
 {% else %}
-import custom_slurm_spawner
-c.JupyterHub.spawner_class = 'custom_slurm_spawner.CustomSlurmSpawner'
+import batchspawner
+c.JupyterHub.spawner_class = 'batchspawner.SlurmSpawner'
 {% endif %}
 
 # Path where jupyterhub binaries are installed
