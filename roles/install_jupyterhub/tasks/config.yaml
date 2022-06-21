@@ -29,5 +29,22 @@
     mode: 0644
   become: true
   tags: "install_jh_config"
-  notify:
-    - restart jupyterhub
+
+# We need to restart jupyterhub service when we make changes
+# to configuration. Here we do that as a task only if the
+# service file exists. We should skip this task when service file
+# does not exist which can be case when we are installing jupyterhub
+# for the first time
+- name: check /etc/systemd/system/jupyterhub.service exists
+  stat:
+    path: "/etc/systemd/system/jupyterhub.service"
+  register: jh_service_file
+  tags: "install_jh_config"
+    
+- name: restart jupyterhub
+  service: 
+    name: "jupyterhub"
+    state: restarted
+  become: true
+  when: jh_service_file.stat.exists
+  tags: "install_jh_config"
