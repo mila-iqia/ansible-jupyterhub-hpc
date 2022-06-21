@@ -18,9 +18,10 @@
   systemd:
     name: "loki"
     daemon_reload: yes
-    enabled: Yes
+    state: reloaded
 
 - name: restart systemd loki
   service:
     name: "loki"
     state: restarted
+    enabled: yes
