@@ -51,4 +51,3 @@
   when: inventory_hostname in groups['grafana'] and install_mon_stack
   with_items:
     - "{{ grafana_logfiles }}"
-

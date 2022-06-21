@@ -33,4 +33,3 @@ jupyterhub_logfiles:
 # this info from grafana-server system service file
 grafana_logfiles:
   - { service_name: "grafana", log_files: ["*.log"], mode: '0640', user: 'grafana', group: 'grafana', postrotate: "/bin/kill -HUP `cat /var/run/grafana/grafana-server.pid` > /dev/null 2>/dev/null || true" }
-
