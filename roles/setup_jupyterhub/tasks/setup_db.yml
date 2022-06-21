@@ -27,6 +27,48 @@
   become: true
   tags: "setup_db"
   when: not pgsql_stat.stat.exists
+  
+- name: use md5 as authentication method for databases on localhost
+  lineinfile:
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
+    state: present
+    regexp: "^{{ item.oldentry }}"
+    line: "{{ item.newentry }}"
+  become: true
+  tags: "setup_db"
+  with_items:
+    - { oldentry: "host    all             all             127.0.0.1/32            ident", newentry: "host    all             all             127.0.0.1/32            md5" }
+    - { oldentry: "host    all             all             ::1/128                 ident", newentry: "host    all             all             ::1/128                 md5" }
+
+# Seems like we have a bug in systemd 239 which comes with CentOS 8
+# https://bugs.centos.org/view.php?id=17461
+# We need to add this additional conf file to reload daemon post stopping
+# the service
+- name: add stop.conf to /etc/systemd/system/postgresql.service.d/stop.conf
+  block:
+   - name: create /etc/systemd/system/postgresql.service.d folder
+     file:
+       path: "/etc/systemd/system/postgresql.service.d"
+       state: "{{ item }}"
+     with_items:
+       - directory
+       - touch
+       
+   - name: create stop.conf file
+     copy:
+      dest: "/etc/systemd/system/postgresql.service.d/stop.conf"
+      content: |
+        [Service]
+        ExecStopPost=+/usr/bin/systemctl daemon-reload
+  become: true
+  tags: "setup_db"
+
+- name: restart postgresql
+  service: 
+    name: postgresql 
+    state: restarted
+  become: true
+  tags: "setup_db"
 
 - name: enable postgresql
   service: 
@@ -70,23 +112,4 @@
      state: present
   become: true
   become_user: postgres
-  tags: "setup_db"
-  
-- name: use md5 as authentication method for databases on localhost
-  lineinfile:
-    dest: "/var/lib/pgsql/data/pg_hba.conf"
-    state: present
-    regexp: "^{{ item.oldentry }}"
-    line: "{{ item.newentry }}"
-  become: true
-  tags: "setup_db"
-  with_items:
-    - { oldentry: "host    all             all             127.0.0.1/32            ident", newentry: "host    all             all             127.0.0.1/32            md5" }
-    - { oldentry: "host    all             all             ::1/128                 ident", newentry: "host    all             all             ::1/128                 md5" }
-
-- name: restart postgresql
-  service: 
-    name: postgresql 
-    state: restarted
-  become: true
   tags: "setup_db"
