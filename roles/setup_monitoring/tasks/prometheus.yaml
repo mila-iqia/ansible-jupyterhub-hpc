@@ -86,9 +86,9 @@
   tags: "setup_prometheus"
   with_items:
     - { path: "{{ jupyterhub_srv_dir }}", permissions: "rx" }
-    - { path: "{{ jupyterhub_srv_dir }}/internal-certs", permissions: "rx" }
-    - { path: "{{ jupyterhub_srv_dir }}/internal-certs/proxy-client", permissions: "rx" }
     - { path: "{{ jupyterhub_srv_dir }}/metrics_token", permissions: "r" }
-    - { path: "{{ jupyterhub_srv_dir }}/internal-certs/hub-ca_trust.crt", permissions: "r" }
-    - { path: "{{ jupyterhub_srv_dir }}/internal-certs/proxy-client/proxy-client.key", permissions: "r" }
-    - { path: "{{ jupyterhub_srv_dir }}/internal-certs/proxy-client/proxy-client.crt", permissions: "r" }
+    - { path: "{{ jupyterhub_internal_certs_dir }}", permissions: "rx" }
+    - { path: "{{ jupyterhub_internal_certs_dir }}/proxy-client", permissions: "rx" }
+    - { path: "{{ jupyterhub_internal_certs_dir }}/hub-ca_trust.crt", permissions: "r" }
+    - { path: "{{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.key", permissions: "r" }
+    - { path: "{{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.crt", permissions: "r" }

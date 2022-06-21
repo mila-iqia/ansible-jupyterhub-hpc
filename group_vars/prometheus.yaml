@@ -52,9 +52,9 @@ prometheus_scrape_configs_self_signed_certs:
     authorization:
        credentials_file: "{{ jupyterhub_srv_dir }}/metrics_token"
     tls_config:
-       ca_file: "{{ jupyterhub_srv_dir }}/internal-ssl/hub-ca_trust.crt"
-       cert_file: "{{ jupyterhub_srv_dir }}/internal-ssl/proxy-client/proxy-client.crt"
-       key_file: "{{ jupyterhub_srv_dir }}/internal-ssl/proxy-client/proxy-client.key"
+       ca_file: "{{ jupyterhub_internal_certs_dir }}/hub-ca_trust.crt"
+       cert_file: "{{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.crt"
+       key_file: "{{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.key"
        insecure_skip_verify: True
     metrics_path: "/metrics"
     static_configs:
@@ -77,9 +77,9 @@ prometheus_scrape_configs_ext_certs:
     authorization:
        credentials_file: "{{ jupyterhub_srv_dir }}/metrics_token"
     tls_config:
-       ca_file: "{{ jupyterhub_srv_dir }}/internal-ssl/hub-ca_trust.crt"
-       cert_file: "{{ jupyterhub_srv_dir }}/internal-ssl/proxy-client/proxy-client.crt"
-       key_file: "{{ jupyterhub_srv_dir }}/internal-ssl/proxy-client/proxy-client.key"
+       ca_file: "{{ jupyterhub_internal_certs_dir }}/hub-ca_trust.crt"
+       cert_file: "{{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.crt"
+       key_file: "{{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.key"
        insecure_skip_verify: True
     metrics_path: "/metrics"
     static_configs:
