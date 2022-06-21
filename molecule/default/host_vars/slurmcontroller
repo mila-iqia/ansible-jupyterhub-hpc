@@ -1,0 +1,163 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+# These are global variables that are used on host.
+
+# ---------------------------------------------------
+# Ansible
+# ---------------------------------------------------
+
+# Path of the Python 3 interpreter on the remote server
+ansible_python_interpreter: "/usr/bin/python3"
+
+# ---------------------------------------------------
+# conda related configuration
+# ---------------------------------------------------
+
+# Whether to install conda or use a pre-existing installation
+# In case if it is set to false, make sure conda-forge 
+# channel is added to conda configuration
+install_conda: true
+
+# Location where conda is installed in the case of install_conda
+# is false. If install_conda is true, set this to /opt/conda as 
+# we use rpms to install conda and /opt/conda is the default 
+# location
+conda_prefix: "/opt/conda"
+
+
+# ---------------------------------------------------
+# List of dev tools to install
+# ---------------------------------------------------
+
+dev_tools:
+  - "git"
+  - "htop"
+  - "nano"
+  - "tree"
+
+# ---------------------------------------------------
+# JupyterHub version
+# ---------------------------------------------------
+
+# We use version as conda env name for the jupyterhub
+# It helps us to move between different versions seamlessly
+jupyterhub_version: "2.3.0"
+
+# ---------------------------------------------------
+# Jupyter components list
+# ---------------------------------------------------
+
+# core jupyterhub components
+jupyterhub_pkgs:
+ - "jupyterhub={{ jupyterhub_version }}"
+ - "jupyterlab=3.2.9"
+ - "notebook=6.4.8"
+ - "openssl=1.1.1o"  # Seems like we have an issue in molecule testing and not in prod
+ - "cryptography=36.0.0"
+ - "nodejs=17.4.0"
+
+# Additional dependencies
+jupyterhub_deps:
+ - "batchspawner==1.1"
+ - "psycopg2-binary==2.9.3"
+ 
+# List of jupyterlab extensions that will be installed from pip
+jupyterlab_pip_extensions:
+ - "jupyterlab-git==0.34.2"
+ - "jupyter-resource-usage==0.6.1"
+ - "jupyterlab-topbar==0.6.1"
+ - "jupyterlab-system-monitor==0.8.0"
+ - "jupyterlab_latex==3.1.0"
+ - "jupyter_bokeh==3.0.2"
+ - "jupyterlab-lsp==3.10.0"
+ - "jupyterlab-gitlab==3.0.0"
+ - "jupyterlab-quickopen==1.2.0"
+ - "ipywidgets==7.6.3"
+ - "plotly==5.6.0"
+ - "cdsdashboards==0.6.0"
+ - "cdsdashboards[user]==0.6.0"
+ - "voila==0.3.5"
+ - "streamlit==1.7.0"
+ - "dash==2.0.0"
+ - "dask-labextension==5.2.0"
+ - "nbdime==3.1.1"
+ - "sidecar==0.5.1"
+ - "bokeh==2.4.2"
+ - "SQLAlchemy==1.4.35"  # Seems like < 1.3.* versions have some issues
+
+# We need server-proxy to get different external applications to be 
+# able to launch within jupyterhub
+jupyterlab_extensions:
+  - "jupyterlab-theme-toggle"
+
+
+# ---------------------------------------------------
+# Xues Cling C++ kernel
+# ---------------------------------------------------
+
+# C++ kernel
+install_cpp_kernel: false
+
+# Xues cling version for C++ kernel
+cling_version: "0.13.0"
+
+# Path where xeus cling binaries will be installed
+cling_pkg_path: "{{ jupyter_env_prefix }}/cling-{{ julia_version }}"
+
+
+# ---------------------------------------------------
+# List of Julia packages to install
+# ---------------------------------------------------
+
+# Julia kernel
+install_julia_kernel: false
+
+# Julia version
+julia_version: "1.6.5"
+
+# Path where Julia binaries will be installed
+julia_pkg_path: "{{ jupyter_env_prefix }}/julia-{{ julia_version }}"
+
+# This is just a minimal list. We can add more based
+# on the requirements of the users
+julia_packages:
+  - "Flux"
+  - "ScikitLearn"
+  - "MLBase"
+  - "MPI"
+
+
+# ---------------------------------------------------
+# List of R packages to install
+# ---------------------------------------------------
+
+# R kernel
+install_r_kernel: false
+
+# R version
+# Note we are installing R from conda using r-recommended 
+# package. The version corresponds to the same. See below
+# for more details
+rlang_version: "3.6.0"
+
+# Path where R binaries will be installed
+rlang_pkg_path: "{{ jupyter_env_prefix }}/r-{{ rlang_version }}"
+
+# Minimal list of R packages that will be installed
+r_packages:
+  - "r-recommended={{ rlang_version }}"
+  - "r-essentials={{ rlang_version }}"
+  - "r-irkernel=0.8.15"
