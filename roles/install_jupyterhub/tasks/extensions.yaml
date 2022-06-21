@@ -16,7 +16,7 @@
 
 # Install JupyterHub server proxies and web servers that will be proxied 
 
-- name: install jupyterlab extensions from pip
+- name: install jupyterlab stack from pip
   pip:
     executable: "{{ jupyterhub_env_prefix }}/bin/pip"
     name: "{{ item }}"
@@ -24,13 +24,4 @@
   become: true
   with_items:
      - "{{ jupyterlab_pip_extensions }}"
-  tags: "extensions"
-  
-- name: install jupyterhub extensions using jupyter
-  shell: "source {{ conda_prefix }}/etc/profile.d/conda.sh && conda activate {{ jupyterhub_env_prefix }} && jupyter labextension install {{ item }}"
-  become: true
-  register: extension
-  with_items:
-     - "{{ jupyterlab_extensions }}"
-  changed_when: "'error' not in extension.stderr"
-  tags: "extensions"
+  tags: "jupyterlab"
