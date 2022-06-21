@@ -27,6 +27,8 @@ ansible_python_interpreter: "/usr/bin/python3"
 # ---------------------------------------------------
 
 # Whether to install conda or use a pre-existing installation
+# In case if it is set to false, make sure conda-forge 
+# channel is added to conda configuration
 install_conda: true
 
 # Location where conda is installed in the case of install_conda
@@ -52,7 +54,7 @@ dev_tools:
 
 # We use version as conda env name for the jupyterhub
 # It helps us to move between different versions seamlessly
-jupyterhub_version: "2.2.0"
+jupyterhub_version: "2.3.0"
 
 # ---------------------------------------------------
 # Jupyter components list
@@ -70,10 +72,6 @@ jupyterhub_pkgs:
 jupyterhub_deps:
  - "batchspawner==1.1"
  - "psycopg2-binary==2.9.3"
- 
-# Custom packages provided with ansible playbook
-jupyterhub_custom_pkgs:
- - "custom-slurm-spawner"
  
 # List of jupyterlab extensions that will be installed from pip
 jupyterlab_pip_extensions:
