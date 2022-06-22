@@ -19,14 +19,11 @@
 - name: make sure /var/log/loki exists
   file:
     path: "/var/log/loki/"
-    state: "{{ item }}"
+    state: directory
     owner: "{{ loki_service_user }}"
     group: "{{ loki_service_user }}"
     mode: '0755'
   become: true
-  with_items:
-    - directory
-    - touch
 
 - name: create config directories for loki
   file:

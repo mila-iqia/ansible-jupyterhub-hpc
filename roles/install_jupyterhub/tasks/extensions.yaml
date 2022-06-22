@@ -24,4 +24,4 @@
   become: true
   with_items:
      - "{{ jupyterlab_pip_extensions }}"
-  tags: "jupyterlab"
+  tags: "jupyterlab, molecule-idempotence-notest"

@@ -16,46 +16,65 @@
 
 # Install grafana loki
 
-- name: download loki release
-  get_url:
-    url: "{{ loki_download }}"
-    dest: "/tmp/{{ loki_archive }}"
-    checksum: "sha256:{{ loki_download_github }}/v{{ loki_version }}/SHA256SUMS"
-    mode: '0644'
+- name: check if loki is already installed
+  stat:
+    path: "/usr/local/bin/loki"
+  register: get_loki_bin
   become: true
-  register: download_release
-  until: download_release is succeeded
-  retries: 5
-  delay: 2
-
-- name: unpack loki release
-  unarchive:
-    src: "/tmp/{{ loki_archive }}"
-    dest: "/tmp"
-    creates: "/tmp/{{ loki_bin }}"
-    remote_src: true
-    mode: '0644'
-  become: true
-
-- name: copy loki to /usr/local/bin
-  copy:
-    src: "/tmp/{{ loki_bin }}"
-    dest: "/usr/local/bin/loki"
-    mode: '0755'
-    owner: root
-    group: root
-    remote_src: true
-  become: true
-  notify: restart systemd loki
   
-- name: clean-up
-  file:
-    path: "/tmp/{{ item }}"
-    state: absent
+- name: get existing loki version
+  shell: "/usr/local/bin/loki --version | grep 'loki, version' | awk '{print $3}'"
+  register: get_loki_version
+  when: get_loki_bin.stat.exists
+  # To make this task idempotent
+  changed_when: false
   become: true
-  loop:
-    - "{{ loki_archive }}"
-    - "{{ loki_bin }}"
+  
+- name: set loki version variable as fact
+  set_fact: 
+    current_loki_version: "{% if 'stdout' in get_loki_version.keys() %}{{ get_loki_version['stdout'] }}{% else %}\"0.0.0\"{% endif %}"
+  become: true
+
+- name: download, unzip and install loki
+  block:
+    - name: download and install loki release
+      get_url:
+        url: "{{ loki_download }}"
+        dest: "/tmp/{{ loki_archive }}"
+        checksum: "sha256:{{ loki_download_github }}/v{{ loki_version }}/SHA256SUMS"
+        mode: '0644'
+      delegate_to: localhost
+      register: download_release
+      until: download_release is succeeded
+      retries: 5
+      delay: 2
+
+    - name: unpack loki release
+      unarchive:
+        src: "/tmp/{{ loki_archive }}"
+        dest: "/tmp"
+        creates: "/tmp/{{ loki_bin }}"
+        mode: '0644'
+      delegate_to: localhost
+
+    - name: copy loki to /usr/local/bin
+      copy:
+        src: "/tmp/{{ loki_bin }}"
+        dest: "/usr/local/bin/loki"
+        mode: '0755'
+        owner: root
+        group: root
+  
+    - name: clean-up
+      file:
+        path: "/tmp/{{ item }}"
+        state: absent
+      delegate_to: localhost
+      loop:
+        - "{{ loki_archive }}"
+        - "{{ loki_bin }}"
+  when: current_loki_version != loki_version
+  become: true
 
 - name: install systemd-unit
   template:
@@ -65,3 +84,4 @@
   become: true
   notify:
     - reload systemd loki
+    - restart systemd loki

@@ -16,26 +16,33 @@
 
 # Create all the directories necessary for configuring JupyterHub
 
+# First we check if the path exists and we will touch the directory
+# only if the path does not exist. The reason is that this directory
+# will have ACL permissions for prometheus user to access JupyterHub 
+# internal certificats. The file task with owner and group will remove
+# these ACL permissions and that will result in failed API requests by
+# Prometheus
+- name: check if /srv/jupyterhub exists
+  stat:
+    path: "{{ jupyterhub_srv_dir }}"
+  register: jh_srv_dir
+  become: true
+
 - name: make sure /srv/jupyterhub exists
   file:
-    path: "{{ jupyterhub_srv_dir }}/"
-    state: "{{ item }}"
+    path: "{{ jupyterhub_srv_dir }}"
+    state: directory
     owner: "{{ jupyterhub_service_user }}"
     group: "{{ jupyterhub_service_user }}"
     mode: 0700
   become: true
-  with_items:
-    - directory
-    - touch
+  when: not jh_srv_dir.stat.exists
     
 - name: make sure /var/log/jupyterhub exists
   file:
-    path: "{{ jupyterhub_log_dir }}/"
-    state: "{{ item }}"
+    path: "{{ jupyterhub_log_dir }}"
+    state: directory
     owner: "{{ jupyterhub_service_user }}"
     group: "{{ jupyterhub_service_user }}"
     mode: 0755
   become: true
-  with_items:
-    - directory
-    - touch

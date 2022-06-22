@@ -17,7 +17,6 @@ Group={{ jupyterhub_service_user }}
 RuntimeDirectory=jupyterhub
 LogsDirectory=jupyterhub
 CacheDirectory=jupyterhub
-ConfigurationDirectory=jupyterhub
 
 ExecStart={{ jupyterhub_env_bin_path }}/jupyterhub -f {{ jupyterhub_config_dir }}/jupyterhub_config.py
 

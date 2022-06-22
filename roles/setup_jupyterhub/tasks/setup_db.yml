@@ -49,11 +49,10 @@
    - name: create /etc/systemd/system/postgresql.service.d folder
      file:
        path: "/etc/systemd/system/postgresql.service.d"
-       state: "{{ item }}"
-     with_items:
-       - directory
-       - touch
-       
+       state: directory
+     # with_items:
+     #   - directory
+     #   - touch
    - name: create stop.conf file
      copy:
       dest: "/etc/systemd/system/postgresql.service.d/stop.conf"
@@ -68,7 +67,7 @@
     name: postgresql 
     state: restarted
   become: true
-  tags: "setup_db"
+  tags: "setup_db, molecule-idempotence-notest"
 
 - name: enable postgresql
   service: 

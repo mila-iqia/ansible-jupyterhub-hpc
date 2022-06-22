@@ -35,15 +35,12 @@
 - name: make sure /etc/node_exporter/ssl exists
   file:
     path: "{{ remote_path_node_exporter_ssl }}/"
-    state: "{{ item }}"
+    state: directory
     owner: "{{ _node_exporter_system_user }}"
     group: "{{ _node_exporter_system_group }}"
     mode: '0700'
   become: true
   tags: "setup_node_exp"
-  with_items:
-    - directory
-    - touch
   
 - name: install SSL key
   copy:

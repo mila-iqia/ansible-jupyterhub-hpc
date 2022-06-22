@@ -34,14 +34,24 @@
     create_home: false
   become: true
   
-- name: create a config file in /etc/sudoers.d
-  file:
+- name: check if config file at /etc/sudoers.d exists
+  stat:
     path: "{{ sudoers_file }}"
-    state: touch
+  register: sudoers_file_stat
+  become: true
+  
+- name: create a config file in /etc/sudoers.d
+  copy:
+    dest: "{{ sudoers_file }}"
     owner: root
     group: root
     mode: 0440
+    content: |
+      # This file is Ansible managed, please do not modify it
+      # List of commands jupyter user can execute as sudo
+    validate: "visudo -cf %s"
   become: true
+  when: not sudoers_file_stat.stat.exists
   
 - name: add command alias for spawner command in config file
   lineinfile:

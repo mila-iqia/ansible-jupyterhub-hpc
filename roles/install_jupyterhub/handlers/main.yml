@@ -18,3 +18,4 @@
   service: 
     name: "jupyterhub"
     state: restarted
+  when: jh_service_file.stat.exists

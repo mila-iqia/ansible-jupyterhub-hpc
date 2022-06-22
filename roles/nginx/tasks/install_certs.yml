@@ -18,14 +18,11 @@
 - name: make sure /etc/nginx/ssl exists
   file:
     path: "{{ remote_path_nginx_proxy_ssl }}/"
-    state: "{{ item }}"
+    state: directory
     owner: "{{ ssl_certs_owner }}"
     group: "{{ ssl_certs_owner }}"
     mode: 0700
   become: true
-  with_items:
-    - directory
-    - touch
 
 - name: install SSL key
   copy:
@@ -57,14 +54,11 @@
 - name: make sure /etc/ssl/ca exists
   file:
     path: "{{ remote_path_ca_cert_ssl }}/"
-    state: "{{ item }}"
+    state: directory
     owner: root
     group: root
     mode: 0755
   become: true
-  with_items:
-    - directory
-    - touch
   when: self_signed_certs
   
 - name: install SSL CA certificate

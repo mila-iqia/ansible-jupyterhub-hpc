@@ -33,34 +33,32 @@
 
 - name: make sure /etc/grafana/ssl exists
   file:
-    path: "{{ remote_path_grafana_ssl }}/"
-    state: "{{ item }}"
-    owner: grafana
+    path: "{{ remote_path_grafana_ssl }}"
+    state: directory
+    owner: root
     group: grafana
-    mode: '0700'
+    mode: '0755'
   become: true
   tags: "setup_grafana"
-  with_items:
-    - directory
-    - touch
   
 - name: install SSL key
   copy:
     src: "{{ local_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
     dest: "{{ remote_path_grafana_ssl }}/{{ ssl_key_name_grafana }}"
-    owner: grafana
+    owner: root
     group: grafana
-    mode: '0600'
+    mode: '0640'
   become: true
   tags: "setup_grafana"
+  register: test
 
 - name: install SSL certificate
   copy:
     src: "{{ local_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
     dest: "{{ remote_path_grafana_ssl }}/{{ ssl_cert_name_grafana }}"
-    owner: grafana
+    owner: root
     group: grafana
-    mode: '0600'
+    mode: '0640'
   become: true
   tags: "setup_grafana"
   
@@ -73,4 +71,4 @@
     mode: '0644'
   become: true
   when: self_signed_certs
-  tags: "setup_grafana"
+  # tags: "setup_grafana"

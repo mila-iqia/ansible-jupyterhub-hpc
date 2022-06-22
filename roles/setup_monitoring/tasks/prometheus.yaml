@@ -34,15 +34,12 @@
 - name: make sure /etc/prometheus/ssl exists
   file:
     path: "{{ remote_path_prometheus_ssl }}/"
-    state: "{{ item }}"
+    state: directory
     owner: prometheus
     group: prometheus
     mode: '0700'
   become: true
   tags: "setup_prometheus"
-  with_items:
-    - directory
-    - touch
   
 - name: install SSL key
   copy:
