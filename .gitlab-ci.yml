@@ -40,7 +40,7 @@ molecule-test:
     - cp .ci/nginx.dhparam.pem encryption/
   script:
     - source encryption/jp-adminrc
-    - molecule --debug test -- -vvvv
+    - molecule --debug test --destroy=never -- -vvvv
     - cp ansible-lint.xml build/reports/linting.xml
   artifacts:
     paths:
