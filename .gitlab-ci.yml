@@ -35,7 +35,7 @@ molecule-test:
     - conda create -n ${CI_COMMIT_SHORT_SHA} python=3.8 -y
     - conda activate ${CI_COMMIT_SHORT_SHA}
     - python3 --version
-    - python3 -m pip install -r requirements-dev.txt
+    - pip install --no-cache-dir -r requirements-dev.txt
     - ansible --version
     - molecule --version
     - cp molecule/default/hostfile .
