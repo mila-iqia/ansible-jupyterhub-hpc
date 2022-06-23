@@ -14,10 +14,10 @@
 **/*.DS_Store
 
 # Ignore hostfile
-hostfile
+/hostfile
 
 # Ignore vault password file
-.vault_pass
+/.vault_pass
 
 # Ignore vault files
 **/*vault
@@ -34,3 +34,6 @@ ansible-lint.xml
 
 # Ignore build dirs
 **/*build
+
+# Ignore gitlab-ci-local folder
+**/.gitlab-ci-local
