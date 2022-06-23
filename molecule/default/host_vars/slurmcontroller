@@ -65,7 +65,10 @@ jupyterhub_pkgs:
  - "jupyterhub={{ jupyterhub_version }}"
  - "jupyterlab=3.2.9"
  - "notebook=6.4.8"
- - "openssl=1.1.1o"  # Seems like we have an issue in molecule testing and not in prod
+# By default conda will install openssl>3.0.0 from conda-forge channel
+# and then links to system libs which are openssl 1.1.1. We force it here
+# to install openssl<3.0.0 to avoid linking issues
+ - "openssl=1.1.1o"
  - "cryptography=36.0.0"
  - "nodejs=17.4.0"
 
@@ -97,11 +100,6 @@ jupyterlab_pip_extensions:
  - "sidecar==0.5.1"
  - "bokeh==2.4.2"
  - "SQLAlchemy==1.4.35"  # Seems like < 1.3.* versions have some issues
-
-# We need server-proxy to get different external applications to be 
-# able to launch within jupyterhub
-jupyterlab_extensions:
-  - "jupyterlab-theme-toggle"
 
 
 # ---------------------------------------------------

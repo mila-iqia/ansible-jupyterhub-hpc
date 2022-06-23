@@ -24,3 +24,6 @@ hostfile
 
 # Ignore encryption folder
 **/encryption
+
+# Ignore pytest logs
+pytestdebug.log

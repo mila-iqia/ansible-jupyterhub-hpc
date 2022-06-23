@@ -13,18 +13,28 @@
 # limitations under the License.
 
 ---
+# This playbook prepares Ansible tests.
 
-- name: Converge
+- name: Prepare
   hosts: all
-  become: true
-  
-  post_tasks:
-    - name: dump variables
-      copy:
-        content: |
-          {{ vars | to_yaml }}
-        dest: /tmp/ansible-vars.yml
-      delegate_to: localhost
-      changed_when: false
-  
-- import_playbook: ../../site.yml
+  gather_facts: false
+  tasks:
+   - name: enable munge
+     service: 
+      name: munge 
+      state: started 
+      enabled: yes
+      
+   - name: configure SLURM
+     shell: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
+
+   - name: enable slurm controller
+     service: 
+      name: slurmctld 
+      state: started 
+      enabled: yes
+     when: inventory_hostname in groups['jupyterhub']
+
+   - name: start slurm daemon on compute nodes
+     shell: slurmd -N $(hostname)
+     when: inventory_hostname in groups['compute']
