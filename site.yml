@@ -55,13 +55,6 @@
     - install_jupyterhub
   tags: install_jh
   
-- name: Install jupyter kernels
-  hosts: jupyterhub
-  gather_facts: no
-  roles:
-    - install_kernels
-  tags: install_kernels
-  
 - name: Setup jupyterhub environment
   hosts: jupyterhub
   gather_facts: no
@@ -73,7 +66,7 @@
   hosts: nginx
   gather_facts: no
   roles:
-    - nginx
+    - setup_nginx
   tags: setup_nginx
 
 - name: Setup jupyterhub services
@@ -129,5 +122,5 @@
   hosts: jupyterhub
   gather_facts: no
   roles:
-    - logrotate
+    - setup_logrotate
   tags: logrotate
