@@ -13,15 +13,27 @@
 # limitations under the License.
 
 ---
-    
-- name: restart jupyterhub
-  service: 
-    name: "jupyterhub"
-    state: restarted
-    enabled: yes
-    
-- name: restart jupyterhub-proxy
-  service: 
-    name: "jupyterhub-proxy"
-    state: restarted
-    enabled: yes
+  
+- name: install jupyterhub-proxy system unit file
+  template:
+    src: jupyterhub-proxy.service.j2
+    dest: /etc/systemd/system/jupyterhub-proxy.service
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify:
+   - restart jupyterhub-proxy
+   
+- meta: flush_handlers
+
+- name: install jupyterhub system unit file
+  template:
+    src: jupyterhub.service.j2
+    dest: /etc/systemd/system/jupyterhub.service
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify:
+   - restart jupyterhub

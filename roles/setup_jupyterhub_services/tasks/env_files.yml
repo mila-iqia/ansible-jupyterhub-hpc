@@ -13,15 +13,21 @@
 # limitations under the License.
 
 ---
-    
-- name: restart jupyterhub
-  service: 
-    name: "jupyterhub"
-    state: restarted
-    enabled: yes
-    
-- name: restart jupyterhub-proxy
-  service: 
-    name: "jupyterhub-proxy"
-    state: restarted
-    enabled: yes
+
+- name: create configurable http proxy environment file for systemd service
+  template:
+    src: jupyterhub-proxy.j2
+    dest: /etc/sysconfig/jupyterhub-proxy
+    owner: root
+    group: root
+    mode: 0640
+  become: true
+  
+- name: create jupyterhub environment file for systemd service
+  template:
+    src: jupyterhub.j2
+    dest: /etc/sysconfig/jupyterhub
+    owner: root
+    group: root
+    mode: 0640
+  become: true

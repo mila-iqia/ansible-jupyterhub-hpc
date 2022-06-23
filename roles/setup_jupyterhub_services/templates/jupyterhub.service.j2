@@ -3,7 +3,8 @@
 
 [Unit]
 Description=Service for launching Jupyterhub
-After=network-online.target remote-fs.target local-fs.target nss-lookup.target
+Requires=jupyterhub-proxy.service
+After=network-online.target remote-fs.target local-fs.target nss-lookup.target jupyterhub-proxy.service
 Wants=network-online.target
 
 [Service]
