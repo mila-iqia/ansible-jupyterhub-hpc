@@ -47,9 +47,9 @@ molecule-test:
       - build/reports/
     expire_in: 1 day
     
-Create Gitlab CI badges from CI metrics
-This job is allowed to fail so that it will not mark CI as
-failure if this job fails
+# Create Gitlab CI badges from CI metrics
+# This job is allowed to fail so that it will not mark CI as
+# failure if this job fails
 include:
   - project: 'idris-cnrs/ci-utilities/ci-templates'
     file: 'includes/create-badges.yml'
