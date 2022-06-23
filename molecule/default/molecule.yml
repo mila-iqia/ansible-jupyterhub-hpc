@@ -22,7 +22,9 @@ driver:
   name: docker
 lint: |
   yamllint . || exit 0
-  ansible-lint -c .ansible-lint --exclude meta | ansible-lint-junit -o ansible-lint.xml || exit 0
+  ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml > ansible-lint.txt || exit 0
+  ansible-lint-junit ansible-lint.txt -o ansible-lint.xml
+  
 platforms:
   - name: slurmcontroller
     image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-controller-centos8:latest
@@ -101,4 +103,4 @@ scenario:
 verifier:
   name: testinfra
   options:
-    s: true
+    junitxml: 'build/reports/unit-tests.xml'

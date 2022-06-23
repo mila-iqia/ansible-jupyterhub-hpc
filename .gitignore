@@ -27,3 +27,10 @@ hostfile
 
 # Ignore pytest logs
 pytestdebug.log
+
+# Ignore intermediate lint files
+ansible-lint.txt
+ansible-lint.xml
+
+# Ignore build dirs
+**/*build

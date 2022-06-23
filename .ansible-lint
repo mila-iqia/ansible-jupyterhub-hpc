@@ -11,6 +11,7 @@ exclude_paths:
 skip_list:
  - 'role-name'
  - 'fqcn-builtins'
+ - 'unnamed-task'
  
 # List of additional kind:pattern to be added at the top of the default
 # match list, first match determines the file kind.
