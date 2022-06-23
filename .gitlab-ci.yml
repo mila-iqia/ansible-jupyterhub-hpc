@@ -20,10 +20,11 @@ variables:
 services:
   - docker:20.10.16-dind
 
-stages: 
+stages:
+  - lint
   - test
 
-molecule:
+molecule-test:
   stage: test
   before_script:
     - mkdir -p build/reports
@@ -34,6 +35,7 @@ molecule:
     - python3 -m pip install -r requirements-dev.txt
     - ansible --version
     - molecule --version
+    - cp molecule/default/hostfile .
     - cd scripts && ./gen-encrypt-data -c -p -t && cd ..
     - cp .ci/nginx.dhparam.pem encryption/
   script:
