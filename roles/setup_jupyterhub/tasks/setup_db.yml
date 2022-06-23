@@ -23,7 +23,7 @@
   tags: "setup_db"
 
 - name: initialise PostgreSQL database
-  shell: "postgresql-setup --initdb"
+  command: "postgresql-setup --initdb"
   become: true
   tags: "setup_db"
   when: not pgsql_stat.stat.exists
@@ -49,13 +49,16 @@
    - name: create /etc/systemd/system/postgresql.service.d folder
      file:
        path: "/etc/systemd/system/postgresql.service.d"
+       owner: root
+       group: root
+       mode: '0755'
        state: directory
-     # with_items:
-     #   - directory
-     #   - touch
    - name: create stop.conf file
      copy:
       dest: "/etc/systemd/system/postgresql.service.d/stop.conf"
+      owner: root
+      group: root
+      mode: '0644'
       content: |
         [Service]
         ExecStopPost=+/usr/bin/systemctl daemon-reload

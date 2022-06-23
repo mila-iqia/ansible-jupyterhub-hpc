@@ -23,7 +23,9 @@
   become: true
   
 - name: get existing loki version
-  shell: "/usr/local/bin/loki --version | grep 'loki, version' | awk '{print $3}'"
+  shell: "set -o pipefail && /usr/local/bin/loki --version | grep 'loki, version' | awk '{print $3}'"
+  args:
+   executable: /usr/bin/bash
   register: get_loki_version
   when: get_loki_bin.stat.exists
   # To make this task idempotent

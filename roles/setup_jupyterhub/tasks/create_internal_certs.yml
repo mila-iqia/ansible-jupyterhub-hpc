@@ -21,7 +21,7 @@
   become: true
 
 - name: create TLS certs for internal communication of JupyterHub
-  shell: "{{ jupyterhub_env_bin_path }}/jupyterhub --generate-certs -f {{ jupyterhub_config_dir }}/jupyterhub_config.py"
+  command: "{{ jupyterhub_env_bin_path }}/jupyterhub --generate-certs -f {{ jupyterhub_config_dir }}/jupyterhub_config.py"
   become: true
   become_user: "{{ jupyterhub_service_user }}"
   when: not certs_dir.stat.exists
