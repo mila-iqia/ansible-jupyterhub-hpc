@@ -33,6 +33,7 @@ molecule:
     - python3 -m pip install -r requirements-dev.txt
     - ansible --version
     - molecule --version
+    - alias python=python3
     - cd scripts && ./gen-encrypt-data -c -p -t && cd ..
     - cp .ci/nginx.dhparam.pem encryption/
   script:
