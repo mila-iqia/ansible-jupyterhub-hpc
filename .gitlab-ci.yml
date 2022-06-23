@@ -33,12 +33,11 @@ molecule:
     - python3 -m pip install -r requirements-dev.txt
     - ansible --version
     - molecule --version
-    - cd scripts && ./gen-encryption-data -c -p -t && cd ..
+    - cd scripts && ./gen-encrypt-data -c -p -t && cd ..
     - cp .ci/nginx.dhparam.pem encryption/
   script:
     - source encryption/jp-adminrc
     - molecule test
-  after_script:
     - cp ansible-lint.xml build/reports/linting.xml
   artifacts:
     paths:
