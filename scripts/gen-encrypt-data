@@ -96,6 +96,9 @@ def load_ansible_inventory():
     """Load inventory data from ansible"""
     # Path to inventory file
     inventory_file_path = os.path.join(ROOT_DIR, 'hostfile')
+    if not os.path.exists(inventory_file_path):
+       logger.exception('Inventory file at %s not found', inventory_file_path)
+       raise err
     loader = DataLoader()
     # create inventory, use path to host config file 
     # as source or hosts in a comma separated string
