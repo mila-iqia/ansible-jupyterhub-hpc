@@ -38,9 +38,9 @@ molecule-test:
     - python3 -m pip install -r requirements-dev.txt
     - ansible --version
     - molecule --version
+    - cp molecule/default/hostfile .
     - cd scripts && ./gen-encrypt-data -c -p -t && cd ..
     - cp .ci/nginx.dhparam.pem encryption/
-    - cp molecule/default/hostfile .
   script:
     - source encryption/jp-adminrc
     - molecule --debug test --destroy=never
