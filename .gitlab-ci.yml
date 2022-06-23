@@ -42,6 +42,8 @@ molecule-test:
     - source encryption/jp-adminrc
     - molecule --debug test --destroy=never -- -vvvv
     - cp ansible-lint.xml build/reports/linting.xml
+  after_script:
+    - sleep 3600
   artifacts:
     paths:
       - build/reports/
