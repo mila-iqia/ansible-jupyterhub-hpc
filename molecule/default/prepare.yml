@@ -19,14 +19,15 @@
   hosts: all
   gather_facts: false
   tasks:
+   - name: configure SLURM
+     shell: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
+
    - name: enable munge
      service: 
       name: munge 
       state: started 
       enabled: yes
-      
-   - name: configure SLURM
-     shell: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
+     ignore_errors: yes
 
    - name: enable slurm controller
      service: 
@@ -34,7 +35,9 @@
       state: started 
       enabled: yes
      when: inventory_hostname in groups['jupyterhub']
+     ignore_errors: yes
 
    - name: start slurm daemon on compute nodes
      shell: slurmd -N $(hostname)
      when: inventory_hostname in groups['compute']
+     ignore_errors: yes
