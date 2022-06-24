@@ -24,7 +24,7 @@ stages:
   - lint
   - test
   
-molecule-test:
+molecule-lint:
   stage: lint
   before_script:
     - mkdir -p build/reports
