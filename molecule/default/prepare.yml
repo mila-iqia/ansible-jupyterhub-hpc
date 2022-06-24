@@ -19,6 +19,11 @@
   hosts: all
   gather_facts: false
   tasks:
+   # Ansible executes sudo tasks with flags sudo -H -S -n -u root <cmd>
+   # If we are behind a proxy and those proxy variables are not in
+   # env_keep commands like yum update would not work as proxy envs are
+   # not set. Basically we add those proxy variables in env_keep to set
+   # them when ansible uses sudo -u root for executing tasks
    - name: add proxy env variables to env_keep in sudoers file
      lineinfile:
        dest: /etc/sudoers

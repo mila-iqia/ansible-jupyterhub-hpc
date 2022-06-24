@@ -28,12 +28,9 @@ molecule-test:
   stage: test
   before_script:
     - mkdir -p build/reports
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
-    # - source /opt/conda/etc/profile.d/conda.sh
-    # - conda create -n ${CI_COMMIT_SHORT_SHA} python=3.8 -y
-    # - conda activate ${CI_COMMIT_SHORT_SHA}
     - python3 --version
     - pip install --no-cache-dir -r requirements-dev.txt
     - ansible-galaxy install -r requirements.yml
@@ -44,13 +41,10 @@ molecule-test:
     - cp .ci/nginx.dhparam.pem encryption/
   script:
     - source encryption/jp-adminrc
-    - molecule --debug test --destroy=never
+    - molecule --debug test
     - cp ansible-lint.xml build/reports/linting.xml
   after_script:
     - sleep 36000
-    # - source /opt/conda/etc/profile.d/conda.sh
-    # - conda deactivate
-    # - conda env remove -n ${CI_COMMIT_SHORT_SHA}
   artifacts:
     paths:
       - build/reports/
