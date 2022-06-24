@@ -20,7 +20,40 @@
   gather_facts: false
   tasks:
    - name: configure SLURM
-     shell: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
+     command: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
+     args:
+       executable: /bin/bash
+       
+   # In default service file of munge they use Type=forking and it has 
+   # consequeneces when running docker-in-docker. We got errors from systemd
+   # saying that PID file is not owned by root and it is supposed to be not owned
+   # by root as process is started as service user munge. Systemd needs PID file as
+   # the default Type is forking to be able to stop the process. Here we simplify it
+   # by using Type=simple and hence systemd does not need PIDfile anymore and it can
+   # stop the process by sending signal to main PID.
+   # https://unix.stackexchange.com/questions/534032/systemd-services-fail-with-user-in-service-file
+   - name: change Type of systemd file for munge
+     copy:
+       dest: "/usr/lib/systemd/system/munge.service"
+       owner: root
+       group: root
+       mode: '0644'
+       content: |
+        [Unit]
+        Description=MUNGE authentication service
+        Documentation=man:munged(8)
+        After=network.target
+        After=time-sync.target
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/sbin/munged
+        User=munge
+        Group=munge
+        Restart=on-abort
+
+        [Install]
+        WantedBy=multi-user.target
 
    - name: enable munge
      service: 

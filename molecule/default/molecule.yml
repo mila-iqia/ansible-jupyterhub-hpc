@@ -38,6 +38,12 @@ platforms:
     hostname: slurmcontroller
     privileged: true
     pre_build_image: true
+    env:
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      no_proxy: ${no_proxy}
     
   - name: compute-0
     image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-compute-centos8:latest
@@ -47,6 +53,12 @@ platforms:
     hostname: compute-0
     privileged: true
     pre_build_image: true
+    env:
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      no_proxy: ${no_proxy}
     
   - name: compute-1
     image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-compute-centos8:latest
@@ -56,6 +68,12 @@ platforms:
     hostname: compute-1
     privileged: true
     pre_build_image: true
+    env:
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      no_proxy: ${no_proxy}
 provisioner:
   name: ansible
   inventory:

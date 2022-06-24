@@ -1,24 +1,24 @@
-# image: docker:20.10.16
+image: docker:20.10.16
 
-# variables:
-#   # When you use the dind service, you must instruct Docker to talk with
-#   # the daemon started inside of the service. The daemon is available
-#   # with a network connection instead of the default
-#   # /var/run/docker.sock socket. Docker 19.03 does this automatically
-#   # by setting the DOCKER_HOST in
-#   # https://github.com/docker-library/docker/blob/d45051476babc297257df490d22cbd806f1b11e4/19.03/docker-entrypoint.sh#L23-L29
-#   #
-#   # The 'docker' hostname is the alias of the service container as described at
-#   # https://docs.gitlab.com/ee/ci/services/#accessing-the-services.
-#   #
-#   # Specify to Docker where to create the certificates. Docker
-#   # creates them automatically on boot, and creates
-#   # `/certs/client` to share between the service and job
-#   # container, thanks to volume mount from config.toml
-#   DOCKER_TLS_CERTDIR: "/certs"
+variables:
+  # When you use the dind service, you must instruct Docker to talk with
+  # the daemon started inside of the service. The daemon is available
+  # with a network connection instead of the default
+  # /var/run/docker.sock socket. Docker 19.03 does this automatically
+  # by setting the DOCKER_HOST in
+  # https://github.com/docker-library/docker/blob/d45051476babc297257df490d22cbd806f1b11e4/19.03/docker-entrypoint.sh#L23-L29
+  #
+  # The 'docker' hostname is the alias of the service container as described at
+  # https://docs.gitlab.com/ee/ci/services/#accessing-the-services.
+  #
+  # Specify to Docker where to create the certificates. Docker
+  # creates them automatically on boot, and creates
+  # `/certs/client` to share between the service and job
+  # container, thanks to volume mount from config.toml
+  DOCKER_TLS_CERTDIR: "/certs"
 
-# services:
-#   - docker:20.10.16-dind
+services:
+  - docker:20.10.16-dind
 
 stages:
   - lint
@@ -28,12 +28,12 @@ molecule-test:
   stage: test
   before_script:
     - mkdir -p build/reports
-    # - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh
-    # - ln -s /usr/bin/python3 /usr/bin/python
-    # - docker info
-    - source /opt/conda/etc/profile.d/conda.sh
-    - conda create -n ${CI_COMMIT_SHORT_SHA} python=3.8 -y
-    - conda activate ${CI_COMMIT_SHORT_SHA}
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh
+    - ln -s /usr/bin/python3 /usr/bin/python
+    - docker info
+    # - source /opt/conda/etc/profile.d/conda.sh
+    # - conda create -n ${CI_COMMIT_SHORT_SHA} python=3.8 -y
+    # - conda activate ${CI_COMMIT_SHORT_SHA}
     - python3 --version
     - pip install --no-cache-dir -r requirements-dev.txt
     - ansible-galaxy install -r requirements.yml
@@ -47,9 +47,10 @@ molecule-test:
     - molecule --debug test --destroy=never
     - cp ansible-lint.xml build/reports/linting.xml
   after_script:
-    - source /opt/conda/etc/profile.d/conda.sh
-    - conda deactivate
-    - conda env remove -n ${CI_COMMIT_SHORT_SHA}
+    - sleep 36000
+    # - source /opt/conda/etc/profile.d/conda.sh
+    # - conda deactivate
+    # - conda env remove -n ${CI_COMMIT_SHORT_SHA}
   artifacts:
     paths:
       - build/reports/
