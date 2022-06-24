@@ -19,6 +19,14 @@
   hosts: all
   gather_facts: false
   tasks:
+   - name: add proxy env variables to env_keep in sudoers file
+     lineinfile:
+       dest: /etc/sudoers
+       state: present
+       regexp: '^Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
+       line: 'Defaults    env_keep += "HTTP_PROXY HTTPS_PROXY http_proxy https_proxy no_proxy NO_PROXY"'
+       validate: "visudo -cf %s"
+       
    - name: configure SLURM
      command: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
      args:
