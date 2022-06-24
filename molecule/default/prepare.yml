@@ -33,9 +33,11 @@
        validate: "visudo -cf %s"
        
    - name: configure SLURM
-     command: 'sed -i "s/REPLACE_IT/CPUs=$(nproc)/g" /etc/slurm/slurm.conf'
-     args:
-       executable: /bin/bash
+     lineinfile:
+       dest: /etc/slurm/slurm.conf
+       state: present
+       regexp: "^NodeName=compute[0-10] REPLACE_IT State=UNKNOWN"
+       line: "NodeName=compute[0-10] CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
        
    # In default service file of munge they use Type=forking and it has 
    # consequeneces when running docker-in-docker. We got errors from systemd
@@ -45,6 +47,7 @@
    # by using Type=simple and hence systemd does not need PIDfile anymore and it can
    # stop the process by sending signal to main PID.
    # https://unix.stackexchange.com/questions/534032/systemd-services-fail-with-user-in-service-file
+   # https://github.com/dun/munge/issues/101
    - name: change Type of systemd file for munge
      copy:
        dest: "/usr/lib/systemd/system/munge.service"
@@ -60,7 +63,7 @@
 
         [Service]
         Type=simple
-        ExecStart=/usr/sbin/munged
+        ExecStart=/usr/sbin/munged --foreground --syslog
         User=munge
         Group=munge
         Restart=on-abort
