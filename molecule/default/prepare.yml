@@ -70,6 +70,31 @@
 
         [Install]
         WantedBy=multi-user.target
+     when: ansible_os_family == 'RedHat'
+     
+   - name: change Type of systemd file for munge
+     copy:
+       dest: "/lib/systemd/system/munge.service"
+       owner: root
+       group: root
+       mode: '0644'
+       content: |
+        [Unit]
+        Description=MUNGE authentication service
+        Documentation=man:munged(8)
+        After=network.target
+        After=time-sync.target
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/sbin/munged --foreground --syslog
+        User=munge
+        Group=munge
+        Restart=on-abort
+
+        [Install]
+        WantedBy=multi-user.target
+     when: ansible_os_family == 'Debian'
 
    - name: enable munge
      service: 

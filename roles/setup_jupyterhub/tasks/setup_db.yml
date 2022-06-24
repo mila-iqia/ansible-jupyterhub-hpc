@@ -16,29 +16,55 @@
 
 # Setup PostgresSQL database for jupyterhub
 
-- name: check if PostgreSQL database is initialised
-  stat:
-    path: "/var/lib/pgsql/data/pg_hba.conf"
-  register: pgsql_stat
-  tags: "setup_db"
+- block:
+  - name: check if PostgreSQL database is initialised [CentOS/RedHat]
+    stat:
+      path: "/var/lib/pgsql/data/pg_hba.conf"
+    register: pgsql_stat
 
-- name: initialise PostgreSQL database
-  command: "postgresql-setup --initdb"
-  become: true
-  tags: "setup_db"
-  when: not pgsql_stat.stat.exists
+  - name: initialise PostgreSQL database [CentOS/RedHat]
+    command: "postgresql-setup --initdb"
+    when: not pgsql_stat.stat.exists
   
-- name: use md5 as authentication method for databases on localhost
-  lineinfile:
-    dest: "/var/lib/pgsql/data/pg_hba.conf"
-    state: present
-    regexp: "^{{ item.oldentry }}"
-    line: "{{ item.newentry }}"
+  - name: use md5 as authentication method for databases on localhost [CentOS/RedHat]
+    lineinfile:
+      dest: "/var/lib/pgsql/data/pg_hba.conf"
+      state: present
+      regexp: "^{{ item.oldentry }}"
+      line: "{{ item.newentry }}"
+    
+    with_items:
+      - { oldentry: "host    all             all             127.0.0.1/32            ident", newentry: "host    all             all             127.0.0.1/32            md5" }
+      - { oldentry: "host    all             all             ::1/128                 ident", newentry: "host    all             all             ::1/128                 md5" }
   become: true
   tags: "setup_db"
-  with_items:
-    - { oldentry: "host    all             all             127.0.0.1/32            ident", newentry: "host    all             all             127.0.0.1/32            md5" }
-    - { oldentry: "host    all             all             ::1/128                 ident", newentry: "host    all             all             ::1/128                 md5" }
+  when: ansible_os_family == 'RedHat'
+  
+- block:
+  - name: check if PostgreSQL database is initialised [Ubuntu/Debian]
+    stat:
+      path: "/var/lib/postgresql/data/pg_hba.conf"
+    register: pgsql_stat
+    tags: "setup_db"
+
+  - name: initialise PostgreSQL database [Ubuntu/Debian]
+    command: "/usr/lib/postgresql/13/bin/initdb -D /var/lib/postgresql/data"
+    become_user: "postgres"
+    when: not pgsql_stat.stat.exists
+  
+  - name: use md5 as authentication method for databases on localhost [Ubuntu/Debian]
+    lineinfile:
+      dest: "/var/lib/postgresql/data/pg_hba.conf"
+      state: present
+      regexp: "^{{ item.oldentry }}"
+      line: "{{ item.newentry }}"
+    
+    with_items:
+      - { oldentry: "host    all             all             127.0.0.1/32            trust", newentry: "host    all             all             127.0.0.1/32            md5" }
+      - { oldentry: "host    all             all             ::1/128                 trust", newentry: "host    all             all             ::1/128                 md5" }
+  become: true
+  tags: "setup_db"
+  when: ansible_os_family == 'Debian'
 
 # Seems like we have a bug in systemd 239 which comes with CentOS 8
 # https://bugs.centos.org/view.php?id=17461
