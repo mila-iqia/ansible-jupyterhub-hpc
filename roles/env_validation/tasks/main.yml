@@ -25,4 +25,3 @@
   assert:
     that: (ansible_os_family, ansible_distribution_major_version) in [('RedHat', '8'), ('Debian', '11'), ('Debian', '20')]
     msg: "This ansible setup only work on CentOS 8/RHEL 8/Debian 11/Ubuntu 20"
-
