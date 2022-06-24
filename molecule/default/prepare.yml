@@ -17,7 +17,7 @@
 
 - name: Prepare
   hosts: all
-  gather_facts: false
+  gather_facts: true
   tasks:
    # Ansible executes sudo tasks with flags sudo -H -S -n -u root <cmd>
    # If we are behind a proxy and those proxy variables are not in
