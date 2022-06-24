@@ -36,7 +36,7 @@
      lineinfile:
        dest: /etc/slurm/slurm.conf
        state: present
-       regexp: "^NodeName=compute[0-10] REPLACE_IT State=UNKNOWN"
+       regexp: "^(.*)REPLACE_IT State=UNKNOWN(.*)$"
        line: "NodeName=compute[0-10] CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
        
    # In default service file of munge they use Type=forking and it has 

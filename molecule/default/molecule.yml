@@ -22,8 +22,7 @@ driver:
   name: docker
 lint: |
   yamllint . || exit 0
-  ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml > ansible-lint.txt || exit 0
-  ansible-lint-junit ansible-lint.txt -o ansible-lint.xml
+  ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml -p --nocolor | tee ansible-lint.txt || exit 0
   
 platforms:
   - name: slurmcontroller
