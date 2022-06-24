@@ -16,24 +16,49 @@
 
 # This playbook installs adds conda repository and installs conda using RPMs
 
-- name: add repository configuration file for conda
-  yum_repository:
-    name: conda
-    description: Conda YUM repo
-    file: conda
-    baseurl: "{{ conda_base_url }}"
-    gpgcheck: yes
-    gpgkey: "{{ conda_gpgkey }}"
-  become: true
-  tags: "conda"
+- block:
+    - name: add repository configuration file for conda [RHEL/CentOS]
+      yum_repository:
+        name: conda
+        description: Conda YUM repo
+        file: conda
+        baseurl: "{{ conda_yum_base_url }}"
+        gpgcheck: yes
+        gpgkey: "{{ conda_gpgkey }}"
 
-- name: install conda
-  yum:
-    name: conda
-    update_cache: yes
-    state: present
+    - name: install conda [RHEL/CentOS]
+      yum:
+        name: conda
+        update_cache: yes
+        state: present
   become: true
   tags: "conda"
+  when: ansible_pkg_mgr in ['yum', 'dnf']
+
+- block:
+    - name: add gpg key to trusted store [Debian/Ubuntu]
+      shell: "curl {{ conda_gpgkey }} | gpg --dearmor > /tmp/conda.gpg"
+      changed_when: false
+      args:
+        executable: /bin/bash
+
+    - name: install gpg key [Debian/Ubuntu]
+      command: "install -o root -g root -m 644 /tmp/conda.gpg /usr/share/keyrings/conda-archive-keyring.gpg"
+      changed_when: false
+     
+    - name: add repository configuration file for conda [Debian/Ubuntu]
+      apt_repository:
+        filename: conda
+        repo: "{{ conda_apt_repo }}"
+
+    - name: install conda [Debian/Ubuntu]
+      apt:
+        name: conda
+        update_cache: yes
+        state: present
+  become: true
+  tags: "conda"
+  when: ansible_pkg_mgr == 'apt'
   
 - name: add conda config
   copy:

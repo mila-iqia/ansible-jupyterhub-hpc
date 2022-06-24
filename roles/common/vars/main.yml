@@ -13,10 +13,14 @@
 # limitations under the License.
 
 ---
+# Conda GPG key
+conda_gpgkey: "https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc"
 
 # Conda yum repo config
-conda_base_url: "https://repo.anaconda.com/pkgs/misc/rpmrepo/conda"
-conda_gpgkey: "https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc"
+conda_yum_base_url: "https://repo.anaconda.com/pkgs/misc/rpmrepo/conda"
+
+# Conda apt repo config
+conda_apt_repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/conda-archive-keyring.gpg] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main"
 
 conda_config:
   channels:
@@ -27,6 +31,11 @@ conda_config:
     - r
   show_channel_urls: yes
 
-postgressql_pkgs:
+postgressql_yum_pkgs:
   - "postgresql-server"
+  - "python3-psycopg2"
+
+postgressql_apt_pkgs:
+  - "postgresql"
+  - "postgresql-contrib"
   - "python3-psycopg2"

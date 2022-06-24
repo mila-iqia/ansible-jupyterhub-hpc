@@ -61,7 +61,6 @@ molecule-test:
   script:
     - source encryption/jp-adminrc
     - molecule --debug test
-    - ansible-lint-junit ansible-lint.txt -o build/reports/linting.xml 
   after_script:
     - ls -la build
     - ls -la build/reports
