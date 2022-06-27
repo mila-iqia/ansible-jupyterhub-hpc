@@ -18,7 +18,6 @@ import os
 import pytest
 import yaml
 
-
 # We run tests against these hosts
 testinfra_hosts = ['slurmcontroller']
 
@@ -29,19 +28,20 @@ hostvars = ansible_vars['hostvars']['slurmcontroller']
 # Server running on ports
 expected_nginx_ports = ['80', '443']
 # Rest of the ports run at IP address of the machine
-expected_ports = ['9090', '9100', '8081', 
+expected_ports = ['9090', '9100', '8081',
                   '9080', '3100', '3000']
-    
+
 
 @pytest.mark.parametrize("ports", expected_nginx_ports)
 def test_nginx_ports(host, ports):
     s = host.socket(f'tcp://0.0.0.0:{ports}')
     assert s.is_listening
-    
+
 
 @pytest.mark.parametrize("ports", expected_ports)
 def test_ports(host, ports):
-    s = host.socket(f'tcp://{hostvars["ansible_all_ipv4_addresses"][0]}:{ports}')
+    s = host.socket(
+        f'tcp://{hostvars["ansible_all_ipv4_addresses"][0]}:{ports}')
     assert s.is_listening
 
 

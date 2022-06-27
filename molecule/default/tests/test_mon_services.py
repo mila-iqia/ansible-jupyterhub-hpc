@@ -18,7 +18,6 @@ import os
 import pytest
 import yaml
 
-
 # We run tests against these hosts
 testinfra_hosts = ['slurmcontroller']
 
@@ -27,13 +26,19 @@ ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
 hostvars = ansible_vars['hostvars']['slurmcontroller']
 
 # Directories that are expected to exist
-expected_dirs = ['/etc/grafana', '/etc/grafana', '/etc/prometheus', '/etc/node_exporter', '/etc/promtail', '/etc/loki']
+expected_dirs = ['/etc/grafana', '/etc/grafana', '/etc/prometheus',
+                 '/etc/node_exporter', '/etc/promtail', '/etc/loki']
 
 # Systemd service files that are expected to exist
-expected_cfg_files = ['/var/lib/grafana/dashboards/jupyterhub-dashboard.json', '/etc/grafana/grafana.ini', '/etc/prometheus/prometheus.yml', '/etc/promtail/promtail.yml', '/etc/node_exporter/config.yaml', '/etc/loki/loki.yml']
+expected_cfg_files = ['/var/lib/grafana/dashboards/jupyterhub-dashboard.json',
+                      '/etc/grafana/grafana.ini',
+                      '/etc/prometheus/prometheus.yml',
+                      '/etc/promtail/promtail.yml',
+                      '/etc/node_exporter/config.yaml', '/etc/loki/loki.yml']
 
 # System services that are expected to run
-expected_services = ['grafana-server', 'prometheus', 'node_exporter', 'promtail', 'loki']
+expected_services = ['grafana-server', 'prometheus', 'node_exporter',
+                     'promtail', 'loki']
 
 
 @pytest.mark.parametrize("dirs", expected_dirs)
@@ -48,7 +53,7 @@ def test_config_files(host, cfg_files):
     f = host.file(cfg_files)
     assert f.is_file
     assert f.exists
-    
+
 
 @pytest.mark.parametrize("services", expected_services)
 def test_service(host, services):

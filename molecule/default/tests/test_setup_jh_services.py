@@ -18,7 +18,6 @@ import os
 import pytest
 import yaml
 
-
 # We run tests against these hosts
 testinfra_hosts = ['slurmcontroller']
 
@@ -45,12 +44,13 @@ def test_directories(host, dirs):
     assert d.is_directory
     assert d.exists
 
+
 @pytest.mark.parametrize("service_files", expected_service_files)
 def test_service_files(host, service_files):
     f = host.file(service_files)
     assert f.is_file
     assert f.exists
-    
+
 
 @pytest.mark.parametrize("services", expected_services)
 def test_service(host, services):

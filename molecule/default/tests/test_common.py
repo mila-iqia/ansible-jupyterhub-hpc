@@ -19,7 +19,6 @@ import pytest
 import yaml
 import testinfra.utils.ansible_runner
 
-
 # We run tests against these hosts
 testinfra_hosts = ['slurmcontroller']
 
@@ -27,13 +26,14 @@ testinfra_hosts = ['slurmcontroller']
 ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
 hostvars = ansible_vars['hostvars']['slurmcontroller']
 
-@pytest.mark.parametrize("packages", hostvars['dev_tools']
-                         + ['conda', 'postgresql-server', 
-                           'python3-psycopg2'])
+
+@pytest.mark.parametrize("packages",
+                         hostvars['dev_tools'] +
+                         ['conda', 'postgresql-server', 'python3-psycopg2'])
 def test_package(host, packages):
     p = host.package(packages)
     assert p.is_installed
-   
+
 
 def test_conda_config(host):
     f = host.file('/opt/conda/.condarc')

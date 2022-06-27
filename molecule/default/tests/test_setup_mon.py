@@ -18,7 +18,6 @@ import os
 import pytest
 import yaml
 
-
 # We run tests against these hosts
 testinfra_hosts = ['slurmcontroller']
 
@@ -27,18 +26,31 @@ ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
 hostvars = ansible_vars['hostvars']['slurmcontroller']
 
 # Directories that are expected to exist
-expected_dirs = [hostvars['remote_path_node_exporter_ssl'], hostvars['remote_path_prometheus_ssl'], hostvars['remote_path_grafana_ssl']]
+expected_dirs = [hostvars['remote_path_node_exporter_ssl'],
+                 hostvars['remote_path_prometheus_ssl'],
+                 hostvars['remote_path_grafana_ssl']]
 
 # Systemd service files that are expected to exist
-expected_cert_files = [os.path.join(hostvars['remote_path_node_exporter_ssl'], hostvars['ssl_key_name_node_exporter']), os.path.join(hostvars['remote_path_node_exporter_ssl'], hostvars['ssl_cert_name_node_exporter']), os.path.join(hostvars['remote_path_prometheus_ssl'], hostvars['ssl_key_name_prometheus']), os.path.join(hostvars['remote_path_prometheus_ssl'], hostvars['ssl_cert_name_prometheus']), os.path.join(hostvars['remote_path_grafana_ssl'], hostvars['ssl_key_name_grafana']), os.path.join(hostvars['remote_path_grafana_ssl'], hostvars['ssl_cert_name_grafana'])]
-    
+expected_cert_files = [os.path.join(hostvars['remote_path_node_exporter_ssl'],
+                                    hostvars['ssl_key_name_node_exporter']),
+                       os.path.join(hostvars['remote_path_node_exporter_ssl'],
+                                    hostvars['ssl_cert_name_node_exporter']),
+                       os.path.join(hostvars['remote_path_prometheus_ssl'],
+                                    hostvars['ssl_key_name_prometheus']),
+                       os.path.join(hostvars['remote_path_prometheus_ssl'],
+                                    hostvars['ssl_cert_name_prometheus']),
+                       os.path.join(hostvars['remote_path_grafana_ssl'],
+                                    hostvars['ssl_key_name_grafana']),
+                       os.path.join(hostvars['remote_path_grafana_ssl'],
+                                    hostvars['ssl_cert_name_grafana'])]
+
 
 @pytest.mark.parametrize("dirs", expected_dirs)
 def test_directories(host, dirs):
     d = host.file(dirs)
     assert d.is_directory
     assert d.exists
-   
+
 
 @pytest.mark.parametrize("cert_files", expected_cert_files)
 def test_cert_files(host, cert_files):
