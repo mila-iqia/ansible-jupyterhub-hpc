@@ -133,10 +133,10 @@
             [Install]
             WantedBy=multi-user.target
             
-        - name: remove systemd file in lib folder
-          file:
-            path: "/lib/systemd/system/postgresql@.service"
-            state: absent
+       - name: remove systemd file in lib folder
+         file:
+           path: "/lib/systemd/system/postgresql@.service"
+           state: absent
          
      when: ansible_distribution == 'Ubuntu'
      
@@ -173,9 +173,9 @@
             [Install]
             WantedBy=multi-user.target
             
-        - name: remove systemd file in lib folder
-          file:
-            path: "/lib/systemd/system/postgresql@.service"
-            state: absent
+       - name: remove systemd file in lib folder
+         file:
+           path: "/lib/systemd/system/postgresql@.service"
+           state: absent
          
      when: ansible_distribution == 'Debian'
