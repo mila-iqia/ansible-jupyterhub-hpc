@@ -1,11 +1,8 @@
 # WARNING: This file is {{ ansible_managed }}, do not modify.
 
-user {{ nginx_service_user }} {{ nginx_service_user }};
 worker_processes {{ ansible_processor_count }};
-pid {{ nginx_pid_file }};
-{% if nginx_run_as_service_user == true %}
+pid /run/nginx/nginx.pid;
 daemon off;
-{% endif %}
 
 events {
     worker_connections   1024;
@@ -64,8 +61,6 @@ http {
 
     access_log /var/log/nginx/json_access.log json_analytics;
     
-    # geoip_country {{ remote_path_geoip_data }}/{{ geoip_file }}; # the country IP database
-    # geoip_city {{ remote_path_geoip_data }}/{{ geolitecity_file }}; # the city IP database
 {% endif %}
     
     # top-level http config for websocket headers
@@ -91,9 +86,9 @@ http {
         server_name {{ inventory_hostname }};
 
         ssl on;
-        ssl_certificate {{ remote_path_nginx_proxy_ssl }}/{{ ssl_cert_name_nginx_proxy }};
-        ssl_certificate_key {{ remote_path_nginx_proxy_ssl }}/{{ ssl_key_name_nginx_proxy }};
-        ssl_dhparam {{ remote_path_nginx_proxy_ssl }}/{{ ssl_dhparam_name_nginx_proxy }};
+        ssl_certificate /etc/nginx/ssl/cert/{{ inventory_hostname }}.crt;
+        ssl_certificate_key /etc/nginx/ssl/private/{{ inventory_hostname }}.key;
+        ssl_dhparam /etc/nginx/ssl/{{ inventory_hostname }}.dhparam.pem;
         ssl_ciphers "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!RC4:!PSK";
         ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
         ssl_ecdh_curve secp384r1;

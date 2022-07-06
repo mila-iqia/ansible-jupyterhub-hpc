@@ -1,0 +1,115 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Setup service user, jupyterhub conda env and install JupyterHub core components and dependencies
+
+- name: create the jupyter group
+  group:
+    name: "{{ jupyterhub_system_group }}"
+    state: present
+    system: true
+  become: true
+
+- name: create jupyter service user
+  user:
+    name: "{{ jupyterhub_system_user }}"
+    groups: "{{ jupyterhub_system_group }}"
+    append: true
+    state: present
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+  become: true
+  
+- name: check if config file at /etc/sudoers.d exists
+  stat:
+    path: "{{ sudoers_file }}"
+  register: sudoers_file_stat
+  become: true
+  
+- name: create a config file in /etc/sudoers.d
+  copy:
+    dest: "{{ sudoers_file }}"
+    owner: root
+    group: root
+    mode: 0440
+    content: |
+      # This file is Ansible managed, please do not modify it
+      # List of commands jupyter user can execute as sudo
+    validate: "visudo -cf %s"
+  become: true
+  when: not sudoers_file_stat.stat.exists
+  
+- name: add command alias for spawner command in config file
+  lineinfile:
+    dest: "{{ sudoers_file }}"
+    state: present
+    regexp: "^Cmnd_Alias {{ item.name }}"
+    line: "Cmnd_Alias {{ item.name }} = {{ slurm_bin_path }}/{{ item.cmd }}"
+    validate: "visudo -cf %s"
+  become: true
+  with_items:
+    - "{{ slurm_cmds }}"
+
+- name: add rules to give jupyter user privileges for using slurm commands
+  lineinfile:
+    dest: "{{ sudoers_file }}"
+    state: present
+    regexp: "^{{ jupyterhub_system_user }} {{ ansible_hostname }}=(ALL, !root)"
+    line: "{{ jupyterhub_system_user }} {{ ansible_hostname }}=(ALL, !root) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
+    validate: "visudo -cf %s"
+  become: true
+
+- name:  setup conda environment and install jupyterhub core components
+  conda:
+    name: "{{ item }}"
+    environment: "{{ jupyterhub_env_prefix }}"
+    state: present
+    executable: "{{ conda_prefix }}/bin/conda"
+    channels:
+      - conda-forge
+  become: true
+  with_items:
+    - "{{ jupyterhub_pkgs }}"
+  tags:
+    - molecule-idempotence-notest
+    
+- name: install jupyterhub dependencies from pip
+  pip:
+    executable: "{{ jupyterhub_env_prefix }}/bin/pip"
+    name: "{{ item }}"
+    extra_args: "--no-cache-dir"
+  become: true
+  # We need to add conda env bin to PATH as jupyter-server-proxy looks for node and npm
+  # while building the package
+  environment:
+    PATH: "{{ jupyterhub_env_prefix }}/bin:{{ ansible_env.PATH }}"
+  with_items:
+     - "{{ jupyterhub_deps }}"
+  tags:
+     - molecule-idempotence-notest
+
+- name: install jupyterlab extensions from PyPI
+  pip:
+    executable: "{{ jupyterhub_env_prefix }}/bin/pip"
+    name: "{{ item }}"
+    extra_args: "--no-cache-dir"
+  become: true
+  with_items:
+    - "{{ jupyterlab_extensions }}"
+  tags:
+    - molecule-idempotence-notest
+    - install_jupyterlab_extensions

@@ -17,7 +17,12 @@
 galaxy_info:
   author: Mahendra Paipuri
   role_name: ansible-jupyterhub
-  description: Installs JupyterHub along with custom SLURM spawner on HPC platforms. The role additionally can deploy node exporter, prometheus and grafana stack to monitor the jupyterhub node.
+  description: |
+    Installs JupyterHub along with batchspawner on HPC platforms. 
+    The role additionally can deploy node exporter, Prometheus and 
+    Grafana stack to monitor the jupyterhub deployment. Besides, it
+    will also install Promtail and Grafana Loki to analyse logs of 
+    nginx reverse proxy. 
   license: Apache
   company: CNRS
   min_ansible_version: 2.5
@@ -25,6 +30,12 @@ galaxy_info:
     - name: EL
       versions:
         - 8
+    - name: Debian
+      versions:
+        - 11
+    - name: Ubuntu
+      versions:
+        - 22
   galaxy_tags:
     - jupyterhub
     - hpc

@@ -36,8 +36,8 @@
      lineinfile:
        dest: /etc/slurm/slurm.conf
        state: present
-       regexp: "^(.*)REPLACE_IT State=UNKNOWN(.*)$"
-       line: "NodeName=compute[0-10] CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
+       regexp: "^(.*)CPUs=1 State=UNKNOWN(.*)$"
+       line: "NodeName=slurmcontroller CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
        
    # In default service file of munge they use Type=forking and it has 
    # consequeneces when running docker-in-docker. We got errors from systemd
@@ -108,10 +108,8 @@
       name: slurmctld 
       state: started 
       enabled: yes
-     when: inventory_hostname in groups['jupyterhub']
      ignore_errors: yes
 
    - name: start slurm daemon on compute nodes
-     shell: slurmd -N $(hostname)
-     when: inventory_hostname in groups['compute']
+     shell: slurmd
      ignore_errors: yes

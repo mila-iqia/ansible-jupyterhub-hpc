@@ -1,0 +1,49 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Promtail service user and group
+promtail_system_user: "promtail"
+promtail_system_group: "{{ promtail_system_user }}"
+
+# We override default value of adm
+# User can add additional groups depending on their platform
+promtail_user_additional_groups: ""
+
+# Log level of promtail
+promtail_log_level: "debug"
+
+# Loki server URL where promtail will push the logs to
+promtail_loki_server_url: "http://{{ loki_config_http_address }}:{{ loki_config_http_port }}"
+
+# Promtail scrape config
+# For the time being we are scraping only nginx log files
+# In the future we would like to scrape jupyterhub log files as well
+# By default promtail runs on every host where we want to get logs
+# so the default target should be localhost
+promtail_config_scrape_configs:
+  - job_name: 'system'
+    pipeline_stages:
+      - replace:
+          expression: '(?:[0-9]{1,3}\.){3}([0-9]{1,3})'
+          replace: '***'
+    static_configs:
+    - targets:
+        - 'localhost'
+      labels:
+        job: 'nginx_access_log'
+        host: 'jupyterhub'
+        agent: 'promtail'
+        __path__: '/var/log/nginx/json_access.log'

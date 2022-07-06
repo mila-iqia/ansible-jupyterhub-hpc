@@ -13,114 +13,142 @@
 # limitations under the License.
 
 ---
-# This playbook deploys JupyterHub.
+# This playbook deploys JupyterHub and monitoring stack.
 
 - name: Gather facts from jupyterhub hosts
-  hosts: jupyterhubstack
+  hosts: all
   gather_facts: yes
-  tags: always
+  tags:
+    - always
 
 - name: Validate environment
-  hosts: jupyterhub
+  hosts: all
   gather_facts: no
   roles:
-    - env_validation
-  tags: always
-  
-- name: Preflight chekcs
+    - validation
+  tags:
+    - always
+    
+- name: Preflights
   hosts: localhost
   gather_facts: no
   roles:
-    - preflight_checks
-  tags: always
+    - preflights
+  tags:
+    - always
 
-- name: Conda role
-  hosts: jupyterhubstack
+- name: Include conda role
+  hosts: all
   gather_facts: no
   roles:
     - evandam.conda
-  tags: always
+  tags:
+    - always
   
 - name: Run common tasks
-  hosts: jupyterhub
+  hosts: all
   gather_facts: no
+  pre_tasks:
+    - include_vars: config.yml
   roles:
-    - common
-  tags: common
-  
-- name: Install jupyterhub
-  hosts: jupyterhub
-  gather_facts: no
-  roles:
-    - install_jupyterhub
-  tags: install_jh
+    - setup_hosts
+  tags:
+    - prerequisites
   
 - name: Setup jupyterhub environment
   hosts: jupyterhub
   gather_facts: no
+  pre_tasks:
+    - include_vars: config.yml
   roles:
     - setup_jupyterhub
-  tags: setup_jh
+  tags:
+    - jupyterhub
 
 - name: Setup nginx reverse proxy
   hosts: nginx
   gather_facts: no
+  pre_tasks:
+    - include_vars: config.yml
   roles:
     - setup_nginx
-  tags: setup_nginx
+  tags:
+    - nginx
 
-- name: Setup jupyterhub services
-  hosts: jupyterhub
+- name: Setup node_exporter
+  hosts: node_exporter
   gather_facts: no
+  pre_tasks:
+    - include_vars: config.yml
   roles:
-    - setup_jupyterhub_services
-  tags: setup_jh_services
+    - role: setup_node_exporter
+      when: install_mon_stack
+    - role: cloudalchemy.node_exporter
+      when: install_mon_stack
+  tags:
+    - node_exporter
+    - monitoring
   
-- name: Setup monitoring
-  hosts: node_exporter
-  gather_facts: no
-  roles: 
-    - {role: setup_monitoring, when: install_mon_stack}
-  tags: setup_mon, monitoring
-
-- name: Deploy node_exporter
-  hosts: node_exporter
-  gather_facts: no
-  roles: 
-    - {role: cloudalchemy.node_exporter, when: install_mon_stack}
-  tags: node_exporter, monitoring
-  
-- name: Install prometheus
+- name: Setup prometheus
   hosts: prometheus
   gather_facts: no
-  roles: 
-    - {role: cloudalchemy.prometheus, when: install_mon_stack}
-  tags: prometheus, monitoring
-  
-- name: Deploy grafana loki
-  hosts: grafana_loki
-  gather_facts: no
-  roles: 
-    - {role: grafana_loki, when: install_mon_stack}
-  tags: loki, monitoring
-  
-- name: Deploy promtail
+  pre_tasks:
+    - include_vars: config.yml
+  roles:
+    - role: setup_prometheus
+      when: install_mon_stack
+    - role: cloudalchemy.prometheus
+      when: install_mon_stack
+  tags:
+    - prometheus
+    - monitoring
+    
+- name: Setup promtail
   hosts: promtail
   gather_facts: no
-  roles: 
-    - {role: patrickjahns.promtail, when: install_mon_stack}
-  tags: promtail, monitoring
+  pre_tasks:
+    - include_vars: config.yml
+  roles:
+    - role: setup_promtail
+      when: install_mon_stack
+    - role: patrickjahns.promtail
+      when: install_mon_stack
+  tags:
+    - promtail
+    - monitoring
+  
+- name: Setup grafana loki
+  hosts: loki
+  gather_facts: no
+  pre_tasks:
+    - include_vars: config.yml
+  roles:
+    - role: setup_loki
+      when: install_mon_stack
+  tags:
+    - loki
+    - monitoring
 
-- name: Deploy grafana
+- name: Setup grafana
   hosts: grafana
   gather_facts: no
-  roles: 
-    - {role: cloudalchemy.grafana, when: install_mon_stack}
-  tags: grafana, monitoring
+  pre_tasks:
+    - include_vars: config.yml
+  roles:
+    - role: setup_grafana
+      when: install_mon_stack
+    - role: cloudalchemy.grafana
+      when: install_mon_stack
+  tags:
+    - grafana
+    - monitoring
   
-- name: Set logrotate configs
-  hosts: jupyterhub
+- name: Setup logrotate
+  hosts: all
   gather_facts: no
+  pre_tasks:
+    - include_vars: config.yml
   roles:
     - setup_logrotate
-  tags: logrotate
+  tags:
+    - logrotate

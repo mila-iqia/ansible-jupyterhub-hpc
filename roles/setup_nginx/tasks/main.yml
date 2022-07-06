@@ -14,8 +14,9 @@
 ---
 
 # Install nginx web server and install certificates
+  
+- import_tasks: setup.yml
 
-- import_tasks: create_nginx_user.yml
-- import_tasks: install_certs.yml
-# - import_tasks: fetch_geoip_data.yml
-- import_tasks: configure_nginx.yml
+- import_tasks: configure.yml
+  tags:
+    - configure_nginx

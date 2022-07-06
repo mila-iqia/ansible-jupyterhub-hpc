@@ -1,0 +1,87 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# This playbook installs common packages used on a UNIX/Linux system
+
+- block:
+    - name: update yum [RHEL/CentOS]
+      yum:
+        update_cache: yes
+        state: present
+
+    - name: install build tools [RHEL/CentOS]
+      yum:
+        name: "@Development tools"
+        state: present
+
+    - name: install other developer tools [RHEL/CentOS]
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ dev_tools }}"
+
+    - name: install nginx web server [RHEL/CentOS]
+      yum:
+        name: nginx
+        state: present
+
+    - name: install postgressql database [RHEL/CentOS]
+      yum:
+        name: "{{ item }}"
+        state: present
+      when: use_postgresql_db
+      with_items:
+        - "{{ postgressql_yum_pkgs }}"
+  become: true
+  when: ansible_pkg_mgr in ['yum', 'dnf']
+  tags:
+    - install_dev_tools
+
+- block:
+    - name: update apt [Debian/Ubuntu]
+      apt:
+        update_cache: yes
+        state: present
+
+    - name: install build tools [Debian/Ubuntu]
+      apt:
+        name: "build-essential"
+        state: present
+
+    - name: install other developer tools [Debian/Ubuntu]
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ dev_tools }}"
+
+    - name: install nginx web server [Debian/Ubuntu]
+      apt:
+        name: nginx
+        state: present
+
+    - name: install postgressql database [Debian/Ubuntu]
+      apt:
+        name: "{{ item }}"
+        state: present
+      when: use_postgresql_db
+      with_items:
+        - "{{ postgressql_apt_pkgs }}"
+  become: true
+  when: ansible_pkg_mgr == "apt"
+  tags:
+    - install_dev_tools

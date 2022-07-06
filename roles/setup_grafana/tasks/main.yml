@@ -1,0 +1,84 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: create grafana system group
+  group:
+    name: grafana
+    system: true
+    state: present
+  become: true
+
+- name: create grafana system user
+  user:
+    name: grafana
+    system: true
+    shell: "/usr/sbin/nologin"
+    group: grafana
+    createhome: false
+  become: true
+
+- name: make sure /etc/grafana/ssl exists
+  file:
+    path: "/etc/grafana/ssl/{{ item }}"
+    state: directory
+    owner: root
+    group: grafana
+    mode: 0755
+  become: true
+  with_items:
+    - "cert"
+    - "private"
+  
+- name: install TLS key
+  copy:
+    src: "{{ local_tls_dir }}/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+    dest: "/etc/grafana/ssl/private/{{ inventory_hostname }}.key"
+    owner: root
+    group: grafana
+    mode: 0640
+  become: true
+
+- name: install TLS certificate
+  copy:
+    src: "{{ local_tls_dir }}/{{ inventory_hostname }}/{{ inventory_hostname }}.crt"
+    dest: "/etc/grafana/ssl/cert/{{ inventory_hostname }}.crt"
+    owner: root
+    group: grafana
+    mode: 0640
+  become: true
+  
+- name: add prometheus datasource to grafana configuration for self signed certs
+  set_fact:
+    grafana_datasources: "{{ grafana_datasources | default([]) + [{ 'name': 'jupyterhub_prometheus', 'type': 'prometheus', 'url': 'https://' + hostvars[inventory_hostname]['prometheus_address'] + ':' + hostvars[inventory_hostname]['prometheus_port'], 'basicAuth': true, 'basicAuthUser': 'prometheus', 'isDefault': true, 'editable': false, 'jsonData': { 'tlsAuth': false, 'tlsAuthWithCACert': true, 'tlsSkipVerify': true }, 'secureJsonData': { 'tlsCACert': lookup('file', local_tls_dir + '/jupyterhub-ca/jupyterhub-ca.crt'), 'basicAuthPassword': lookup('file', local_passwds_dir + '/prometheus_passwd') | trim } }] }}"
+  with_items:
+    - "{{ groups['prometheus'] }}"
+  when: self_signed_certs
+  
+- name: add prometheus datasource to grafana configuration for external CA certs
+  set_fact:
+    grafana_datasources: "{{ grafana_datasources | default([]) + [{ 'name': 'jupyterhub_prometheus', 'type': 'prometheus', 'url': 'https://' + hostvars[inventory_hostname]['prometheus_address'] + ':' + hostvars[inventory_hostname]['prometheus_port'], 'basicAuth': true, 'basicAuthUser': 'prometheus', 'isDefault': true, 'editable': false, 'jsonData': { 'tlsAuth': false, 'tlsAuthWithCACert': false, 'tlsSkipVerify': true }, 'secureJsonData': { 'basicAuthPassword': lookup('file', local_passwds_dir + '/prometheus_passwd') | trim } }] }}"
+  with_items:
+    - "{{ groups['prometheus'] }}"
+  when: not self_signed_certs
+  
+- name: add loki datasource to grafana configuration
+  set_fact:
+    grafana_datasources: "{{ grafana_datasources | default([]) + [{ 'name': 'jupyterhub_loki', 'type': 'loki', 'url': 'https://' + hostvars[inventory_hostname]['loki_config_http_address'] + ':' + hostvars[inventory_hostname]['loki_config_http_port'], 'jsonData': { 'maxLines': 1000 } }] }}"
+  with_items:
+    - "{{ groups['loki'] }}"
+    
+- name: set grafana dashboards
+  set_fact:
+    grafana_dashboards: "{{ grafana_dashboards | default([]) + [{ 'dashboard_id': '1860', 'revision_id': '26', 'datasource': 'jupyterhub_prometheus' }] + [{ 'dashboard_id': '12559', 'revision_id': '11', 'datasource': 'jupyterhub_loki' }] }}"

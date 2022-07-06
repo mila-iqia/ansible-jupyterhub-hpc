@@ -16,41 +16,55 @@
 
 - name: install jupyterhub cookie secret
   copy:
-    src: "{{ local_path_tokens }}/cookie_secret"
+    src: "{{ local_tokens_dir }}/cookie_secret"
     dest: "{{ jupyterhub_srv_dir }}/cookie_secret"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
-    mode: '0600'
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
+    mode: 0600
   become: true
-  tags: "tokens"
 
 - name: install CHP proxy auth token
   copy:
-    src: "{{ local_path_tokens }}/proxy_auth_token"
+    src: "{{ local_tokens_dir }}/proxy_auth_token"
     dest: "{{ jupyterhub_srv_dir }}/proxy_auth_token"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
-    mode: '0600'
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
+    mode: 0600
   become: true
-  tags: "tokens"
 
 - name: install encryption keys
   copy:
-    src: "{{ local_path_tokens }}/crypt_key"
+    src: "{{ local_tokens_dir }}/crypt_key"
     dest: "{{ jupyterhub_srv_dir }}/crypt_key"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
-    mode: '0600'
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
+    mode: 0600
   become: true
-  tags: "tokens"
-  
+
+- name: check and install API token for prometheus metrics collection
+  block: 
+   - name: check if prometheus metrics API token exists
+     stat:
+       path: "{{ jupyterhub_srv_dir }}/metrics_token"
+     register: metrics_token
+
+   - name: install prometheus metrics API token
+     copy:
+       src: "{{ local_tokens_dir }}/metrics_token"
+       dest: "{{ jupyterhub_srv_dir }}/metrics_token"
+       owner: "{{ jupyterhub_system_user }}"
+       group: "{{ jupyterhub_system_group }}"
+       mode: 0600
+     when: not metrics_token.stat.exists
+  when: install_mon_stack
+  become: true
+
 - name: install db password if postgresql database is used
   copy:
-    src: "{{ local_path_tokens }}/db_passwd"
+    src: "{{ local_tokens_dir }}/db_passwd"
     dest: "{{ jupyterhub_srv_dir }}/db_passwd"
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
-    mode: '0600'
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
+    mode: 0600
   become: true
-  tags: "tokens"
   when: use_postgresql_db

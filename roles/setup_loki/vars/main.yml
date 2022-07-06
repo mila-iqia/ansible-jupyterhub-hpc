@@ -1,0 +1,46 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Loki go architecture map
+loki_go_arch_map:
+  i386: '386'
+  x86_64: 'amd64'
+  aarch64: 'arm64'
+  armv7l: 'armv7'
+  armv6l: 'armv6'
+
+# Loki pre compiled binaries releases page
+loki_download_github: "https://github.com/grafana/loki/releases/download"
+
+# Loki binary and archive names
+loki_bin: "loki-linux-{{ loki_go_arch_map[ansible_architecture] }}"
+loki_archive: "{{ loki_bin }}.zip"
+
+# Loki download URL
+loki_download: "{{ loki_download_github }}/v{{ loki_version }}/{{ loki_archive }}"
+
+# Grafana loki conifguration details
+# More details can be found at https://grafana.com/docs/loki/latest/configuration/
+
+# loki service user
+loki_system_user: "loki"
+loki_system_group: "{{ loki_system_user }}"
+
+# loki config dir
+loki_config_directory: "/etc/loki"
+
+# loki debug level
+loki_config_log_level: "debug"

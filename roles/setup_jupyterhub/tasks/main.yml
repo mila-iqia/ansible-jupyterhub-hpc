@@ -14,11 +14,32 @@
 
 ---
 
-- import_tasks: create_jupyter_user.yml
+# Tasks to install, configure and setup systemd services for JupyterHub
+
+- name: gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_items:
+    - "{{ ansible_os_family }}.yml"
+    
+- import_tasks: install.yml
+  tags:
+    - install_jupyterhub
+    
 - import_tasks: directories.yml
+    
 - import_tasks: tokens.yml
-- import_tasks: api.yml
-- import_tasks: create_nodelist.yml
+  tags:
+    - setup_jupyterhub_tokens
+    
 - import_tasks: setup_db.yml
   when: use_postgresql_db
-- import_tasks: create_internal_certs.yml
+  tags:
+    - setup_jupyterhub_db
+    
+- import_tasks: configure.yml
+  tags:
+    - configure_jupyterhub
+    
+- import_tasks: services.yml
+  tags:
+    - configure_jupyterhub_services

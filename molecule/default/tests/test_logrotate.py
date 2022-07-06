@@ -22,8 +22,8 @@ import yaml
 testinfra_hosts = ['slurmcontroller']
 
 # Read all ansible vars
-ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
-hostvars = ansible_vars['hostvars']['slurmcontroller']
+# ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
+# hostvars = ansible_vars['hostvars']['slurmcontroller']
 
 # Directories that are expected to exist
 expected_dirs = ['/etc/logrotate.d']

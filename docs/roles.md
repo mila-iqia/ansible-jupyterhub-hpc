@@ -2,57 +2,53 @@
 
 Here we provide a brief overview of what each role does in the playbook.
 
-## env_validation
+## validation
 
 This role validates the environment by checking the Ansible version and OS 
 versions on the hosts.
 
-## preflight_checks
+## preflights
 
-This role checks if all the necessary certificates, tokens and passwords are 
-generated before running the installation tasks.
+This role generates all the necessary certificates, tokens and passwords 
+before running the installation tasks.
 
-## common
+## setup_hosts
 
 This role installs the common dependencies before installing JupyterHub stack. 
 Notably these include nginx, PostgreSQL, *etc*.
 
-## install_jupyterhub
-
-This role installs JupyterHub and its dependencies listed in 
-[host_vars](../host_vars). It also generates the configuration files for 
-JupyterHub and Jupyter notebook that will be used as system-wide configuration 
-files.
-
-## install_kernels
-
-This role installs the C++, R and Julia kernels when configured to do so.
-
 ## setup_jupyterhub
 
-This role sets up JupyterHub by installing certificates, tokens and keys on the 
-host.
+This role installs JupyterHub and its dependencies. It also generates the 
+configuration files for JupyterHub and Jupyter notebook that will be used as 
+system-wide configuration files. If admins would like to further customise 
+JupyterHub and Jupyter notebook configuration, they can add it to the respective 
+files in [templates](../roles/setup_jupyterhub/templates) folder.
 
-## nginx
+## setup_nginx
 
 All the nginx related configuration and certificate installation is done here.
 
-## setup_monitoring
+## setup_node_exporter
 
-We use roles from Ansible Galaxy to install Prometheus, node exporter, Grafana 
-and Promtail. Before doing so, we need some pre-processing steps like creating 
-service users and groups, giving them appropriate permissions to read tokens, 
-*etc*. These sort of tasks are done within this role.
+Install and configure for node exporter. 
 
-## grafana_loki
+## setup_prometheus
 
-This role installs and configures Grafana Loki.
+Install and configure for Prometheus.
 
-## setup_jupyterhub_services
+## setup_promtail
 
-This role creates the systemd service files for JupyterHub and configurable HTTP 
-proxy. In addition it enables them and starts them.
+Install and configure for Promtail. 
 
-## logrotate
+## setup_loki
 
-This role sets up the logrotate configuration for JupyterHub and nginx.
+Install and configure for Grafana Loki. 
+
+## setup_grafana
+
+Install and configure for grafana.
+
+## setup_logrotate
+
+This role sets up the logrotate configuration for JupyterHub, Grafana and nginx.

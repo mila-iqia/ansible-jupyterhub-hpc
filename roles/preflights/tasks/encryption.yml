@@ -1,0 +1,126 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# This tasks checks if TLS certs exists if external certs are used
+
+- name: check for TLS cert key pair for jupyterhub host
+  block:
+    - name: check if TLS key for jupyterhub host exists
+      stat:
+        path: "{{ local_tls_dir }}/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+      register: key_path
+
+    - name: fail when TLS key file for jupyterhub host does not exist
+      fail:
+        msg: "TLS key cannot be found at {{ local_tls_dir }} directory. Please generate one by running gen-encrypt-data script"
+      when: not key_path.stat.exists
+
+    - name: check if TLS cert for jupyterhub host exists
+      stat:
+        path: "{{ local_tls_dir }}/{{ inventory_hostname }}/{{ inventory_hostname }}.crt"
+      register: cert_path
+
+    - name: fail when TLS cert file for jupyterhub host does not exist
+      fail:
+        msg: "TLS cert cannot be found at {{ local_tls_dir }} directory. Please generate one by running gen-encrypt-data script"
+      when: not cert_path.stat.exists
+  when: not self_signed_certs
+  
+- name: create self signed CA and certificates
+  block:
+    - name: create folder for CA certificate
+      file:
+        path: "{{ local_tls_dir }}/jupyterhub-ca"
+        state: directory
+        mode: 0755
+        
+    - name: create private key
+      community.crypto.openssl_privatekey:
+         path: "{{ local_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+         
+    - name: check whether certificate exists
+      stat:
+        path: "{{ local_tls_dir }}/jupyterhub-ca/jupyterhub-ca.crt"
+      run_once: true
+      register: certificate_exists
+   
+    - name: create certificate signing request (CSR) for CA certificate
+      community.crypto.openssl_csr_pipe:
+         privatekey_path: "{{ local_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+         common_name: JupyterHub CA
+         use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+         basic_constraints:
+           - 'CA:TRUE'
+         basic_constraints_critical: yes
+         key_usage:
+           - keyCertSign
+         key_usage_critical: true
+      register: ca_csr
+      when: not certificate_exists.stat.exists
+   
+    - name: create self-signed CA certificate from CSR
+      community.crypto.x509_certificate:
+         path: "{{ local_tls_dir }}/jupyterhub-ca/jupyterhub-ca.crt"
+         csr_content: "{{ ca_csr.csr }}"
+         privatekey_path: "{{ local_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+         provider: selfsigned
+      when: not certificate_exists.stat.exists
+  when: self_signed_certs
+  
+- include_tasks: certs.yml
+  when: self_signed_certs
+  with_items:
+    - "{{ groups['all'] }}"
+    
+- name: make sure /etc/ssl/ca directory exists
+  file:
+    path: "{{ remote_tls_ca_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  when: self_signed_certs
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['all'] }}"
+  
+- name: install TLS CA certificate
+  copy:
+    src: "{{ local_tls_dir }}/jupyterhub-ca/jupyterhub-ca.crt"
+    dest: "{{ remote_tls_ca_dir }}/jupyterhub-ca.crt"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  when: self_signed_certs
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['all'] }}"
+    
+- name: check if Diffie-Hellman key for nginx already exists
+  stat:
+    path: "{{ playbook_dir }}/admin/{{ groups['jupyterhub'][0] }}.dhparam.pem"
+  register: dhparam_path
+
+- name: generate Diffie-Hellman key for nginx. This might take a while....
+  command: "openssl dhparam -out {{ groups['jupyterhub'][0] }}.dhparam.pem 4096"
+  args:
+    chdir: "{{ playbook_dir }}/admin"
+    creates: "{{ playbook_dir }}/admin/{{ groups['jupyterhub'][0] }}.dhparam.pem"
+  delegate_to: localhost
+  tags:
+    - generate_dhparam
+  when: not dhparam_path.stat.exists
