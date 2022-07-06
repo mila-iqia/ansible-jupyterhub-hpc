@@ -29,7 +29,7 @@ molecule-lint:
   stage: lint
   before_script:
     - mkdir -p build/reports
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
@@ -48,7 +48,7 @@ molecule-lint:
 molecule-test-centos:
   stage: test
   before_script:
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
@@ -71,7 +71,7 @@ molecule-test-centos:
 molecule-test-debian:
   stage: test
   before_script:
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
@@ -94,7 +94,7 @@ molecule-test-debian:
 molecule-test-ubuntu:
   stage: test
   before_script:
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
@@ -117,7 +117,7 @@ molecule-test-ubuntu:
 molecule-test-rockylinux:
   stage: test
   before_script:
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
@@ -140,7 +140,7 @@ molecule-test-rockylinux:
 molecule-test-alternative:
   stage: test
   before_script:
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
@@ -163,7 +163,7 @@ molecule-test-alternative:
 merge-junit-files:
   stage: posttest
   before_script:
-    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh tar bzip2 unzip
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
     - docker info
     - python3 --version
