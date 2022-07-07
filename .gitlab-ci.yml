@@ -27,71 +27,71 @@ stages:
   - test-alt
   - posttest
   
-# molecule-lint:
-#   stage: lint
-#   before_script:
-#     - mkdir -p build/reports
-#     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
-#     - ln -s /usr/bin/python3 /usr/bin/python
-#     - docker info
-#     - python3 --version
-#     - pip install --no-cache-dir -r requirements-dev.txt
-#     - ansible-galaxy install -r requirements.yml
-#     - ansible --version
-#     - molecule --version
-#   script:
-#     - molecule lint
-#     - ansible-lint-junit ansible-lint.txt -o build/reports/linting.xml
-#   artifacts:
-#     paths:
-#       - build/reports/
-#     expire_in: 1 day
+molecule-lint:
+  stage: lint
+  before_script:
+    - mkdir -p build/reports
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
+    - ln -s /usr/bin/python3 /usr/bin/python
+    - docker info
+    - python3 --version
+    - pip install --no-cache-dir -r requirements-dev.txt
+    - ansible-galaxy install -r requirements.yml
+    - ansible --version
+    - molecule --version
+  script:
+    - molecule lint
+    - ansible-lint-junit ansible-lint.txt -o build/reports/linting.xml
+  artifacts:
+    paths:
+      - build/reports/
+    expire_in: 1 day
 
-# molecule-test-centos:
-#   stage: test-redhat
-#   before_script:
-#     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
-#     - ln -s /usr/bin/python3 /usr/bin/python
-#     - docker info
-#     - python3 --version
-#     - pip install --no-cache-dir -r requirements-dev.txt
-#     - ansible-galaxy install -r requirements.yml
-#     - ansible --version
-#     - molecule --version
-#     - mkdir -p admin
-#     - cp .ci/slurmcontroller.dhparam.pem admin/
-#   script:
-#     - molecule --debug test
-#   after_script:
-#     - ls -la build
-#     - ls -la build/reports
-#   artifacts:
-#     paths:
-#       - build/reports/
-#     expire_in: 1 day
+molecule-test-centos:
+  stage: test-redhat
+  before_script:
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
+    - ln -s /usr/bin/python3 /usr/bin/python
+    - docker info
+    - python3 --version
+    - pip install --no-cache-dir -r requirements-dev.txt
+    - ansible-galaxy install -r requirements.yml
+    - ansible --version
+    - molecule --version
+    - mkdir -p admin
+    - cp .ci/slurmcontroller.dhparam.pem admin/
+  script:
+    - molecule --debug test
+  after_script:
+    - ls -la build
+    - ls -la build/reports
+  artifacts:
+    paths:
+      - build/reports/
+    expire_in: 1 day
 
-# molecule-test-rockylinux:
-#   stage: test-redhat
-#   before_script:
-#     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
-#     - ln -s /usr/bin/python3 /usr/bin/python
-#     - docker info
-#     - python3 --version
-#     - pip install --no-cache-dir -r requirements-dev.txt
-#     - ansible-galaxy install -r requirements.yml
-#     - ansible --version
-#     - molecule --version
-#     - mkdir -p admin
-#     - cp .ci/slurmcontroller.dhparam.pem admin/
-#   script:
-#     - molecule --debug test --scenario-name=rockylinux8
-#   after_script:
-#     - ls -la build
-#     - ls -la build/reports
-#   artifacts:
-#     paths:
-#       - build/reports/
-#     expire_in: 1 day
+molecule-test-rockylinux:
+  stage: test-redhat
+  before_script:
+    - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev openssh tar bzip2 unzip
+    - ln -s /usr/bin/python3 /usr/bin/python
+    - docker info
+    - python3 --version
+    - pip install --no-cache-dir -r requirements-dev.txt
+    - ansible-galaxy install -r requirements.yml
+    - ansible --version
+    - molecule --version
+    - mkdir -p admin
+    - cp .ci/slurmcontroller.dhparam.pem admin/
+  script:
+    - molecule --debug test --scenario-name=rockylinux8
+  after_script:
+    - ls -la build
+    - ls -la build/reports
+  artifacts:
+    paths:
+      - build/reports/
+    expire_in: 1 day
 
 molecule-test-debian:
   stage: test-debian
