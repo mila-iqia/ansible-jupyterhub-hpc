@@ -85,6 +85,8 @@
       when: install_mon_stack
     - role: cloudalchemy.node_exporter
       when: install_mon_stack
+      tags:
+        - molecule-idempotence-notest
   tags:
     - node_exporter
     - monitoring
@@ -99,6 +101,8 @@
       when: install_mon_stack
     - role: cloudalchemy.prometheus
       when: install_mon_stack
+      tags:
+        - molecule-idempotence-notest
   tags:
     - prometheus
     - monitoring
@@ -113,6 +117,8 @@
       when: install_mon_stack
     - role: patrickjahns.promtail
       when: install_mon_stack
+      tags:
+        - molecule-idempotence-notest
   tags:
     - promtail
     - monitoring
@@ -139,6 +145,8 @@
       when: install_mon_stack
     - role: cloudalchemy.grafana
       when: install_mon_stack
+      tags:
+        - molecule-idempotence-notest
   tags:
     - grafana
     - monitoring
