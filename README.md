@@ -19,8 +19,8 @@ Assuming we have a conda environment created and activated, we need to
 setup the environment as follows
 
 ```
-git clone https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub.git
-cd ansible-jupyterhub
+git clone https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc.git
+cd ansible-jupyterhub-hpc
 pip install -r requirements.txt
 ansible-galaxy install -r requirements.yml
 ```
