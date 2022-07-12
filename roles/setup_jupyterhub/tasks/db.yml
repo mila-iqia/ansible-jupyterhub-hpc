@@ -1,0 +1,112 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Setup PostgresSQL database for jupyterhub
+
+- block:
+  - name: check if PostgreSQL database is initialised
+    stat:
+      path: "{{ postgresql_data_dir }}/pg_hba.conf"
+    register: pgsql_stat
+    
+  - name: initialise PostgreSQL database
+    command: "{{ postgresql_init_cmd }}"
+    args:
+      creates: "{{ postgresql_data_dir }}/pg_hba.conf"
+    become_user: postgres
+    when: not pgsql_stat.stat.exists # and ansible_distribution_major_version == '8'
+  
+  - name: use md5 as authentication method for databases on localhost [CentOS/RedHat]
+    lineinfile:
+      dest: "{{ postgresql_data_dir }}/pg_hba.conf"
+      state: present
+      insertafter: "^local   all             all                                     peer"
+      line: "{{ item }}"
+    with_items:
+      - "host    jupyterhub     jupyter               ::1/128               md5"
+      - "host    jupyterhub     jupyter             127.0.0.1/32            md5"
+  become: true
+
+# Seems like we have a bug in systemd 239 which comes with CentOS 8
+# https://bugs.centos.org/view.php?id=17461
+# We need to add this additional conf file to reload daemon post stopping
+# the service
+- name: add stop.conf to /etc/systemd/system/postgresql.service.d/stop.conf
+  block:
+   - name: create /etc/systemd/system/postgresql.service.d folder
+     file:
+       path: "/etc/systemd/system/postgresql.service.d"
+       owner: root
+       group: root
+       mode: 0755
+       state: directory
+   - name: create stop.conf file
+     copy:
+      dest: "/etc/systemd/system/postgresql.service.d/stop.conf"
+      owner: root
+      group: root
+      mode: 0644
+      content: |
+        [Service]
+        ExecStopPost=+/usr/bin/systemctl daemon-reload
+  become: true
+
+- name: restart postgresql
+  service: 
+    name: postgresql 
+    state: restarted
+  become: true
+  tags:
+    - molecule-idempotence-notest
+
+- name: enable postgresql
+  service: 
+    name: postgresql 
+    state: started 
+    enabled: yes
+  become: true
+
+- name: create the database for jupyterhub
+  postgresql_db: 
+    name: "{{ jupyterhub_db_name }}"
+    template: "template0"
+    state: present
+  become: true
+  become_user: postgres
+
+- name: read the db passwd from /srv/jupyterhub folder
+  slurp:
+    src: "{{ jupyterhub_srv_dir }}/db_passwd"
+  become: true
+  register: db_passwd
+
+- name: ensure user has access to the new database
+  postgresql_user: 
+     db: "{{ jupyterhub_db_name }}"
+     name: "{{ jupyterhub_system_user }}"
+     password: "{{ db_passwd['content'] | b64decode | trim }}"
+     priv: ALL
+     state: present
+  become: true
+  become_user: postgres
+
+- name: ensure user does not have unnecessary permissions
+  postgresql_user: 
+     name: "{{ jupyterhub_system_user }}"
+     role_attr_flags: NOSUPERUSER,NOCREATEDB
+     state: present
+  become: true
+  become_user: postgres

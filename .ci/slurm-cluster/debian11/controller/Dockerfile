@@ -2,7 +2,7 @@ FROM geerlingguy/docker-debian11-ansible:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -y && apt-get install apt-utils -y && apt-get install munge vim git mariadb-server wget curl gnupg2 -y
+RUN apt-get update -y && apt-get install apt-utils -y && apt-get install munge vim git mariadb-server wget curl gnupg2 acl -y
 
 RUN apt-get install slurm-client slurmd slurmd slurmdbd slurmctld -y
 RUN apt-get install sudo -y && apt-get install python3.9 python3-pip -y && useradd --shell /bin/bash --home-dir /home/admin -p $(openssl passwd -1 admin) admin && echo "admin     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers

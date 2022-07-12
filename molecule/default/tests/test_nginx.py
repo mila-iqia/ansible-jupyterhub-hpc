@@ -17,27 +17,24 @@
 import os
 import pytest
 import yaml
+import testinfra.utils.ansible_runner
 
 # We run tests against these hosts
 testinfra_hosts = ['slurmcontroller']
 
-# Read all ansible vars
-ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
-hostvars = ansible_vars['hostvars']['slurmcontroller']
-
 # Directories that are expected to exist
-expected_dirs = [hostvars['remote_path_nginx_proxy_ssl']]
+expected_dirs = ['/etc/nginx/ssl']
 
 # Systemd service files that are expected to exist
-expected_cert_files = [os.path.join(hostvars['remote_path_nginx_proxy_ssl'],
-                                    hostvars['ssl_key_name_nginx_proxy']),
-                       os.path.join(hostvars['remote_path_nginx_proxy_ssl'],
-                                    hostvars['ssl_cert_name_nginx_proxy']),
-                       os.path.join(hostvars['remote_path_nginx_proxy_ssl'],
-                                    hostvars['ssl_dhparam_name_nginx_proxy'])]
+expected_cert_files = ['/etc/nginx/ssl/cert/slurmcontroller.crt',
+                       '/etc/nginx/ssl/private/slurmcontroller.key',
+                       '/etc/nginx/ssl/slurmcontroller.dhparam.pem']
 
 # System services that are expected to run
 expected_services = ['nginx']
+
+# Server running on ports
+expected_nginx_ports = ['80', '443']
 
 
 @pytest.mark.parametrize("dirs", expected_dirs)
@@ -59,3 +56,8 @@ def test_service(host, services):
     s = host.service(services)
     assert s.is_enabled
     assert s.is_running
+
+@pytest.mark.parametrize("ports", expected_nginx_ports)
+def test_nginx_ports(host, ports):
+    s = host.socket(f'tcp://0.0.0.0:{ports}')
+    assert s.is_listening

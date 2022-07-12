@@ -1,0 +1,10 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify it
+# List of env variables that will be used in systemd service for jupyterhub HTTP proxy
+
+# TODO: We are hard coding this path. Is it good idea? No. Lets keep it like this for the
+# moment and find an elegant solution later
+[Service]
+Environment="PATH={{ jupyterhub_env_bin_path }}:{{ lookup('env', 'PATH') }}"
+
+# Config proxy auth token. This must be same as the one defined in jupyterhub config
+Environment="CONFIGPROXY_AUTH_TOKEN={{ lookup('file', '{{ local_tokens_dir }}/proxy_auth_token') }}"

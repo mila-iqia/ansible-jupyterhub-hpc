@@ -24,6 +24,7 @@
 
 # Ignore encryption folder
 **/encryption
+**/admin
 
 # Ignore pytest logs
 pytestdebug.log
@@ -37,3 +38,9 @@ ansible-lint.xml
 
 # Ignore gitlab-ci-local folder
 **/.gitlab-ci-local
+
+# Ignore credentials folder
+**/crendentials
+
+# Ignore template ansible config file
+/ansible.cfg.template

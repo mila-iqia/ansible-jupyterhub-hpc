@@ -4,52 +4,33 @@
 # Host where jupyterhub will be deployed
 slurmcontroller
 
-[compute]
-# List of compute hostnames. We need this to add them as Subject Alternative Names for CA 
-# for internal SSL. If we do not provide these names, communication cannot be established 
-# between JupyterHub proxy and Single notebook server. Seems like just hostnames will
-# suffice here and there is no need to provide full FQDNs
-# More details can be found here: https://github.com/jupyterhub/batchspawner/issues/192
-compute-0
-compute-1
+[prometheus]
+# Single node to host Prometheus server. This can be either same host as
+# jupyterhub host or a different one.
+slurmcontroller
+
+[loki]
+# Single node to host Grafana Loki server. This can be either same host as
+# jupyterhub host or a different one.
+slurmcontroller
+
+[grafana]
+# Single node to host Grafana server. This can be either same host as
+# jupyterhub host or a different one.
+slurmcontroller
 
 [nginx:children]
-# Host that will have nginx reverse proxy. It can be same as jupyterhub host or different
-# By default it is the same. If we want to use a different host, remove children from header
-# and set the name of the host here
+# Host that will have nginx reverse proxy. By default it is the same host as the
+# jupyterhub one. THERE IS NO NEED TO CHANGE THIS GROUP
 jupyterhub
 
 [node_exporter:children]
-# Hosts to monitor for hardware and OS metrics. By default we monitor only the metrics of the
-# host where jupyterhub is deployed
-jupyterhub
-
-[prometheus:children]
-# Single node to host monitoring server. By default this will be same as jupyterhub host
+# Hosts to monitor for hardware and OS metrics. This should be same host as the
+# one where JupyterHub is deployed. THERE IS NO NEED TO CHANGE THIS GROUP
 jupyterhub
 
 [promtail:children]
-# Same host as nginx host to monitor the nginx metrics and send them to loki for displaying
-# in grafana via dashboards
+# Same host as nginx host to monitor the nginx logs and send them to
+# loki for displaying in grafana via dashboards. THERE IS NO NEED TO CHANGE
+# THIS GROUP
 nginx
-
-[grafana_loki:children]
-# Hosts to monitor for hardware and OS metrics. By default we monitor only the metrics of the
-# host where jupyterhub is deployed
-jupyterhub
-
-[grafana:children]
-# Single node to host monitoring dashboards. By default this will be same as jupyterhub host
-jupyterhub
-
-[jupyterhubstack:children]
-# This group contains all hosts that will be used in jupyterhub deployment including monitoring
-# nodes EXCEPT compute which are only used for configuring jupyterhub
-jupyterhub
-nginx
-node_exporter
-prometheus
-promtail
-grafana_loki
-grafana
-

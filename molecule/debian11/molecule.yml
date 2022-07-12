@@ -26,60 +26,33 @@ lint: |
   
 platforms:
   - name: slurmcontroller
-    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-controller-debian11:latest
+    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/docker-slurm-controller-debian11:latest
     command: ""
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    port_bindings:
+    published_ports:
       - 6817:6817
       - 6818:6818
       - 6819:6819
     hostname: slurmcontroller
     privileged: true
     pre_build_image: true
+    docker_networks:
+      - name: 'int'
+        attachable: yes
+    network_mode: 'int'
     env:
       http_proxy: ${http_proxy:-""}
       https_proxy: ${https_proxy:-""}
       HTTP_PROXY: ${HTTP_PROXY:-""}
       HTTPS_PROXY: ${HTTPS_PROXY:-""}
       no_proxy: ${no_proxy:-""}
-    
-  - name: compute-0
-    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-compute-debian11:latest
-    command: ""
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    hostname: compute-0
-    privileged: true
-    pre_build_image: true
-    env:
-      http_proxy: ${http_proxy:-""}
-      https_proxy: ${https_proxy:-""}
-      HTTP_PROXY: ${HTTP_PROXY:-""}
-      HTTPS_PROXY: ${HTTPS_PROXY:-""}
-      no_proxy: ${no_proxy:-""}
-    
-  - name: compute-1
-    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-compute-debian11:latest
-    command: ""
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    hostname: compute-1
-    privileged: true
-    pre_build_image: true
-    env:
-      http_proxy: ${http_proxy:-""}
-      https_proxy: ${https_proxy:-""}
-      HTTP_PROXY: ${HTTP_PROXY:-""}
-      HTTPS_PROXY: ${HTTPS_PROXY:-""}
-      no_proxy: ${no_proxy:-""}
+
 provisioner:
   name: ansible
   inventory:
     links:
       hosts: ../default/hostfile
-      host_vars: ../default/host_vars/
-      group_vars: ../../group_vars/
   playbooks:
     prepare: ../default/prepare.yml
     converge: ../default/converge.yml
@@ -124,4 +97,4 @@ verifier:
   name: testinfra
   directory: ../default/tests
   options:
-    junitxml: 'build/reports/unit-tests.xml'
+    junitxml: 'build/reports/unit-tests-debian11.xml'

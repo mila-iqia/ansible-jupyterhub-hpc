@@ -1,0 +1,74 @@
+ # Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# This playbook installs adds conda repository and installs conda using RPMs
+
+- block:
+    - name: add repository configuration file for conda [RHEL/CentOS]
+      yum_repository:
+        name: conda
+        description: Conda YUM repo
+        file: conda
+        baseurl: "{{ conda_yum_base_url }}"
+        gpgcheck: yes
+        gpgkey: "{{ conda_gpgkey }}"
+
+    - name: install conda [RHEL/CentOS]
+      yum:
+        name: conda
+        update_cache: yes
+        state: present
+  become: true
+  tags:
+    - conda
+  when: ansible_pkg_mgr in ['yum', 'dnf']
+
+- block:
+    - name: add gpg key to trusted store [Debian/Ubuntu]
+      shell: "curl {{ conda_gpgkey }} | gpg --dearmor > /tmp/conda.gpg"
+      changed_when: false
+      args:
+        executable: /bin/bash
+
+    - name: install gpg key [Debian/Ubuntu]
+      command: "install -o root -g root -m 644 /tmp/conda.gpg /usr/share/keyrings/conda-archive-keyring.gpg"
+      changed_when: false
+     
+    - name: add repository configuration file for conda [Debian/Ubuntu]
+      apt_repository:
+        filename: conda
+        repo: "{{ conda_apt_repo }}"
+
+    - name: install conda [Debian/Ubuntu]
+      apt:
+        name: conda
+        update_cache: yes
+        state: present
+  become: true
+  tags:
+    - conda
+  when: ansible_pkg_mgr == 'apt'
+  
+- name: add conda config
+  copy:
+    content: "{{ conda_config | to_yaml }}"
+    dest: "{{ conda_prefix }}/.condarc"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  tags:
+    - conda

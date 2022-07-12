@@ -1,0 +1,119 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# This playbook prepares Ansible tests.
+
+- name: Prepare
+  hosts: all
+  gather_facts: true
+  tasks:
+   # Ansible executes sudo tasks with flags sudo -H -S -n -u root <cmd>
+   # If we are behind a proxy and those proxy variables are not in
+   # env_keep commands like yum update would not work as proxy envs are
+   # not set. Basically we add those proxy variables in env_keep to set
+   # them when ansible uses sudo -u root for executing tasks
+   - name: add proxy env variables to env_keep in sudoers file
+     lineinfile:
+       dest: /etc/sudoers
+       state: present
+       regexp: '^Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
+       line: 'Defaults    env_keep += "HTTP_PROXY HTTPS_PROXY http_proxy https_proxy no_proxy NO_PROXY"'
+       validate: "visudo -cf %s"
+       
+   - name: configure SLURM
+     lineinfile:
+       dest: /etc/slurm/slurm.conf
+       state: present
+       regexp: "^(.*)CPUs=1 State=UNKNOWN(.*)$"
+       line: "NodeName=slurmcontroller CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
+     when: inventory_hostname == 'slurmcontroller'
+       
+   # In default service file of munge they use Type=forking and it has 
+   # consequeneces when running docker-in-docker. We got errors from systemd
+   # saying that PID file is not owned by root and it is supposed to be not owned
+   # by root as process is started as service user munge. Systemd needs PID file as
+   # the default Type is forking to be able to stop the process. Here we simplify it
+   # by using Type=simple and hence systemd does not need PIDfile anymore and it can
+   # stop the process by sending signal to main PID.
+   # https://unix.stackexchange.com/questions/534032/systemd-services-fail-with-user-in-service-file
+   # https://github.com/dun/munge/issues/101
+   - name: change Type of systemd file for munge
+     copy:
+       dest: "/usr/lib/systemd/system/munge.service"
+       owner: root
+       group: root
+       mode: '0644'
+       content: |
+        [Unit]
+        Description=MUNGE authentication service
+        Documentation=man:munged(8)
+        After=network.target
+        After=time-sync.target
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/sbin/munged --foreground --syslog
+        User=munge
+        Group=munge
+        Restart=on-abort
+
+        [Install]
+        WantedBy=multi-user.target
+     when: ansible_os_family == 'RedHat' and inventory_hostname == 'slurmcontroller'
+     
+   - name: change Type of systemd file for munge
+     copy:
+       dest: "/lib/systemd/system/munge.service"
+       owner: root
+       group: root
+       mode: '0644'
+       content: |
+        [Unit]
+        Description=MUNGE authentication service
+        Documentation=man:munged(8)
+        After=network.target
+        After=time-sync.target
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/sbin/munged --foreground --syslog
+        User=munge
+        Group=munge
+        Restart=on-abort
+
+        [Install]
+        WantedBy=multi-user.target
+     when: ansible_os_family == 'Debian' and inventory_hostname == 'slurmcontroller'
+
+   - name: enable munge
+     service: 
+      name: munge 
+      state: started 
+      enabled: yes
+     ignore_errors: yes
+     when: inventory_hostname == 'slurmcontroller'
+
+   - name: enable slurm controller
+     service: 
+      name: slurmctld 
+      state: started 
+      enabled: yes
+     when: inventory_hostname == 'slurmcontroller'
+     ignore_errors: yes
+
+   - name: start slurm daemon on compute nodes
+     shell: slurmd
+     when: inventory_hostname == 'slurmcontroller'
+     ignore_errors: yes

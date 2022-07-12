@@ -1,0 +1,73 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+# Creates nginx user and install certificates
+
+- name: create the nginx system group
+  group:
+    name: "{{ nginx_system_user }}"
+    state: present
+    system: true
+  become: true
+  
+- name: create nginx system user
+  user:
+    name: "{{ nginx_system_user }}"
+    groups: "{{ nginx_system_group }}"
+    append: true
+    state: present
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+  become: true
+  
+- name: make sure /etc/nginx/ssl exists
+  file:
+    path: "/etc/nginx/ssl/{{ item }}"
+    state: directory
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: 0700
+  become: true
+  with_items:
+    - "cert"
+    - "private"
+
+- name: install TLS key
+  copy:
+    src: "{{ local_tls_dir }}/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+    dest: "/etc/nginx/ssl/private/{{ inventory_hostname }}.key"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: 0600
+  become: true
+
+- name: install TLS certificate
+  copy:
+    src: "{{ local_tls_dir }}/{{ inventory_hostname }}/{{ inventory_hostname }}.crt"
+    dest: "/etc/nginx/ssl/cert/{{ inventory_hostname }}.crt"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: 0600
+  become: true
+  
+- name: install Diffie-Hellman key
+  copy:
+    src: "{{ local_tls_dir }}/../{{ inventory_hostname }}.dhparam.pem"
+    dest: "/etc/nginx/ssl/{{ inventory_hostname }}.dhparam.pem"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: 0600
+  become: true

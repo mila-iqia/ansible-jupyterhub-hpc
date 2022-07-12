@@ -6,12 +6,11 @@ After=network-online.target remote-fs.target nss-lookup.target
 Wants=network-online.target
 
 [Service]
-{% if nginx_run_as_service_user == true %}
 
 Type=exec
 
-User={{ nginx_service_user }}
-Group={{ nginx_service_user }}
+User={{ nginx_system_user }}
+Group={{ nginx_system_group }}
 
 # RuntimeDirectory= to assign a runtime directory to the service, which is owned 
 # by the service's user, and removed automatically when the system is terminated.
@@ -135,25 +134,6 @@ LockPersonality=true
 # Capabilities
 # To be able to bind to ports less than 1024
 AmbientCapabilities=CAP_NET_BIND_SERVICE
-
-{% else %}
-
-# This is what comes shipped with nginx repo
-Type=forking
-PIDFile=/run/nginx.pid
-# Nginx will fail to start if /run/nginx.pid already exists but has the wrong
-# SELinux context. This might happen when running `nginx -t` from the cmdline.
-# https://bugzilla.redhat.com/show_bug.cgi?id=1268621
-ExecStartPre=/usr/bin/rm -f /run/nginx.pid
-ExecStartPre=/usr/sbin/nginx -t
-ExecStart=/usr/sbin/nginx
-ExecReload=/bin/kill -s HUP $MAINPID
-KillSignal=SIGQUIT
-TimeoutStopSec=5
-KillMode=mixed
-PrivateTmp=true
-
-{% endif %}
 
 [Install]
 WantedBy=multi-user.target

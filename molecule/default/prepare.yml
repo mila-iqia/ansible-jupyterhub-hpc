@@ -36,8 +36,8 @@
      lineinfile:
        dest: /etc/slurm/slurm.conf
        state: present
-       regexp: "^(.*)REPLACE_IT State=UNKNOWN(.*)$"
-       line: "NodeName=compute[0-10] CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
+       regexp: "^(.*)CPUs=1 State=UNKNOWN(.*)$"
+       line: "NodeName=slurmcontroller CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
        
    # In default service file of munge they use Type=forking and it has 
    # consequeneces when running docker-in-docker. We got errors from systemd
@@ -50,10 +50,10 @@
    # https://github.com/dun/munge/issues/101
    - name: change Type of systemd file for munge
      copy:
-       dest: "/usr/lib/systemd/system/munge.service"
+       dest: "/etc/systemd/system/munge.service"
        owner: root
        group: root
-       mode: '0644'
+       mode: 0644
        content: |
         [Unit]
         Description=MUNGE authentication service
@@ -70,31 +70,13 @@
 
         [Install]
         WantedBy=multi-user.target
-     when: ansible_os_family == 'RedHat'
      
-   - name: change Type of systemd file for munge
-     copy:
-       dest: "/lib/systemd/system/munge.service"
-       owner: root
-       group: root
-       mode: '0644'
-       content: |
-        [Unit]
-        Description=MUNGE authentication service
-        Documentation=man:munged(8)
-        After=network.target
-        After=time-sync.target
-
-        [Service]
-        Type=simple
-        ExecStart=/usr/sbin/munged --foreground --syslog
-        User=munge
-        Group=munge
-        Restart=on-abort
-
-        [Install]
-        WantedBy=multi-user.target
-     when: ansible_os_family == 'Debian'
+   - name: ensure /run/munge directory exists
+     file:
+       path: "/run/munge"
+       state: directory
+       owner: munge
+       group: munge
 
    - name: enable munge
      service: 
@@ -108,10 +90,92 @@
       name: slurmctld 
       state: started 
       enabled: yes
-     when: inventory_hostname in groups['jupyterhub']
      ignore_errors: yes
 
    - name: start slurm daemon on compute nodes
-     shell: slurmd -N $(hostname)
-     when: inventory_hostname in groups['compute']
+     shell: slurmd
      ignore_errors: yes
+   
+   # We need to avoid systemd services of type forking in DinD CI
+   # pipelines. So the hack is to redo the systemd file to make them
+   # simple type and run CI jobs. This is only issue with the DinD and
+   # in production use cases, there is no need to modify systemd files
+   - name: install and customize postgresql systemd unit file [Ubuntu]
+     block:
+       - name: install postgresql
+         apt:
+           name: "{{ item }}"
+           state: present
+         with_items:
+           - "postgresql"
+           - "postgresql-contrib"
+           - "python3-psycopg2"
+       
+       - name: modify systemd unit file of postgresql
+         copy:
+           dest: "/etc/systemd/system/postgresql.service"
+           owner: root
+           group: root
+           mode: 0644
+           content: |
+            [Unit]
+            Description=PostgreSQL RMDB service
+            After=network.target
+            After=time-sync.target
+
+            [Service]
+            Type=simple
+            ExecStart=/usr/lib/postgresql/14/bin/postgres -D /var/lib/postgresql/14/main -c config_file=/etc/postgresql/14/main/postgresql.conf
+            User=postgres
+            Group=postgres
+            Restart=on-failure
+
+            [Install]
+            WantedBy=multi-user.target
+            
+       - name: remove systemd file in lib folder
+         file:
+           path: "/lib/systemd/system/postgresql@.service"
+           state: absent
+         
+     when: ansible_distribution == 'Ubuntu'
+     
+   - name: install and customize postgresql systemd unit file [Debian]
+     block:
+       - name: install postgresql
+         apt:
+           name: "{{ item }}"
+           state: present
+         with_items:
+           - "postgresql"
+           - "postgresql-contrib"
+           - "python3-psycopg2"
+       
+       - name: modify systemd unit file of postgresql
+         copy:
+           dest: "/etc/systemd/system/postgresql.service"
+           owner: root
+           group: root
+           mode: 0644
+           content: |
+            [Unit]
+            Description=PostgreSQL RMDB service
+            After=network.target
+            After=time-sync.target
+
+            [Service]
+            Type=simple
+            ExecStart=/usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql/13/main -c config_file=/etc/postgresql/13/main/postgresql.conf
+            User=postgres
+            Group=postgres
+            Restart=on-failure
+
+            [Install]
+            WantedBy=multi-user.target
+            
+       - name: remove systemd file in lib folder
+         file:
+           path: "/lib/systemd/system/postgresql@.service"
+           state: absent
+         
+     when: ansible_distribution == 'Debian'

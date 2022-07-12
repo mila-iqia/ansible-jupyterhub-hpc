@@ -10,10 +10,8 @@ use playbook to install JupyterHub.
 - [Architecture](architecture.md): The architecture of the JupyterHub 
 installation is discussed in brief here along with important notes on security 
 implications of the deployment. 
-- [Variables](variables.md): A brief overview of several important variables 
+- [Configuration](configuration.md): A brief overview of several important variables 
 that system admins must decide before installing the JupyterHub.
 - [Inventory](inventory.md): Explanation of how inventory groups are organised.
-- [Scripts](scripts.md): An utility script is provided that generates required 
-certificates, tokens and passwords. This file explains the usage of that script.
 - [Roles](roles.md): A very high level view of what each role does in the playbook.
 - [Deployment](deployment.md): Few deployment examples on how to use the playbook.

@@ -1,0 +1,7 @@
+# List of compute hostnames. We need this to add them as Subject Alternative Names for CA
+# for internal SSL. If we do not provide these names, communication cannot be established
+# between JupyterHub proxy and Single notebook server. Seems like just hostnames will
+# suffice here and there is no need to provide full FQDNs
+# More details can be found here: https://github.com/jupyterhub/batchspawner/issues/192
+compute-0
+compute-1 

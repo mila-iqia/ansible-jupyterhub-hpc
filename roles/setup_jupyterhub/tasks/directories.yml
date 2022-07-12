@@ -16,6 +16,42 @@
 
 # Create all the directories necessary for configuring JupyterHub
 
+- name: make sure sys.prefix/etc/jupyterhub exists
+  file:
+    path: "{{ jupyterhub_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: make sure sys.prefix/etc/jupyter/templates exists
+  file:
+    path: "{{ jupyter_templates_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: make sure sys.prefix/etc/jupyter exists
+  file:
+    path: "{{ jupyter_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: make sure sys.prefix/etc/ipython exists
+  file:
+    path: "{{ ipython_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
 # First we check if the path exists and we will touch the directory
 # only if the path does not exist. The reason is that this directory
 # will have ACL permissions for prometheus user to access JupyterHub 
@@ -32,8 +68,26 @@
   file:
     path: "{{ jupyterhub_srv_dir }}"
     state: directory
-    owner: "{{ jupyterhub_service_user }}"
-    group: "{{ jupyterhub_service_user }}"
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
     mode: 0700
   become: true
   when: not jh_srv_dir.stat.exists
+
+- name: make sure /var/log/jupyterhub exists
+  file:
+    path: "{{ jupyterhub_log_dir }}"
+    state: directory
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_user }}"
+    mode: 0755
+  become: true
+
+- name: make sure /var/log/jupyterhub-proxy exists
+  file:
+    path: "/var/log/jupyterhub-proxy"
+    state: directory
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
+    mode: 0755
+  become: true

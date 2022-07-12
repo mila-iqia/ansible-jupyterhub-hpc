@@ -22,7 +22,7 @@
     dest: "/etc/logrotate.d/{{ item.service_name }}"
     owner: root
     group: root
-    mode: '0644'
+    mode: 0644
   become: true
   when: inventory_hostname in groups['nginx']
   with_items:
@@ -46,8 +46,10 @@
     dest: "/etc/logrotate.d/{{ item.service_name }}"
     owner: root
     group: root
-    mode: '0644'
+    mode: 0644
   become: true
-  when: inventory_hostname in groups['grafana'] and install_mon_stack
+  when: 
+    - inventory_hostname in groups['grafana']
+    - install_mon_stack
   with_items:
     - "{{ grafana_logfiles }}"

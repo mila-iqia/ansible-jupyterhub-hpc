@@ -1,0 +1,100 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+dependency:
+  name: galaxy
+  options:
+    role-file: ../../requirements.yml
+driver:
+  name: docker
+lint: |
+  yamllint . || exit 0
+  ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml -p --nocolor | tee ansible-lint.txt || exit 0
+  
+platforms:
+  - name: slurmcontroller
+    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/docker-slurm-controller-rockylinux8:latest
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    published_ports:
+      - 6817:6817
+      - 6818:6818
+      - 6819:6819
+    hostname: slurmcontroller
+    privileged: true
+    pre_build_image: true
+    docker_networks:
+      - name: 'int'
+        attachable: yes
+    network_mode: 'int'
+    env:
+      http_proxy: ${http_proxy:-""}
+      https_proxy: ${https_proxy:-""}
+      HTTP_PROXY: ${HTTP_PROXY:-""}
+      HTTPS_PROXY: ${HTTPS_PROXY:-""}
+      no_proxy: ${no_proxy:-""}
+
+provisioner:
+  name: ansible
+  inventory:
+    links:
+      hosts: ../default/hostfile
+  playbooks:
+    prepare: ../default/prepare.yml
+    converge: ../default/converge.yml
+scenario:
+  create_sequence:
+    - dependency
+    - create
+    - prepare
+  check_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - create
+    - prepare
+    - converge
+    - check
+    - destroy
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+  destroy_sequence:
+    - dependency
+    - cleanup
+    - destroy
+  test_sequence:
+    - dependency
+    - lint
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
+verifier:
+  name: testinfra
+  directory: ../default/tests
+  options:
+    junitxml: 'build/reports/unit-tests-rockylinux8.xml'
