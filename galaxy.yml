@@ -14,8 +14,6 @@
 
 ---
 
----
-
 namespace: mahendrapaipuri
 name: ansible_jupyterhub_hpc
 version: "1.0.0"
