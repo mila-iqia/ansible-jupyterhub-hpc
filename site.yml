@@ -54,6 +54,7 @@
     - setup_hosts
   tags:
     - prerequisites
+    - molecule-idempotence-notest
   
 - name: Setup jupyterhub environment
   hosts: jupyterhub
