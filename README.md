@@ -36,7 +36,7 @@ The admins can modify this file appropriately
 to suit their platforms. The following command will run the playbook
 
 ```
-ansible-playbook -i hostfile site.yml
+ansible-playbook -i inventory site.yml
 ```
 
 Once the execution of playbook is finished successfully, it will create a 

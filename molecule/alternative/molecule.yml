@@ -26,7 +26,7 @@ lint: |
   
 platforms:
   - name: slurmcontroller
-    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub/docker-slurm-controller-centos8:latest
+    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/docker-slurm-controller-centos8:latest
     command: ""
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro

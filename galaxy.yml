@@ -14,40 +14,32 @@
 
 ---
 
-galaxy_info:
-  author: Mahendra Paipuri
-  role_name: ansible-jupyterhub
-  description: |
+---
+
+namespace: mahendrapaipuri
+name: ansible_jupyterhub_hpc
+version: "1.0.0"
+readme: "README.md"
+authors:
+  - "Mahendra Paipuri <mahendra.paipuri@cnrs.fr>"
+description: |
     Installs JupyterHub along with batchspawner on HPC platforms. 
     The role additionally can deploy node exporter, Prometheus and 
     Grafana stack to monitor the jupyterhub deployment. Besides, it
     will also install Promtail and Grafana Loki to analyse logs of 
-    nginx reverse proxy. 
-  license: Apache
-  company: CNRS
-  min_ansible_version: 2.5
-  platforms:
-    - name: EL
-      versions:
-        - 8
-    - name: Debian
-      versions:
-        - 11
-    - name: Ubuntu
-      versions:
-        - 22
-  galaxy_tags:
-    - jupyterhub
-    - hpc
-    - slurm
-    - monitoring
-    - prometheus
-    - grafana
-    - loki
-
-dependencies:
-    - evandam.conda
-    - cloudalchemy.prometheus
-    - cloudalchemy.node_exporter
-    - cloudalchemy.grafana
-    - patrickjahns.promtail
+    nginx reverse proxy.
+license:
+  - "Apache-2.0"
+license_file: "LICENSE"
+tags:
+  - jupyterhub
+  - hpc
+  - slurm
+  - monitoring
+  - prometheus
+  - grafana
+  - loki
+dependencies: {}
+repository: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc"
+documentation: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/tree/main/docs"
+issues: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/issues"
