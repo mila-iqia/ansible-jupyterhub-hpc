@@ -102,6 +102,11 @@
    # in production use cases, there is no need to modify systemd files
    - name: install and customize postgresql systemd unit file [Ubuntu]
      block:
+       - name: update apt
+         apt:
+           update_cache: yes
+           state: present
+
        - name: install postgresql
          apt:
            name: "{{ item }}"
@@ -142,6 +147,11 @@
      
    - name: install and customize postgresql systemd unit file [Debian]
      block:
+       - name: update apt
+         apt:
+           update_cache: yes
+           state: present
+
        - name: install postgresql
          apt:
            name: "{{ item }}"
