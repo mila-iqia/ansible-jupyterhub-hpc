@@ -31,7 +31,7 @@
   tags:
     - setup_jupyterhub_tokens
     
-- import_tasks: db.yml
+- import_tasks: postgresql.yml
   when: use_postgresql_db
   tags:
     - setup_jupyterhub_db
