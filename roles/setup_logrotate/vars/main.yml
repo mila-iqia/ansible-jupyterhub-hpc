@@ -23,7 +23,7 @@
 # specific meaning and tells the nginx master process to reopen it's log files.
 # This effectively means that nginx starts writing to the new log files.
 nginx_logfiles:
-  - { service_name: "nginx", log_files: ["*.log"], mode: '0644', user: 'nginx', group: 'nginx', postrotate: "kill -USR1 `cat /run/nginx/nginx.pid }}`" }
+  - { service_name: "nginx", log_files: ["*.log"], mode: '0644', user: 'nginx', group: 'nginx', postrotate: "kill -USR1 `cat /run/nginx/nginx.pid`" }
 
 jupyterhub_logfiles:
   - { service_name: "jupyterhub", log_files: ["*.log"], mode: '0644', user: 'jupyter', group: 'jupyter', postrotate: "" }
