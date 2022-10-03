@@ -71,7 +71,7 @@ molecule-test-centos:
     expire_in: 1 day
 
 molecule-test-rockylinux:
-  stage: test-readhat
+  stage: test-redhat
   before_script:
     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
