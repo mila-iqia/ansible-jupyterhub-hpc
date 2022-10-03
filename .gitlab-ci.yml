@@ -22,7 +22,9 @@ services:
 
 stages:
   - lint
-  - test
+  - test-redhat
+  - test-debian
+  - test-alt
   - posttest
   
 molecule-lint:
@@ -46,7 +48,7 @@ molecule-lint:
     expire_in: 1 day
 
 molecule-test-centos:
-  stage: test
+  stage: test-redhat
   before_script:
     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
@@ -69,7 +71,7 @@ molecule-test-centos:
     expire_in: 1 day
 
 molecule-test-rockylinux:
-  stage: test
+  stage: test-readhat
   before_script:
     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
@@ -92,7 +94,7 @@ molecule-test-rockylinux:
     expire_in: 1 day
 
 molecule-test-debian:
-  stage: test
+  stage: test-debian
   before_script:
     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
@@ -115,7 +117,7 @@ molecule-test-debian:
     expire_in: 1 day
 
 molecule-test-ubuntu:
-  stage: test
+  stage: test-debian
   before_script:
     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
@@ -138,7 +140,7 @@ molecule-test-ubuntu:
     expire_in: 1 day
 
 molecule-test-alternative:
-  stage: test
+  stage: test-alt
   before_script:
     - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
     - ln -s /usr/bin/python3 /usr/bin/python
