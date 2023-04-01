@@ -30,6 +30,10 @@ stages:
 # prepare job YAML anchor
 .prepare_step: &prepare_step
   - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
+  # Seems like molecule has a specific requirement of packagaing and pip is
+  # complaining about not able to remove this package as it will be installed
+  # by apk
+  - apk del packaging
   - ln -s /usr/bin/python3 /usr/bin/python
   - docker info
   - python3 --version
@@ -62,7 +66,7 @@ molecule-lint:
   stage: lint
   before_script:
     - mkdir -p build/reports
-    - <<:*prepare_step
+    - *prepare_step
 
   script:
     - molecule lint
