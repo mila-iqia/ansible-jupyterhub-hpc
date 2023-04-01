@@ -47,7 +47,7 @@ stages:
    variables:
      OS_DIST: 'default'
    before_script:
-     - <<:*prepare_step
+     - *prepare_step
    script:
      - molecule --debug test --scenario-name=${OS_DIST}
    after_script:
@@ -103,7 +103,7 @@ molecule-test-alternative:
 merge-junit-files:
   stage: posttest
   before_script:
-    - <<:*prepare_step
+    - *prepare_step
   script:
     - junitparser merge build/reports/unit-tests-default.xml build/reports/unit-tests-alternative.xml build/reports/unit-tests-debian11.xml build/reports/unit-tests-ubuntu22.xml build/reports/unit-tests-rockylinux8.xml build/reports/unit-tests.xml
   after_script:
