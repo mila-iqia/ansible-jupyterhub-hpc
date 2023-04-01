@@ -11,13 +11,13 @@ events {
 http {
     include  /etc/nginx/mime.types;
     default_type application/octet-stream;
-    
+
     # Log format
     log_format custom '"$request_method: $remote_addr - $remote_user [$time_local]" "$request_method" "$server_name" "$request" "$args" "$scheme" $status $bytes_sent "$http_referer" "$http_user_agent" "$http_cookie"';
     access_log /var/log/nginx/access.log custom;
     error_log /var/log/nginx/error.log info;
-    
-{% if install_mon_stack == true %}    
+
+{% if install_mon_stack == true %}
     log_format json_analytics escape=json '{'
         '"msec": "$msec", ' # request unixtime in seconds with a milliseconds resolution
         '"connection": "$connection", ' # connection serial number
@@ -60,9 +60,9 @@ http {
         '}';
 
     access_log /var/log/nginx/json_access.log json_analytics;
-    
+
 {% endif %}
-    
+
     # top-level http config for websocket headers
     # If Upgrade is defined, Connection = upgrade
     # If Upgrade is empty, Connection = close
@@ -75,7 +75,7 @@ http {
         listen {{ nginx_http_port }};
         listen [::]:{{ nginx_http_port }};
         server_name {{ inventory_hostname }};
-        
+
         # Tell all requests to HTTP port to be 302 redirected to HTTPS
         return 302 https://$host$request_uri;
     }
@@ -89,12 +89,12 @@ http {
         ssl_certificate /etc/nginx/ssl/cert/{{ inventory_hostname }}.crt;
         ssl_certificate_key /etc/nginx/ssl/private/{{ inventory_hostname }}.key;
         ssl_dhparam /etc/nginx/ssl/{{ inventory_hostname }}.dhparam.pem;
-        ssl_ciphers "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!RC4:!PSK";
-        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_ciphers "ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES256:ECDH+AES128:!aNULL:!SHA1:!AESCCM";
+        ssl_protocols TLSv1.2 TLSv1.3;
         ssl_ecdh_curve secp384r1;
-        ssl_prefer_server_ciphers on;
+        ssl_prefer_server_ciphers off;
         ssl_session_cache shared:SSL:10m;
-        ssl_session_tickets off; 
+        ssl_session_tickets off;
         add_header Strict-Transport-Security "max-age=63072000; includeSubDomains";
         add_header X-Content-Type-Options nosniff;
         ssl_stapling on;
@@ -112,7 +112,7 @@ http {
             {% endif %}
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-NginX-Proxy true;
-            
+
             # websocket headers
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
