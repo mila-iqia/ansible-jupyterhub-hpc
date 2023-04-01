@@ -38,7 +38,7 @@ slurm_bin_path: "/usr/bin"
 # Conda related configuration
 # ---------------------------------------------------
 #
-# Set this to /opt/conda as we use rpms to install conda 
+# Set this to /opt/conda as we use rpms to install conda
 # and /opt/conda is the default location
 #
 conda_prefix: "/opt/conda"
@@ -49,10 +49,10 @@ conda_prefix: "/opt/conda"
 #
 # Use self signed certificates for all services in the
 # deployment. Ideal for testing purposes and playbook will
-# generate certificates for all hosts. If set to 
+# generate certificates for all hosts. If set to
 # false, playbook expects certificates signed by external CA
 # in {{ playbook_dir }}/encryption/{{ inventory_hostname }}
-# directory. Key and cert files should be named as 
+# directory. Key and cert files should be named as
 # {{ inventory_hostname }}.key and {{ inventory_hostname }}.crt
 #
 self_signed_certs: true
@@ -74,7 +74,7 @@ local_passwds_dir: "{{ playbook_dir }}/admin/credentials"
 
 # In the case of self signed certificates, we need CA certificate
 # bundle for verification. We place all CA certificates here.
-# This folder will have relaxed permissions of 0755 so that 
+# This folder will have relaxed permissions of 0755 so that
 # others can read the certificates. If we are using certificates
 # from external CA, this variable will be unused
 #
@@ -89,7 +89,7 @@ remote_tls_ca_dir: "/etc/ssl/ca"
 # This will install node exporter, prometheus and grafana stack
 # on the host where jupyterhub is installed
 # This will also install grafana loki and promtail to monitor
-# nginx reverse proxy. In the future support for jupyterhub 
+# nginx reverse proxy. In the future support for jupyterhub
 # logs might be added to this stack
 # If the user wants to install Prometheus and Grafana on a different
 # node it can be configured in the hostfile
@@ -105,13 +105,12 @@ install_cds_dashboards: true
 # core jupyterhub components
 jupyterhub_pkgs:
   - "python=3.9.0"
-  - "jupyterhub=2.3.0"
-  - "jupyterlab=3.2.9"
-  - "notebook=6.4.8"
+  - "jupyterhub=3.1.1"
+  - "jupyterlab=3.5.0"
 
 # Additional dependencies
 jupyterhub_deps:
-  - "batchspawner==1.1"
+  - "batchspawner==1.2"
   - "psycopg2-binary==2.9.3"
 
 # List of jupyterlab extensions that will be installed from pip
@@ -138,10 +137,10 @@ jupyterlab_extensions:
 
 # All the packages related to jupyterhub deployment will be installed
 # within an conda environment. This variable controls where we want to
-# install this environment. By default conda tends to install the 
+# install this environment. By default conda tends to install the
 # environment at <conda_prefix>/envs/<myenv>. This might not be a suitable
 # location for some deployments where the admins would want this environment
-# on shared file system. We can use this variable to set the location of 
+# on shared file system. We can use this variable to set the location of
 # environment
 jupyter_env_prefix: "/opt/jupyter"
 
@@ -184,22 +183,22 @@ jupyterhub_admin_users: []
 # nginx gets shipped with a systemd service file to
 # launch the web server. Usually this systemd file is
 # configured to run as root and fork the processes which
-# actually run web servers as service users. The master 
+# actually run web servers as service users. The master
 # process needs to be root to be able to bind to ports
 # less than 1024. Here we run nginx as a normal system user
-# and use capabilities to be able to bind the ports less than 
-# 1024. Besides we use more restrictive systemd file to have 
-# more security. For more details check the systemd service file 
-# template in 
+# and use capabilities to be able to bind the ports less than
+# 1024. Besides we use more restrictive systemd file to have
+# more security. For more details check the systemd service file
+# template in
 # {{ playbood_dir }}/roles/setup_nginx/templates/nginx.service.j2
 # file
 
-# HTTPS port that server will listen. By default we use 
+# HTTPS port that server will listen. By default we use
 # standard 443 port. If the user wants to use non-standard
 # port, that can be configured here
 nginx_https_port: "443"
 
-# HTTP port that server will listen. By default we use 
+# HTTP port that server will listen. By default we use
 # standard 80 port. If the user wants to use non-standard
 # port, that can be configured here
 nginx_http_port: "80"
@@ -208,7 +207,7 @@ nginx_http_port: "80"
 # Node exporter configuration
 # ---------------------------------------------------
 
-node_exporter_version: "1.1.2"
+node_exporter_version: "1.4.0"
 
 # Node exporter URL
 node_exporter_port: "9100"
@@ -225,7 +224,7 @@ node_exporter_address: "{{ inventory_hostname }}"
 # will be added to existing scrape configs
 
 # Prometheus related config
-prometheus_version: "2.33.0"
+prometheus_version: "2.40.1"
 prometheus_port: "9090"
 prometheus_address: "{{ inventory_hostname }}"
 prometheus_storage_retention: "30d"
@@ -246,7 +245,7 @@ prometheus_web_config:
 # ---------------------------------------------------
 
 # Promtail version to install
-promtail_version: "2.4.2"
+promtail_version: "2.7.0"
 
 # Promtail server config
 # http_listen_port and grpc_listen_port must be integers
@@ -254,18 +253,24 @@ promtail_config_server:
   http_listen_address: "{{ inventory_hostname }}"
   http_listen_port: 9080
   grpc_listen_port: 9081
-  
+
 
 # ---------------------------------------------------
 # Grafana Loki configuration
 # ---------------------------------------------------
-  
+
 # Verison of loki to be installed
-loki_version: "2.4.1"
+loki_version: "2.7.0"
 
 # loki server config
 loki_config_http_address: "{{ inventory_hostname }}"
 loki_config_http_port: "3100"
+
+# loki config dir
+loki_config_directory: "/etc/loki"
+
+# loki debug level
+loki_config_log_level: "info"
 
 # local storage where loki data will be stored
 loki_config_store: "/var/lib/loki"
@@ -295,6 +300,6 @@ grafana_security:
   admin_user: "grafana"
   admin_password: "{{ lookup('file', local_passwds_dir + '/grafana_passwd') | trim }}"
   allow_embedding: true
-  
+
 # Directory where JupyterHub dashboard is located
 grafana_dashboards_dir: "{{ playbook_dir }}/grafana-dashboards"
