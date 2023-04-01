@@ -33,7 +33,7 @@ stages:
   # Seems like molecule has a specific requirement of packagaing and pip is
   # complaining about not able to remove this package as it will be installed
   # by apk
-  - apk del packaging
+  - apk del py3-packaging
   - ln -s /usr/bin/python3 /usr/bin/python
   - docker info
   - python3 --version
