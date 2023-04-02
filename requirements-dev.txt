@@ -1,7 +1,7 @@
 # List of pip requirements that need to be installed in the ansible host
 
 ansible>=5.0.1
-ansible-core>=2.12.1
+ansible-core<=2.13
 ansible-lint>=6.0.2
 ansible-lint-junit
 bcrypt>=3.2.0
