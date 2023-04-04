@@ -13,28 +13,7 @@
 # limitations under the License.
 ---
 
-# ---------------------------------------------------
-# Jupyter components list
-# ---------------------------------------------------
-
-# core jupyterhub components
-jupyterhub_pkgs:
-  - "python=3.9.0"
-  - "jupyterhub=2.3.0"
-  - "jupyterlab=3.2.9"
-  - "notebook=6.4.8"
-
-# Additional dependencies
-jupyterhub_deps:
-  - "batchspawner==1.1"
-  - "psycopg2-binary==2.9.3"
-
-# List of jupyterlab extensions that will be installed from pip
-jupyterlab_pip_extensions:
-  - "jupyter-server-proxy==3.2.1"
-  - "cdsdashboards==0.6.0"
-
-# Set WAL to true for grafana database
-grafana_database:
-  type: "sqlite3"
-  wal: true
+# The variables declared here will never take precedence due to the
+# way we are setting up vars. DO NOT SET ANY VARS HERE
+#
+# If we need to setup vars for tests, use -e CLI flag
