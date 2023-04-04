@@ -33,3 +33,8 @@ jupyterhub_deps:
 jupyterlab_pip_extensions:
   - "jupyter-server-proxy==3.2.1"
   - "cdsdashboards==0.6.0"
+
+# Set WAL to true for grafana database
+grafana_database:
+  type: "sqlite3"
+  wal: true
