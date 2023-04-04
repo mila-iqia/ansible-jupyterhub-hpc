@@ -21,15 +21,15 @@
     stat:
       path: "{{ postgresql_data_dir }}/pg_hba.conf"
     register: pgsql_stat
-    
+
   - name: initialise PostgreSQL database
     command: "{{ postgresql_init_cmd }}"
     args:
       creates: "{{ postgresql_data_dir }}/pg_hba.conf"
     become_user: postgres
     when: not pgsql_stat.stat.exists # and ansible_distribution_major_version == '8'
-  
-  - name: use md5 as authentication method for databases on localhost [CentOS/RedHat]
+
+  - name: use md5 as authentication method for databases on localhost
     lineinfile:
       dest: "{{ postgresql_data_dir }}/pg_hba.conf"
       state: present
@@ -65,22 +65,22 @@
   become: true
 
 - name: restart postgresql
-  service: 
-    name: postgresql 
+  service:
+    name: postgresql
     state: restarted
   become: true
   tags:
     - molecule-idempotence-notest
 
 - name: enable postgresql
-  service: 
-    name: postgresql 
-    state: started 
+  service:
+    name: postgresql
+    state: started
     enabled: yes
   become: true
 
 - name: create the database for jupyterhub
-  postgresql_db: 
+  postgresql_db:
     name: "{{ jupyterhub_db_name }}"
     template: "template0"
     state: present
@@ -94,7 +94,7 @@
   register: db_passwd
 
 - name: ensure user has access to the new database
-  postgresql_user: 
+  postgresql_user:
      db: "{{ jupyterhub_db_name }}"
      name: "{{ jupyterhub_system_user }}"
      password: "{{ db_passwd['content'] | b64decode | trim }}"
@@ -104,7 +104,7 @@
   become_user: postgres
 
 - name: ensure user does not have unnecessary permissions
-  postgresql_user: 
+  postgresql_user:
      name: "{{ jupyterhub_system_user }}"
      role_attr_flags: NOSUPERUSER,NOCREATEDB
      state: present

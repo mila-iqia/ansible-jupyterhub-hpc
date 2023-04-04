@@ -13,6 +13,11 @@
 # limitations under the License.
 ---
 
+- name: gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_items:
+    - "{{ playbook_dir }}/roles/setup_jupyterhub/vars/{{ ansible_os_family }}.yml"
+
 - name: create grafana system group
   group:
     name: grafana
