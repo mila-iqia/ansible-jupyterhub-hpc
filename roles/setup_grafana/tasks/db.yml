@@ -16,15 +16,28 @@
 
 # Setup PostgresSQL database for grafana
 
-- name: use md5 as authentication method for databases on localhost
-  lineinfile:
-    dest: "{{ postgresql_data_dir }}/pg_hba.conf"
-    state: present
-    insertafter: "^local   all             all                                     peer"
-    line: "{{ item }}"
-  with_items:
-    - "host    grafana     grafana               ::1/128               md5"
-    - "host    grafana     grafana             127.0.0.1/32            md5"
+- block:
+  - name: check if PostgreSQL database is initialised
+    stat:
+      path: "{{ postgresql_data_dir }}/pg_hba.conf"
+    register: pgsql_stat
+
+  - name: initialise PostgreSQL database
+    command: "{{ postgresql_init_cmd }}"
+    args:
+      creates: "{{ postgresql_data_dir }}/pg_hba.conf"
+    become_user: postgres
+    when: not pgsql_stat.stat.exists
+
+  - name: use md5 as authentication method for databases on localhost
+    lineinfile:
+      dest: "{{ postgresql_data_dir }}/pg_hba.conf"
+      state: present
+      insertafter: "^local   all             all                                     peer"
+      line: "{{ item }}"
+    with_items:
+      - "host    jupyterhub     jupyter               ::1/128               md5"
+      - "host    jupyterhub     jupyter             127.0.0.1/32            md5"
   become: true
 
 - name: restart postgresql
