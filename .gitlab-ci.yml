@@ -58,6 +58,8 @@ stages:
     paths:
       - build/reports/
     expire_in: 1 day
+  except:
+    - tags
 
 ansible-lint:
   stage: lint
@@ -70,6 +72,8 @@ ansible-lint:
     paths:
       - build/reports/
     expire_in: 1 day
+  except:
+    - tags
 
 molecule-test-rockylinux9:
   stage: test-rocky
@@ -115,7 +119,7 @@ release:
     - *prepare_step
   script:
     - ansible-galaxy collection build
-    - ansible-galaxy collection publish --token ${GALAXY_API_TOKEN} mahendrapaipuri-ansible_jupyterhub_hpc-*.tar.gz
+    - ansible-galaxy collection publish --token "${GALAXY_API_TOKEN}" mahendrapaipuri-ansible_jupyterhub_hpc-*.tar.gz
   only:
     - tags
 
