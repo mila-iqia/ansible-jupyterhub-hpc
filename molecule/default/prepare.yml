@@ -19,173 +19,23 @@
   hosts: all
   gather_facts: true
   tasks:
-   # Ansible executes sudo tasks with flags sudo -H -S -n -u root <cmd>
-   # If we are behind a proxy and those proxy variables are not in
-   # env_keep commands like yum update would not work as proxy envs are
-   # not set. Basically we add those proxy variables in env_keep to set
-   # them when ansible uses sudo -u root for executing tasks
-   - name: add proxy env variables to env_keep in sudoers file
-     lineinfile:
-       dest: /etc/sudoers
-       state: present
-       regexp: '^Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
-       line: 'Defaults    env_keep += "HTTP_PROXY HTTPS_PROXY http_proxy https_proxy no_proxy NO_PROXY"'
-       validate: "visudo -cf %s"
-       
-   - name: configure SLURM
-     lineinfile:
-       dest: /etc/slurm/slurm.conf
-       state: present
-       regexp: "^(.*)CPUs=1 State=UNKNOWN(.*)$"
-       line: "NodeName=slurmcontroller CPUs={{ ansible_processor_vcpus }} State=UNKNOWN"
-       
-   # In default service file of munge they use Type=forking and it has 
-   # consequeneces when running docker-in-docker. We got errors from systemd
-   # saying that PID file is not owned by root and it is supposed to be not owned
-   # by root as process is started as service user munge. Systemd needs PID file as
-   # the default Type is forking to be able to stop the process. Here we simplify it
-   # by using Type=simple and hence systemd does not need PIDfile anymore and it can
-   # stop the process by sending signal to main PID.
-   # https://unix.stackexchange.com/questions/534032/systemd-services-fail-with-user-in-service-file
-   # https://github.com/dun/munge/issues/101
-   - name: change Type of systemd file for munge
-     copy:
-       dest: "/etc/systemd/system/munge.service"
-       owner: root
-       group: root
-       mode: 0644
-       content: |
-        [Unit]
-        Description=MUNGE authentication service
-        Documentation=man:munged(8)
-        After=network.target
-        After=time-sync.target
+    # Ansible executes sudo tasks with flags sudo -H -S -n -u root <cmd>
+    # If we are behind a proxy and those proxy variables are not in
+    # env_keep commands like yum update would not work as proxy envs are
+    # not set. Basically we add those proxy variables in env_keep to set
+    # them when ansible uses sudo -u root for executing tasks
+    - name: Add proxy env variables to env_keep in sudoers file
+      ansible.builtin.lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
+        line: 'Defaults    env_keep += "HTTP_PROXY HTTPS_PROXY http_proxy https_proxy no_proxy NO_PROXY"'
+        validate: "visudo -cf %s"
 
-        [Service]
-        Type=simple
-        ExecStart=/usr/sbin/munged --foreground --syslog
-        User=munge
-        Group=munge
-        Restart=on-abort
-
-        [Install]
-        WantedBy=multi-user.target
-     
-   - name: ensure /run/munge directory exists
-     file:
-       path: "/run/munge"
-       state: directory
-       owner: munge
-       group: munge
-
-   - name: enable munge
-     service: 
-      name: munge 
-      state: started 
-      enabled: yes
-     ignore_errors: yes
-
-   - name: enable slurm controller
-     service: 
-      name: slurmctld 
-      state: started 
-      enabled: yes
-     ignore_errors: yes
-
-   - name: start slurm daemon on compute nodes
-     shell: slurmd
-     ignore_errors: yes
-   
-   # We need to avoid systemd services of type forking in DinD CI
-   # pipelines. So the hack is to redo the systemd file to make them
-   # simple type and run CI jobs. This is only issue with the DinD and
-   # in production use cases, there is no need to modify systemd files
-   - name: install and customize postgresql systemd unit file [Ubuntu]
-     block:
-       - name: update apt
-         apt:
-           update_cache: yes
-           state: present
-
-       - name: install postgresql
-         apt:
-           name: "{{ item }}"
-           state: present
-         with_items:
-           - "postgresql"
-           - "postgresql-contrib"
-           - "python3-psycopg2"
-       
-       - name: modify systemd unit file of postgresql
-         copy:
-           dest: "/etc/systemd/system/postgresql.service"
-           owner: root
-           group: root
-           mode: 0644
-           content: |
-            [Unit]
-            Description=PostgreSQL RMDB service
-            After=network.target
-            After=time-sync.target
-
-            [Service]
-            Type=simple
-            ExecStart=/usr/lib/postgresql/14/bin/postgres -D /var/lib/postgresql/14/main -c config_file=/etc/postgresql/14/main/postgresql.conf
-            User=postgres
-            Group=postgres
-            Restart=on-failure
-
-            [Install]
-            WantedBy=multi-user.target
-            
-       - name: remove systemd file in lib folder
-         file:
-           path: "/lib/systemd/system/postgresql@.service"
-           state: absent
-         
-     when: ansible_distribution == 'Ubuntu'
-     
-   - name: install and customize postgresql systemd unit file [Debian]
-     block:
-       - name: update apt
-         apt:
-           update_cache: yes
-           state: present
-
-       - name: install postgresql
-         apt:
-           name: "{{ item }}"
-           state: present
-         with_items:
-           - "postgresql"
-           - "postgresql-contrib"
-           - "python3-psycopg2"
-       
-       - name: modify systemd unit file of postgresql
-         copy:
-           dest: "/etc/systemd/system/postgresql.service"
-           owner: root
-           group: root
-           mode: 0644
-           content: |
-            [Unit]
-            Description=PostgreSQL RMDB service
-            After=network.target
-            After=time-sync.target
-
-            [Service]
-            Type=simple
-            ExecStart=/usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql/13/main -c config_file=/etc/postgresql/13/main/postgresql.conf
-            User=postgres
-            Group=postgres
-            Restart=on-failure
-
-            [Install]
-            WantedBy=multi-user.target
-            
-       - name: remove systemd file in lib folder
-         file:
-           path: "/lib/systemd/system/postgresql@.service"
-           state: absent
-         
-     when: ansible_distribution == 'Debian'
+    - name: Creating users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        password: "{{ item | password_hash('sha512') }}"
+      with_items:
+        - usr1
+        - usr2

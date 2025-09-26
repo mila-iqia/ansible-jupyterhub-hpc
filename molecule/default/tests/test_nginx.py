@@ -20,21 +20,20 @@ import yaml
 import testinfra.utils.ansible_runner
 
 # We run tests against these hosts
-testinfra_hosts = ['slurmcontroller']
+testinfra_hosts = ['slurmcluster']
 
 # Directories that are expected to exist
-expected_dirs = ['/etc/nginx/ssl']
+expected_dirs = ['/etc/nginx/tls']
 
 # Systemd service files that are expected to exist
-expected_cert_files = ['/etc/nginx/ssl/cert/slurmcontroller.crt',
-                       '/etc/nginx/ssl/private/slurmcontroller.key',
-                       '/etc/nginx/ssl/slurmcontroller.dhparam.pem']
+expected_cert_files = ['/etc/nginx/tls/certs/slurmcluster.crt',
+                       '/etc/nginx/tls/private/slurmcluster.key']
 
 # System services that are expected to run
 expected_services = ['nginx']
 
 # Server running on ports
-expected_nginx_ports = ['80', '443']
+expected_nginx_ports = ['80', '443', '9443', '3443']
 
 
 @pytest.mark.parametrize("dirs", expected_dirs)

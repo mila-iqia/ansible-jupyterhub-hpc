@@ -1,21 +1,18 @@
 # Deployment
 
-The following examples show some modes of deploying JupyterHub using the current 
+The following examples show some modes of deploying JupyterHub using the current
 Ansible playbook.
 
-## All in one
+## Inventory
 
-We can deploy JupyterHub and the monitoring stack in one machine by using an 
+We can deploy JupyterHub and the monitoring stack in one machine by using an
 inventory file as follows
 
-```
+```ini
 [jupyterhub]
 server.example.com
 
 [prometheus]
-server.example.com
-
-[loki]
 server.example.com
 
 [grafana]
@@ -26,84 +23,64 @@ jupyterhub
 
 [node_exporter:children]
 jupyterhub
-
-[promtail:children]
-nginx
 ```
 
-The playbook also supports to install Prometheus, Grafana and Grafana Loki on 
-different machines. 
-
-```
-[jupyterhub]
-server1.example.com
-
-[prometheus]
-server2.example.com
-
-[loki]
-server3.example.com
-
-[grafana]
-server4.example.com
-
-[nginx:children]
-jupyterhub
-
-[node_exporter:children]
-jupyterhub
-
-[promtail:children]
-nginx
-```
-
-The playbooks are designed to be able to update the configurations of 
-existing Prometheus and Grafana installations on the machine. However, it is not 
+The playbooks are designed to be able to update the configurations of
+existing Prometheus and Grafana installations on the machine. However, it is not
 very well tested.
+
+## Playbook
+
+A sample playbook is shown as follows:
+
+```yaml
+- name: Import JupyterHub collection
+  ansible.builtin.import_playbook: mahendrapaipuri.ansible_jupyterhub_hpc.deploy.yml
+  # Any variables that needs customization can be declared here
+  # vars:
+  #   jupyterhub_service_name: jupyterhub.example.com
+```
 
 ## Using Self-Signed Certificates
 
-Make sure we set `self_signed_certs` variable in [config.yml](../config.yml) to 
-`True` and then we need to simply run
-
-```
-ansible-playbook -i hostfile site.yml
-```
-
-This will create TLS certificates and keys signed by `jupyterhub-ca` and place 
-them in `admin/tls` folder on Ansible controller and also copies them to remote 
-machines. 
+By default playbook will use self signed certificates for nginx. The created CA `jupyterhub-ca`
+is installed to remote machines at at `/etc/pki/tls` for RedHat flavoured OS and `/etc/ssl`
+for Debian flavoured OS.
 
 ## Using External Certificates
 
-If TLS certificates issued by external CA are used, make sure that we place them 
-in `admin/tls` folder before running the playbook. For instance, if we want to 
-deploy JupyterHub on machine `server.example.com` then we must ensure that we 
-have files at `admin/tls/server.example.com/server.example.com.crt` and 
-`admin/tls/server.example.com/server.example.com.key` before running the playbook.
-It is important that folder, certificate and key names should match the name of 
-the host in the inventory file.
+If TLS certificates issued by external CA are used, make sure that we place them
+on the remote machines at `/etc/pki/tls` for RedHat flavoured OS and `/etc/ssl`
+for Debian flavoured OS. It is important that the certificate and key names should
+match the name of `jupyterhub_service_name`.
 
 ## Skip Monitoring Services
 
-If we wish not to install monitoring services, set `install_mon_stack` to 
-`False` and run the playbook
+If we wish not to install monitoring services, set `install_mon_stack` to
+`false` as follows:
+
+```yaml
+- name: Import JupyterHub collection
+  ansible.builtin.import_playbook: mahendrapaipuri.ansible_jupyterhub_hpc.deploy.yml
+  # Any variables that needs customization can be declared here
+  vars:
+    install_mon_stack: false
+```
 
 ## Update Configurations
 
-If we changed JupyterHub configuration and wish to update the configuration 
+If we changed JupyterHub configuration and wish to update the configuration
 file, we can use
 
-```
-ansible-playbook -i hostfile site.yml --tags "configure_jupyterhub"
+```bash
+ansible-playbook -i inventory deploy.yml --tags "configure_jupyterhub"
 ```
 
 Similarly, `nginx` configuration can be updated using
 
-```
-source encryption/jp-adminrc
-ansible-playbook -i hostfile site.yml --tags "configure_nginx"
+```bash
+ansible-playbook -i inventory deploy.yml --tags "configure_nginx"
 ```
 
-After these steps, we need to manually restart JupyterHub, JupyterHub proxy 
+After these steps, we need to manually restart JupyterHub, JupyterHub proxy
 and/or nginx services.

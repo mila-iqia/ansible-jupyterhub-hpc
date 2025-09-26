@@ -1,0 +1,65 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+# Creates nginx user and install certificates
+
+- name: Create the nginx system group
+  ansible.builtin.group:
+    name: "{{ nginx_system_user }}"
+    state: present
+    system: true
+  become: true
+
+- name: Create nginx system user
+  ansible.builtin.user:
+    name: "{{ nginx_system_user }}"
+    groups: "{{ nginx_system_group }}"
+    append: true
+    state: present
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+  become: true
+
+- name: Make sure /etc/nginx/tls exists
+  ansible.builtin.file:
+    path: "/etc/nginx/tls/{{ item }}"
+    state: directory
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: "0700"
+  become: true
+  with_items:
+    - "certs"
+    - "private"
+
+- name: Install TLS key
+  ansible.builtin.copy:
+    src: "{{ __remote_tls_dir }}/private/{{ jupyterhub_service_name }}.key"
+    dest: "/etc/nginx/tls/private/{{ jupyterhub_service_name }}.key"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    remote_src: true
+    mode: "0600"
+  become: true
+
+- name: Install TLS certificate
+  ansible.builtin.copy:
+    src: "{{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt"
+    dest: "/etc/nginx/tls/certs/{{ jupyterhub_service_name }}.crt"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    remote_src: true
+    mode: "0600"
+  become: true

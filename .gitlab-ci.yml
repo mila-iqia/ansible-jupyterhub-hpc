@@ -1,4 +1,5 @@
-image: docker:20.10.16
+---
+image: docker:28.3.2
 
 variables:
   # When you use the dind service, you must instruct Docker to talk with
@@ -18,94 +19,38 @@ variables:
   DOCKER_TLS_CERTDIR: "/certs"
 
 services:
-  - docker:20.10.16-dind
+  - docker:28.3.2-dind
 
 stages:
   - lint
-  - test-redhat
+  - test-rocky
   - test-debian
-  - test-alt
-  - posttest
+  - test-ubuntu
+  - release
 
 # prepare job YAML anchor
 .prepare_step: &prepare_step
   - apk add --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl openssl-dev tar bzip2 unzip
-  - ln -s /usr/bin/python3 /usr/bin/python
   - docker info
   - python3 --version
-  - pip install --upgrade pip
-  - pip install wheel
+  - python3 -m venv /root/venv
+  - . /root/venv/bin/activate
   - pip install --no-cache-dir --ignore-installed -r requirements-dev.txt
-  - ansible-galaxy install -r requirements.yml
+  # If we need to pin Ansible version, do it now
+  - if [ ! -z "${ANSIBLE_VERSION}" ]; then pip install "ansible==${ANSIBLE_VERSION}"; fi
   - ansible --version
   - molecule --version
   - mkdir -p admin
-  - cp .ci/slurmcontroller.dhparam.pem admin/
 
 # Job template
 .job_template:
-   variables:
-     OS_DIST: 'default'
-   before_script:
-     - *prepare_step
-   script:
-     - molecule --debug test --scenario-name=${OS_DIST}
-   after_script:
-     - ls -la build
-     - ls -la build/reports
-   artifacts:
-    paths:
-      - build/reports/
-    expire_in: 1 day
-
-molecule-lint:
-  stage: lint
-  before_script:
-    - mkdir -p build/reports
-    - *prepare_step
-
-  script:
-    - molecule lint
-    - ansible-lint-junit ansible-lint.txt -o build/reports/linting.xml
-  artifacts:
-    paths:
-      - build/reports/
-    expire_in: 1 day
-
-molecule-test-centos:
-  stage: test-redhat
-  extends: .job_template
-
-molecule-test-rockylinux:
-  stage: test-redhat
   variables:
-     OS_DIST: 'rockylinux8'
-  extends: .job_template
-
-molecule-test-debian:
-  stage: test-debian
-  variables:
-     OS_DIST: 'debian11'
-  extends: .job_template
-
-molecule-test-ubuntu:
-  stage: test-debian
-  variables:
-     OS_DIST: 'ubuntu22'
-  extends: .job_template
-
-molecule-test-alternative:
-  stage: test-alt
-  variables:
-     OS_DIST: 'alternative'
-  extends: .job_template
-
-merge-junit-files:
-  stage: posttest
+    OS_DIST: "default"
+    ANSIBLE_VERSION: ""
   before_script:
     - *prepare_step
   script:
-    - junitparser merge build/reports/unit-tests-default.xml build/reports/unit-tests-alternative.xml build/reports/unit-tests-debian11.xml build/reports/unit-tests-ubuntu22.xml build/reports/unit-tests-rockylinux8.xml build/reports/unit-tests.xml
+    - molecule --debug test --scenario-name=${OS_DIST}
   after_script:
     - ls -la build
     - ls -la build/reports
@@ -114,9 +59,70 @@ merge-junit-files:
       - build/reports/
     expire_in: 1 day
 
+ansible-lint:
+  stage: lint
+  before_script:
+    - mkdir -p build/reports
+    - *prepare_step
+  script:
+    - ansible-lint
+  artifacts:
+    paths:
+      - build/reports/
+    expire_in: 1 day
+
+molecule-test-rockylinux9:
+  stage: test-rocky
+  extends: .job_template
+
+molecule-test-rockylinux8:
+  stage: test-rocky
+  variables:
+    OS_DIST: "rockylinux8"
+    # For RHEL 8 flavours, last supported Ansible is 2.16/9.13
+    # Ref: https://www.jeffgeerling.com/blog/2024/newer-versions-ansible-dont-work-rhel-8
+    ANSIBLE_VERSION: "9.13.0"
+  extends: .job_template
+
+molecule-test-debian11:
+  stage: test-debian
+  variables:
+    OS_DIST: "debian11"
+  extends: .job_template
+
+molecule-test-debian12:
+  stage: test-debian
+  variables:
+    OS_DIST: "debian12"
+  extends: .job_template
+
+molecule-test-ubuntu22:
+  stage: test-ubuntu
+  variables:
+    OS_DIST: "ubuntu22"
+  extends: .job_template
+
+molecule-test-ubuntu24:
+  stage: test-ubuntu
+  variables:
+    OS_DIST: "ubuntu24"
+  extends: .job_template
+
+# Create a new release on GitLab
+release:
+  stage: release
+  before_script:
+    - *prepare_step
+  script:
+    - ansible-galaxy collection build
+    - ansible-galaxy collection publish --token ${GALAXY_API_TOKEN} mahendrapaipuri-ansible_jupyterhub_hpc-*.tar.gz
+  only:
+    - tags
+
+
 # Create Gitlab CI badges from CI metrics
 # This job is allowed to fail so that it will not mark CI as
 # failure if this job fails
 include:
-  - project: 'idris-cnrs/ci-utilities/ci-templates'
-    file: 'includes/create-badges.yml'
+  - project: "idris-cnrs/ci-utilities/ci-templates"
+    file: "includes/create-badges.yml"

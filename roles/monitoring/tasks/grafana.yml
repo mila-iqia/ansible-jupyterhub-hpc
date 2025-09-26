@@ -1,0 +1,34 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- name: Set grafana ini config
+  ansible.builtin.set_fact:
+    grafana_ini: "{{ {'paths': {'data': '/var/lib/grafana'}, 'server': {'http_addr': grafana_http_addr, 'http_port': grafana_http_port, 'root_url': 'https://' + jupyterhub_service_name + ':' + (((nginx_https_port
+      | int) + 3000) | string)}, 'security': {'admin_user': 'grafana', 'admin_password': grafana_passwd | trim}, 'users': {'allow_sign_up': 'false', 'auto_assign_org_role': 'Viewer', 'default_theme': 'dark'},
+      'analytics': {'enabled': 'false', 'reporting_enabled': 'false', 'check_for_updates': 'false'}} }}"
+
+- name: Add prometheus datasource to grafana configuration for self signed certs
+  ansible.builtin.set_fact:
+    grafana_datasources: "{{ grafana_datasources | default([]) + [{'name': 'jupyterhub_prometheus', 'type': 'prometheus', 'url': 'http://' + hostvars[inventory_hostname]['prometheus_http_address'] + ':'
+      + hostvars[inventory_hostname]['prometheus_http_port'], 'basicAuth': true, 'basicAuthUser': 'prometheus', 'isDefault': true, 'editable': false, 'secureJsonData': {'basicAuthPassword': prometheus_passwd
+      | trim}}] }}"
+  with_items:
+    - "{{ groups['prometheus'] }}"
+
+- name: Set grafana dashboards
+  ansible.builtin.set_fact:
+    grafana_dashboards: "{{ grafana_dashboards | default([]) + [{'dashboard_id': '1860', 'revision_id': '26', 'datasource': 'jupyterhub_prometheus'}] + [{'dashboard_id': '23694', 'revision_id': '1', 'datasource':
+      'jupyterhub_prometheus'}] }}"
+    # Only until a new release is made which contains the fix
+    grafana_provisioning_synced: true

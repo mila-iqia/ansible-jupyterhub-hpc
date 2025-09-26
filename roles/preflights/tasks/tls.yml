@@ -1,0 +1,122 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# This tasks checks if TLS certs exists if external certs are used
+
+- name: Check for TLS cert key pair for jupyterhub host
+  when: not self_signed_certs and inventory_hostname in groups['jupyterhub']
+  block:
+    - name: Check if TLS key for jupyterhub host exists on remote machine
+      ansible.builtin.stat:
+        path: "{{ __remote_tls_dir }}/private/{{ jupyterhub_service_name }}.key"
+      register: key_path
+
+    - name: Fail when TLS key file for jupyterhub host does not exist on remote machine
+      ansible.builtin.fail:
+        msg: "TLS key cannot be found at {{ __remote_tls_dir }}/private/{{ jupyterhub_service_name }}.key"
+      when: not key_path.stat.exists
+
+    - name: Check if TLS cert for jupyterhub host exists on remote machine
+      ansible.builtin.stat:
+        path: "{{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt"
+      register: cert_path
+
+    - name: Fail when TLS cert file for jupyterhub host does not exist on remote machine
+      ansible.builtin.fail:
+        msg: "TLS cert cannot be found at {{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt."
+      when: not cert_path.stat.exists
+
+- name: Create self signed CA and certificates
+  when: self_signed_certs and inventory_hostname in groups['jupyterhub']
+  block:
+    - name: Create folder for CA certificate
+      ansible.builtin.file:
+        path: "{{ __remote_tls_dir }}/jupyterhub-ca"
+        state: directory
+        mode: "0755"
+
+    - name: Create private key
+      community.crypto.openssl_privatekey:
+        path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+
+    - name: Check whether certificate exists
+      ansible.builtin.stat:
+        path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.crt"
+      run_once: true
+      register: certificate_exists
+
+    - name: Create certificate signing request (CSR) for CA certificate
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+        common_name: JupyterHub CA
+        use_common_name_for_san: false # since we do not specify SANs, don't use CN as a SAN
+        basic_constraints:
+          - "CA:TRUE"
+        basic_constraints_critical: true
+        key_usage:
+          - keyCertSign
+        key_usage_critical: true
+      register: ca_csr
+      when: not certificate_exists.stat.exists
+
+    - name: Create self-signed CA certificate from CSR
+      community.crypto.x509_certificate:
+        path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.crt"
+        csr_content: "{{ ca_csr.csr }}"
+        privatekey_path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+        provider: selfsigned
+      when: not certificate_exists.stat.exists
+
+    - name: Create private key for new certificate
+      community.crypto.openssl_privatekey:
+        path: "{{ __remote_tls_dir }}/private/{{ jupyterhub_service_name }}.key"
+      run_once: true
+
+    - name: Check whether certificate exists
+      ansible.builtin.stat:
+        path: "{{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt"
+      run_once: true
+      register: certificate_exists
+
+    - name: Create certificate signing request (CSR) for new certificate
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ __remote_tls_dir }}/private/{{ jupyterhub_service_name }}.key"
+        subject_alt_name:
+          - "DNS:{{ jupyterhub_service_name }}"
+          - "DNS:localhost"
+          - "IP:127.0.0.1"
+      run_once: true
+      register: csr
+      when: not certificate_exists.stat.exists
+
+    - name: Sign certificate with our CA
+      community.crypto.x509_certificate_pipe:
+        csr_content: "{{ csr.csr }}"
+        provider: ownca
+        ownca_path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.crt"
+        ownca_privatekey_path: "{{ __remote_tls_dir }}/jupyterhub-ca/jupyterhub-ca.key"
+        ownca_not_after: +365d # valid for one year
+        ownca_not_before: "-1d" # valid since yesterday
+      run_once: true
+      register: certificate
+      when: not certificate_exists.stat.exists
+
+    - name: Write certificate file
+      ansible.builtin.copy:
+        dest: "{{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt"
+        content: "{{ certificate.certificate }}"
+        mode: "0755"
+      run_once: true
+      when: not certificate_exists.stat.exists

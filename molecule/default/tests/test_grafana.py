@@ -20,18 +20,15 @@ import yaml
 import testinfra.utils.ansible_runner
 
 # We run tests against these hosts
-testinfra_hosts = ['slurmcontroller']
+testinfra_hosts = ['slurmcluster']
 
 # Directories that are expected to exist
-expected_dirs = ['/etc/grafana', '/etc/grafana/ssl']
+expected_dirs = ['/etc/grafana']
 
 # Systemd service files that are expected to exist
-expected_cfg_files = ['/var/lib/grafana/dashboards/jupyterhub-dashboard.json',
+expected_cfg_files = ['/var/lib/grafana/dashboards/1860.json',
+                      '/var/lib/grafana/dashboards/23694.json',
                       '/etc/grafana/grafana.ini']
-
-# Expected cert files
-expected_tls_files = ['/etc/grafana/ssl/cert/slurmcontroller.crt',
-                      '/etc/grafana/ssl/private/slurmcontroller.key']
 
 # System services that are expected to run
 expected_services = ['grafana-server']
@@ -58,13 +55,6 @@ def test_config_files(host, cfg_files):
     assert f.exists
 
 
-@pytest.mark.parametrize("cert_files", expected_tls_files)
-def test_cert_files(host, cert_files):
-    f = host.file(cert_files)
-    assert f.is_file
-    assert f.exists
-
-
 @pytest.mark.skip(reason="This might fail on Ubuntu22")
 @pytest.mark.parametrize("services", expected_services)
 def test_service(host, services):
@@ -76,7 +66,7 @@ def test_service(host, services):
 @pytest.mark.skip(reason="This might fail on Ubuntu22")
 @pytest.mark.parametrize("ports", expected_ports)
 def test_ports(host, ports):
-    ip_addr = host.check_output('hostname -I').strip()
+    ip_addr = host.check_output('hostname -I').strip().split()[0]
     s = host.socket(
         f'tcp://{ip_addr}:{ports}')
     assert s.is_listening

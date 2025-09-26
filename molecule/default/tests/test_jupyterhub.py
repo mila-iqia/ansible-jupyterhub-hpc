@@ -20,7 +20,7 @@ import yaml
 import testinfra.utils.ansible_runner
 
 # We run tests against these hosts
-testinfra_hosts = ['slurmcontroller']
+testinfra_hosts = ['slurmcluster']
 
 # Read all ansible vars
 # ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
@@ -33,32 +33,20 @@ expected_dirs = [
     '/opt/jupyter/jupyterhub/share/jupyterhub/templates',
     '/opt/jupyter/jupyterhub/etc/ipython', '/var/log/jupyterhub', 
     '/srv/jupyterhub', '/srv/jupyterhub/internal-ssl', 
-    '/var/lib/pgsql/data', '/var/log/jupyterhub-proxy',
+    '/var/lib/pgsql/data',
     '/etc/systemd/system/postgresql.service.d'
 ]
 
 # Config files that are expected to exist
 expected_cfg_files = [
     '/opt/jupyter/jupyterhub/etc/jupyterhub/jupyterhub_config.py',
-    '/opt/jupyter/jupyterhub/etc/jupyter/jupyter_notebook_config.py',
-    '/etc/systemd/system/postgresql.service.d/stop.conf', 
-    '/srv/jupyterhub/nodelist.txt', 
-    '/etc/sudoers.d/jupyter'
-]
-
-# Token files that are expected to exist
-expected_token_files = [
-    '/srv/jupyterhub/cookie_secret',
-    '/srv/jupyterhub/proxy_auth_token',
-    '/srv/jupyterhub/crypt_key',
-    '/srv/jupyterhub/db_passwd',
-    '/srv/jupyterhub/metrics_token'
+    '/opt/jupyter/jupyterhub/etc/jupyter/jupyter_server_config.py',
+    '/etc/systemd/system/postgresql.service.d/stop.conf',
 ]
 
 # Pip packages that are expected to exist
 expected_pip_pkgs = [
-    'batchspawner', 'psycopg2-binary', 'jupyter-server-proxy',
-    'cdsdashboards'
+    'batchspawner', 'psycopg2-binary', 'jupyter_server_proxy',
 ]
 
 # System services that are expected to run
@@ -83,12 +71,6 @@ def test_config_files(host, cfg_files):
     f = host.file(cfg_files)
     assert f.is_file
     assert f.exists
-    
-@pytest.mark.parametrize("token_files", expected_token_files)
-def test_token_files(host, token_files):
-    f = host.file(token_files)
-    assert f.is_file
-    assert f.exists
 
 
 @pytest.mark.parametrize("pip_pkgs", expected_pip_pkgs)
@@ -107,7 +89,7 @@ def test_service(host, services):
 
 @pytest.mark.parametrize("ports", expected_ports)
 def test_ports(host, ports):
-    ip_addr = host.check_output('hostname -I').strip()
+    ip_addr = host.check_output('hostname -I').strip().split()[0]
     s = host.socket(
         f'tcp://{ip_addr}:{ports}')
     assert s.is_listening

@@ -1,0 +1,46 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# We need to restart jupyterhub service when we make changes
+# to configuration. Here we do that as a task only if the
+# service file exists. We should skip this task when service file
+# does not exist which can be case when we are installing jupyterhub
+# for the first time
+- name: Check /etc/systemd/system/jupyterhub.service exists
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/jupyterhub.service"
+  register: jh_service_file
+
+- name: Install jupyterhub config file
+  ansible.builtin.template:
+    src: jupyterhub_config.py.j2
+    dest: "{{ jupyterhub_config_dir }}/jupyterhub_config.py"
+    mode: "0644"
+  become: true
+
+- name: Install jupyter config file
+  ansible.builtin.template:
+    src: jupyter_server_config.py.j2
+    dest: "{{ jupyter_config_dir }}/jupyter_server_config.py"
+    mode: "0644"
+  become: true
+
+- name: Restart jupyterhub
+  ansible.builtin.service:
+    name: "jupyterhub"
+    state: restarted
+  when: jh_service_file.stat.exists
+  tags:
+    - molecule-idempotence-notest

@@ -19,7 +19,7 @@ import pytest
 import yaml
 
 # We run tests against these hosts
-testinfra_hosts = ['slurmcontroller']
+testinfra_hosts = ['slurmcluster']
 
 # Read all ansible vars
 # ansible_vars = yaml.safe_load(open('/tmp/ansible-vars.yml', 'r'))
@@ -30,8 +30,8 @@ expected_dirs = ['/etc/logrotate.d']
 
 # Systemd service files that are expected to exist
 expected_cfg_files = ['/etc/logrotate.d/jupyterhub',
-                      '/etc/logrotate.d/jupyterhub-proxy',
-                      '/etc/logrotate.d/nginx', '/etc/logrotate.d/grafana']
+                      '/etc/logrotate.d/nginx', 
+                      '/etc/logrotate.d/grafana']
 
 
 @pytest.mark.parametrize("dirs", expected_dirs)

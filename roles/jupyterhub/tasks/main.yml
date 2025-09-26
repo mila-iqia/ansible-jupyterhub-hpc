@@ -1,0 +1,44 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# Tasks to install, configure and setup systemd services for JupyterHub
+
+- name: Gather variables for each operating system
+  ansible.builtin.include_vars: "{{ item }}"
+  with_items:
+    - "{{ ansible_os_family }}.yml"
+
+- name: Install JupyterHub components
+  ansible.builtin.import_tasks: install.yml
+  tags:
+    - install_jupyterhub
+
+- name: Setup JupyterHub related directories
+  ansible.builtin.import_tasks: directories.yml
+- name: Setup PostgreSQL DB
+  ansible.builtin.import_tasks: postgresql.yml
+  when: use_postgresql_db
+  tags:
+    - setup_jupyterhub_db
+
+- name: Configure JupyterHub
+  ansible.builtin.import_tasks: configure.yml
+  tags:
+    - configure_jupyterhub
+
+- name: Setup JupyterHub systemd services
+  ansible.builtin.import_tasks: services.yml
+  tags:
+    - configure_jupyterhub_services

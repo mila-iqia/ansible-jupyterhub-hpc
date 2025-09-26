@@ -1,0 +1,129 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# Setup PostgresSQL database for jupyterhub
+
+- name: Init PostgreSQL DB
+
+  # Seems like we have a bug in systemd 239 which comes with CentOS 8
+  # https://bugs.centos.org/view.php?id=17461
+  # We need to add this additional conf file to reload daemon post stopping
+  # the service
+  block:
+    - name: Check if PostgreSQL database is initialised
+      ansible.builtin.stat:
+        path: "{{ postgresql_data_dir }}/pg_hba.conf"
+      register: pgsql_stat
+      become: true
+
+    - name: Initialise PostgreSQL database
+      ansible.builtin.command: "{{ postgresql_init_cmd }}"
+      args:
+        creates: "{{ postgresql_data_dir }}/pg_hba.conf"
+      become_user: postgres
+      become: true
+      when: not pgsql_stat.stat.exists # and ansible_distribution_major_version == '8'
+
+    - name: Use md5 as authentication method for databases on localhost
+      ansible.builtin.lineinfile:
+        dest: "{{ postgresql_data_dir }}/pg_hba.conf"
+        state: present
+        insertafter: "^local   all             all                                     peer"
+        line: "{{ item }}"
+      become: true
+      with_items:
+        - "host    {{ jupyterhub_db_name }}     {{ jupyterhub_system_user }}               ::1/128               md5"
+        - "host    {{ jupyterhub_db_name }}     {{ jupyterhub_system_user }}             127.0.0.1/32            md5"
+- name: Add stop.conf to /etc/systemd/system/postgresql.service.d/stop.conf
+  become: true
+
+  block:
+    - name: Create /etc/systemd/system/postgresql.service.d folder
+      ansible.builtin.file:
+        path: "/etc/systemd/system/postgresql.service.d"
+        owner: root
+        group: root
+        mode: "0755"
+        state: directory
+    - name: Create stop.conf file
+      ansible.builtin.copy:
+        dest: "/etc/systemd/system/postgresql.service.d/stop.conf"
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Service]
+          ExecStopPost=+/usr/bin/systemctl daemon-reload
+- name: Restart postgresql
+  ansible.builtin.service:
+    name: "{{ postgresql_service_unit }}"
+    state: restarted
+  become: true
+  tags:
+    - molecule-idempotence-notest
+
+- name: Enable postgresql
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+  become: true
+
+- name: Create the database for jupyterhub
+  community.postgresql.postgresql_db:
+    name: "{{ jupyterhub_db_name }}"
+    template: "template0"
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Create user that has access to the new database
+  community.postgresql.postgresql_user:
+    login_db: "{{ jupyterhub_db_name }}"
+    name: "{{ jupyterhub_system_user }}"
+    password: "{{ jupyterhub_db_passwd }}"
+    role_attr_flags: NOSUPERUSER,NOCREATEDB
+    state: present
+  become: true
+  become_user: postgres
+
+# GRANT ALL PRIVILEGES ON DATABASE jupyterhub TO jupyter
+- name: Ensure user does not have unnecessary permissions
+  community.postgresql.postgresql_privs:
+    login_db: "{{ jupyterhub_db_name }}"
+    privs: ALL
+    type: database
+    role: "{{ jupyterhub_system_user }}"
+    state: present
+  become: true
+  become_user: postgres
+  tags:
+    - molecule-idempotence-notest
+
+# GRANT ALL PRIVILEGES ON SCHEMA public TO jupyter
+# Seems like this is necessary in PostgreSQL 15 (Ubuntu2404)
+# Ref: https://stackoverflow.com/questions/67276391/why-am-i-getting-a-permission-denied-error-for-schema-public-on-pgadmin-4
+- name: Ensure user does not have unnecessary permissions
+  community.postgresql.postgresql_privs:
+    login_db: "{{ jupyterhub_db_name }}"
+    privs: ALL
+    type: schema
+    obj: public
+    role: "{{ jupyterhub_system_user }}"
+    state: present
+  become: true
+  become_user: postgres
+  tags:
+    - molecule-idempotence-notest
