@@ -39,3 +39,13 @@ dependencies:
 repository: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc"
 documentation: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/tree/main/docs"
 issues: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/issues"
+build_ignore:
+  - .config
+  - .github
+  - .gitignore
+  - .ansible
+  - changelogs
+  - molecule
+  - tests
+  - '*test-requirements.txt'
+  - '*.tar.gz'
