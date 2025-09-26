@@ -22,6 +22,7 @@ if sys.version_info[0] < 3:
 
 
 def get_type(var, **kwargs):
+    """Get type of the variable"""
     return type(var)
 
 

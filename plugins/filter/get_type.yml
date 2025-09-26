@@ -1,0 +1,22 @@
+DOCUMENTATION:
+  name: get_type
+  short_description: get variable type
+  description:
+    - Return the Python type of the variable
+  positional: _input
+  options:
+    _input:
+      description: Variable to infer type.
+      type: any
+      required: true
+
+EXAMPLES: |
+  config: '{{ get_type('a') }}'
+  # =>
+  #     string
+
+RETURN:
+  _value:
+    description:
+      - Type of the variable
+    type: string

@@ -1,3 +1,3 @@
-# Setup Grafana
+# Setup monitoring facts
 
-This role contains tasks for installation TLS certificates for Grafana installation.
+This role contains tasks to setup facts for monitoring stack.

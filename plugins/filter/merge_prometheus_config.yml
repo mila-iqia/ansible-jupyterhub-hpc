@@ -1,0 +1,28 @@
+DOCUMENTATION:
+  name: merge_prometheus_config
+  short_description: merge Prometheus scrape configs
+  description:
+    - Merge the generated Prometheus scrape configs with existing scrape configs if and when present
+  positional: _generated, _existing
+  options:
+    _generated:
+      description: Generated Prometheus scrape config.
+      type: list
+      required: true
+    _existing:
+      description: Existing Prometheus full config.
+      type: dict
+      required: true
+
+EXAMPLES: |
+  config: '{{ [{"job": "test"}] | merge_prometheus_config({"scrape_configs": [{"job": "existing"}]}) }}'
+  # =>
+  #     {
+  #         "scrape_configs": [{"job": "test"}, {"job": "existing"}]
+  #     }
+
+RETURN:
+  _value:
+    description:
+      - Prometheus config after merging scrape configs
+    type: dict
