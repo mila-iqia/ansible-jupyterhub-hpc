@@ -1,0 +1,87 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- name: Fetch JupyterHub internal TLS cert files
+  become: true
+  when: jupyterhub_internal_tls
+
+  block:
+    - name: Read JupyterHub internal TLS cert files
+      ansible.builtin.slurp:
+        src: "{{ hostvars[inventory_hostname]['jupyterhub_internal_certs_dir'] }}/{{ item[1] }}"
+      register: jupyterhub_certs
+      no_log: true
+      delegate_to: "{{ item[0] }}"
+      with_nested:
+        - "{{ groups['jupyterhub'] }}"
+        - ["hub-ca_trust.crt", "proxy-client/proxy-client.key", "proxy-client/proxy-client.crt"]
+
+    - name: Read JupyterHub internal TLS cert contents into a tmp variable
+      ansible.builtin.set_fact:
+        __jh_certs_contents: "{{ (__jh_certs_contents | default({})) | combine({item.item[0] + '/' + item.item[1]: item.content | b64decode}) }}"
+      no_log: true
+      with_items: "{{ jupyterhub_certs.results }}"
+- name: Check if prometheus scrape config already exists
+  ansible.builtin.stat:
+    path: "/etc/prometheus/prometheus.yml"
+  become: true
+  register: prometheus_scrape_config
+
+- name: Read the existing prometheus scrape config
+  become: true
+  when: prometheus_scrape_config.stat.exists
+
+  block:
+    - name: Slurp prometheus config file
+      ansible.builtin.slurp:
+        src: "/etc/prometheus/prometheus.yml"
+      register: slurpfile
+
+    - name: Set fact for existing prometheus config file
+      ansible.builtin.set_fact:
+        _existing_prometheus_scrape_configs: "{{ slurpfile['content'] | b64decode | from_yaml }}"
+- name: Generate prometheus scrape configuration for node exporter targets
+  ansible.builtin.set_fact:
+    _node_prometheus_scrape_configs: "{{ _node_prometheus_scrape_configs | default([]) + [{'job_name': item + '_node_exporter', 'metrics_path': '/metrics', 'scheme': 'http', 'basic_auth': {'username': 'node_exporter',
+      'password': node_exporter_passwd | trim}, 'static_configs': [{'targets': [hostvars[inventory_hostname]['node_exporter_http_address'] + ':' + hostvars[inventory_hostname]['node_exporter_http_port']]}]}]
+      }}"
+  with_items:
+    - "{{ groups['node_exporter'] }}"
+
+- name: Generate prometheus scrape configuration for JupyterHub targets with internal TLS
+  ansible.builtin.set_fact:
+    _jh_prometheus_scrape_configs: "{{ _jh_prometheus_scrape_configs | default([]) + [{'job_name': item + '_jupyterhub', 'metrics_path': '/metrics', 'scheme': 'https', 'authorization': {'credentials': jupyterhub_prometheus_metrics_token},
+      'tls_config': {'ca': __jh_certs_contents[item + '/hub-ca_trust.crt'], 'cert': __jh_certs_contents[item + '/proxy-client/proxy-client.crt'], 'key': __jh_certs_contents[item + '/proxy-client/proxy-client.key'],
+      'insecure_skip_verify': True}, 'static_configs': [{'targets': [item + ':8081']}]}] }}"
+  when: jupyterhub_internal_tls
+  with_items:
+    - "{{ groups['jupyterhub'] }}"
+
+- name: Generate prometheus scrape configuration for JupyterHub targets
+  ansible.builtin.set_fact:
+    _jh_prometheus_scrape_configs: "{{ _jh_prometheus_scrape_configs | default([]) + [{'job_name': item + '_jupyterhub', 'metrics_path': '/metrics', 'scheme': 'http', 'authorization': {'credentials': jupyterhub_prometheus_metrics_token},
+      'static_configs': [{'targets': [item + ':8081']}]}] }}"
+  when: not jupyterhub_internal_tls
+  with_items:
+    - "{{ groups['jupyterhub'] }}"
+
+- name: Get resultant prometheus config from existing one and generated one
+  ansible.builtin.set_fact:
+    prometheus_scrape_configs: "{{ (_jh_prometheus_scrape_configs + _node_prometheus_scrape_configs) | merge_prometheus_config(_existing_prometheus_scrape_configs | default({})) }}"
+
+- name: Set prometheus basic auth configuration
+  ansible.builtin.set_fact:
+    prometheus_web_config: "{{ {'basic_auth_users': {'prometheus': prometheus_passwd | trim}, 'tls_server_config': {}, 'http_server_config': {}} }}"
+    prometheus_web_listen_address: "{{ prometheus_http_address }}:{{ prometheus_http_port }}"
+    prometheus_web_external_url: "https://{{ jupyterhub_service_name }}:{{ ((prometheus_http_port | int) + 9000) | string }}"

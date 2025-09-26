@@ -20,18 +20,13 @@ import yaml
 import testinfra.utils.ansible_runner
 
 # We run tests against these hosts
-testinfra_hosts = ['slurmcontroller']
+testinfra_hosts = ['slurmcluster']
 
 # Directories that are expected to exist
-expected_dirs = ['/etc/prometheus', '/etc/prometheus/ssl']
+expected_dirs = ['/etc/prometheus']
 
 # Systemd service files that are expected to exist
-expected_cfg_files = ['/etc/prometheus/prometheus.yml', 
-                      '/etc/prometheus/web.yml',]
-
-# Expected cert files
-expected_tls_files = ['/etc/prometheus/ssl/cert/slurmcontroller.crt',
-                      '/etc/prometheus/ssl/private/slurmcontroller.key']
+expected_cfg_files = ['/etc/prometheus/prometheus.yml']
 
 # System services that are expected to run
 expected_services = ['prometheus']
@@ -56,13 +51,6 @@ def test_config_files(host, cfg_files):
     f = host.file(cfg_files)
     assert f.is_file
     assert f.exists
-    
-
-@pytest.mark.parametrize("cert_files", expected_tls_files)
-def test_cert_files(host, cert_files):
-    f = host.file(cert_files)
-    assert f.is_file
-    assert f.exists
 
 
 @pytest.mark.parametrize("services", expected_services)
@@ -74,7 +62,6 @@ def test_service(host, services):
 
 @pytest.mark.parametrize("ports", expected_ports)
 def test_ports(host, ports):
-    ip_addr = host.check_output('hostname -I').strip()
     s = host.socket(
-        f'tcp://{ip_addr}:{ports}')
+        f'tcp://127.0.0.1:{ports}')
     assert s.is_listening

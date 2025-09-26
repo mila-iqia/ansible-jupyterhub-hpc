@@ -2,22 +2,17 @@
 
 [jupyterhub]
 # Host where jupyterhub will be deployed
-slurmcontroller
+slurmcluster
 
 [prometheus]
 # Single node to host Prometheus server. This can be either same host as
 # jupyterhub host or a different one.
-slurmcontroller
-
-[loki]
-# Single node to host Grafana Loki server. This can be either same host as
-# jupyterhub host or a different one.
-slurmcontroller
+slurmcluster
 
 [grafana]
 # Single node to host Grafana server. This can be either same host as
 # jupyterhub host or a different one.
-slurmcontroller
+slurmcluster
 
 [nginx:children]
 # Host that will have nginx reverse proxy. By default it is the same host as the
@@ -28,9 +23,3 @@ jupyterhub
 # Hosts to monitor for hardware and OS metrics. This should be same host as the
 # one where JupyterHub is deployed. THERE IS NO NEED TO CHANGE THIS GROUP
 jupyterhub
-
-[promtail:children]
-# Same host as nginx host to monitor the nginx logs and send them to
-# loki for displaying in grafana via dashboards. THERE IS NO NEED TO CHANGE
-# THIS GROUP
-nginx

@@ -1,0 +1,30 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify it
+# Jupyterhub systemd service config
+
+[Unit]
+Description=Service for launching Jupyterhub HTTP proxy
+After=network-online.target remote-fs.target local-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+User={{ jupyterhub_system_user }}
+Group={{ jupyterhub_system_group }}
+
+RuntimeDirectory=jupyterhub
+CacheDirectory=jupyterhub
+
+ExecStart={{ jupyterhub_env_bin_path }}/configurable-http-proxy --ip '' --port 8000 --api-ip 127.0.0.1 --api-port 8001 --error-target https://127.0.0.1:8081/hub/error --log-level debug --api-ssl-key {{ jupyterhub_internal_certs_dir }}/proxy-api/proxy-api.key --api-ssl-cert {{ jupyterhub_internal_certs_dir }}/proxy-api/proxy-api.crt --api-ssl-ca {{ jupyterhub_internal_certs_dir }}/proxy-api-ca_trust.crt --api-ssl-request-cert --api-ssl-reject-unauthorized --client-ssl-key {{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.key --client-ssl-cert {{ jupyterhub_internal_certs_dir }}/proxy-client/proxy-client.crt --client-ssl-ca {{ jupyterhub_internal_certs_dir }}/proxy-client-ca_trust.crt --client-ssl-request-cert --client-ssl-reject-unauthorized
+
+Restart=always
+RestartSec=5
+
+StandardOutput=append:/var/log/jupyterhub/jupyterhub-proxy.log
+StandardError=append:/var/log/jupyterhub/jupyterhub-proxy.log
+
+# Add JupyterHub env to PATH
+Environment="PATH={{ jupyterhub_env_bin_path }}:$PATH"
+
+[Install]
+WantedBy=multi-user.target

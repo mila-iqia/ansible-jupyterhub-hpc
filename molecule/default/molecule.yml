@@ -20,27 +20,28 @@ dependency:
     role-file: ../../requirements.yml
 driver:
   name: docker
-lint: |
-  yamllint . || exit 0
-  ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml -p --nocolor | tee ansible-lint.txt || exit 0
-  
+# lint: |
+#   yamllint . || exit 0
+#   ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml -p --nocolor | tee ansible-lint.txt || exit 0
+
 platforms:
-  - name: slurmcontroller
-    image: registry.gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/docker-slurm-controller-centos8:latest
+  - name: slurmcluster
+    image: registry.gitlab.com/idris-cnrs/ci-utilities/ci-service-containers/generic/slurm-cluster:rockylinux9
     command: ""
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
     published_ports:
-      - 6817:6817
-      - 6818:6818
-      - 6819:6819
-    hostname: slurmcontroller
+      - 8443:443
+      - 9443:9443
+      - 3443:3443
+    hostname: slurmcluster
+    cgroupns_mode: host
     privileged: true
     pre_build_image: true
     docker_networks:
-      - name: 'int'
-        attachable: yes
-    network_mode: 'int'
+      - name: "int"
+        attachable: true
+    network_mode: "int"
     env:
       http_proxy: ${http_proxy:-""}
       https_proxy: ${https_proxy:-""}
@@ -50,9 +51,19 @@ platforms:
 
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      remote_tmp: /tmp
+      stdout_callback: yaml
+      deprecation_warnings: false
+      allow_broken_conditionals: true
+      interpreter_python: /usr/bin/python3
+      filter_plugins: ${PWD}/plugins/filter
+      roles_path: ${PWD}/roles:${HOME}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
   inventory:
     links:
       hosts: hostfile
+      group_vars: ../../playbooks/group_vars/
 scenario:
   create_sequence:
     - dependency
@@ -78,7 +89,6 @@ scenario:
     - destroy
   test_sequence:
     - dependency
-    - lint
     - cleanup
     - destroy
     - syntax
@@ -94,4 +104,4 @@ verifier:
   name: testinfra
   directory: tests
   options:
-    junitxml: 'build/reports/unit-tests-default.xml'
+    junitxml: "build/reports/unit-tests-default.xml"

@@ -1,0 +1,60 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+# Install nginx web server and install certificates
+
+- name: Make sure /var/lib/nginx is owned by nginx system user
+  ansible.builtin.file:
+    path: "/var/lib/nginx/"
+    state: directory
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: "0700"
+  become: true
+
+- name: Install nginx main config file
+  ansible.builtin.template:
+    src: "nginx.conf.j2"
+    dest: "/etc/nginx/nginx.conf"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: "0644"
+    backup: true
+  become: true
+
+- name: Install nginx service config files
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/nginx/conf.d/{{ item }}"
+    owner: "{{ nginx_system_user }}"
+    group: "{{ nginx_system_group }}"
+    mode: "0644"
+    backup: true
+  become: true
+  with_items:
+    - jupyterhub.conf
+    - prometheus.conf
+    - grafana.conf
+
+- name: Install user defined systemd unit file for nginx
+  ansible.builtin.template:
+    src: nginx.service.j2
+    dest: /etc/systemd/system/nginx.service
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify:
+    - Reload nginx
+    - Restart nginx

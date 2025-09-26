@@ -1,0 +1,446 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify.
+# Configuration file for jupyterhub.
+{% set hub_ip = jupyterhub_hub_ip | default(ansible_all_ipv4_addresses[0], true) %}
+
+import os
+
+c = get_config()
+
+## Set the log level by value or name.
+c.Application.log_level = 10
+
+## Allow named single-user servers per user
+c.JupyterHub.allow_named_servers = True
+
+## Maximum number of concurrent named servers that can be created by a user at a
+#  time.
+#
+#  Setting this can limit the total resources a user can consume.
+#
+#  If set to 0, no limit is enforced.
+c.JupyterHub.named_server_limit_per_user = 10
+
+## Whether to shutdown single-user servers when the Hub shuts down.
+#
+#  Disable if you want to be able to teardown the Hub while leaving the single-
+#  user servers running.
+#
+#  If both this and cleanup_proxy are False, sending SIGINT to the Hub will only
+#  shutdown the Hub, leaving everything else running.
+#
+#  The Hub should be able to resume from database state.
+c.JupyterHub.cleanup_servers = False
+
+## The ip address for the Hub process to *bind* to.
+#
+#  By default, the hub listens on localhost only. This address must be accessible
+#  from the proxy and user servers. You may need to set this to a public ip or ''
+#  for all interfaces if the proxy or user servers are in containers or on a
+#  different host.
+#
+#  See `hub_connect_ip` for cases where the bind and connect address should
+#  differ, or `hub_bind_url` for setting the full bind URL.
+c.JupyterHub.hub_ip = '{{ hub_ip }}'
+
+## Class for authenticating users.
+c.JupyterHub.authenticator_class = '{{ jupyterhub_authenticator_class }}'
+
+## Number of days for a login cookie to be valid. Default is two weeks.
+c.JupyterHub.cookie_max_age_days = 7
+
+## File in which to store the cookie secret.
+c.JupyterHub.cookie_secret = os.environ.get('JUPYTERHUB_COOKIE_SECRET')
+
+## The location of jupyterhub data files (e.g. /usr/local/share/jupyterhub)
+c.JupyterHub.data_files_path = '{{ jupyterhub_env_prefix }}/share/jupyterhub'
+
+## url for the database. We use PostgresSql on localhost at default port
+{% if use_postgresql_db == true %}
+c.JupyterHub.db_url = f'postgresql://{os.environ.get("JUPYTERHUB_DB_USER")}:{os.environ.get("JUPYTERHUB_DB_PASSWORD")}@localhost:5432/{{ jupyterhub_db_name }}'
+{% else %}
+c.JupyterHub.db_url = '{{ jupyterhub_srv_dir }}/jupyterhub.sqlite'
+{% endif %}
+
+## If named servers are enabled, default name of server to spawn or open, e.g. by
+#  user-redirect.
+c.JupyterHub.default_server_name = 'jupyter'
+
+## Enable SSL for all internal communication
+#
+#  This enables end-to-end encryption between all JupyterHub components.
+#  JupyterHub will automatically create the necessary certificate authority and
+#  sign notebook certificates as they're created.
+c.JupyterHub.internal_ssl = {{ jupyterhub_internal_tls | bool }}
+
+{% if jupyterhub_internal_tls | bool %}
+## The location to store certificates automatically created by JupyterHub.
+#
+#  Use with internal_ssl
+c.JupyterHub.internal_certs_location = '{{ jupyterhub_internal_certs_dir }}'
+
+## Names to include in the subject alternative name.
+#
+#  These names will be used for server name verification. This is useful if
+#  JupyterHub is being run behind a reverse proxy or services using ssl are on
+#  different hosts.
+#
+#  Use with internal_ssl
+trusted_alt_names = [
+    'DNS:{{ jupyterhub_service_name }}', 'DNS:{{ ansible_hostname }}',
+    'IP:{{ hub_ip }}'
+]
+
+# Add rest of the SANs
+{% if jupyterhub_trusted_alt_names | length %}
+trusted_alt_names += [
+{%- for host in jupyterhub_trusted_alt_names[:-1] -%}
+'DNS:{{ host }}',
+{%- endfor -%}
+'DNS:{{-jupyterhub_trusted_alt_names[-1]-}}']
+{% endif %}
+c.JupyterHub.trusted_alt_names = trusted_alt_names
+{% endif %}
+
+## File to write PID Useful for daemonizing JupyterHub.
+c.JupyterHub.pid_file = '{{ jupyterhub_srv_dir }}/pid'
+
+## The default URL for users when they arrive (e.g. when user directs to "/")
+#
+#  By default, redirects users to their own server.
+def default_url_fn(handler):
+    user = handler.current_user
+    if user and user.admin:
+       return '/hub/admin'
+    return '/hub/home'
+c.JupyterHub.default_url = default_url_fn
+
+## Following configuration is needed to run hub separetely from HTTP proxy
+# This will allow us to restart hub without interupting the connected hub
+# users. Will be useful during updates
+#
+## Whether to shutdown single-user servers when the Hub shuts down.
+#
+#  Disable if you want to be able to teardown the Hub while leaving the single-
+#  user servers running.
+#
+#  If both this and cleanup_proxy are False, sending SIGINT to the Hub will only
+#  shutdown the Hub, leaving everything else running.
+#
+#  The Hub should be able to resume from database state.
+c.JupyterHub.cleanup_servers = False
+
+## Whether to start HTTP proxy when hub starts.
+#
+c.ConfigurableHTTPProxy.should_start = False
+
+## Token for authenticating communication with the proxy
+#
+# We need to use the same token as an env variable while launching
+# proxy as systemd service
+#
+c.ConfigurableHTTPProxy.auth_token = os.environ.get('CONFIGPROXY_AUTH_TOKEN')
+
+## File to write PID Useful for daemonizing JupyterHub proxy.
+c.ConfigurableHTTPProxy.pid_file = '{{ jupyterhub_srv_dir }}/proxy_pid'
+
+## should be set to the URL which the hub uses to connect to the proxy’s API.
+#
+c.ConfigurableHTTPProxy.api_url = 'https://localhost:8001'
+
+## The class to use for spawning single-user servers.
+#
+#          Should be a subclass of :class:`jupyterhub.spawner.Spawner`.
+#
+#          .. versionchanged:: 1.0
+#              spawners may be registered via entry points,
+#              e.g. `c.JupyterHub.spawner_class = 'localprocess'`
+#
+#  Currently installed:
+#    - default: jupyterhub.spawner.LocalProcessSpawner
+#    - localprocess: jupyterhub.spawner.LocalProcessSpawner
+#    - simple: jupyterhub.spawner.SimpleLocalProcessSpawner
+{% if 'SlurmSpawner' in jupyterhub_spawner_class %}
+c.SlurmSpawner.batchspawner_singleuser_cmd = "{{ jupyterhub_env_bin_path }}/batchspawner-singleuser"
+c.Spawner.options_form = """
+<strong>
+<p>
+The following fields are used in SLURM batch script submission.
+</p>
+</strong>
+<br>
+<div class="form-group row">
+<div class="col-sm-6">
+    <label for="account">Account</label>
+    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Account on HPC platform.">
+    <span class="fa fa-question-circle"></span>
+    </span>
+    <input id="account" name="account" class="form-control" size="15" type="text"></input>
+</div>
+<div class="col-sm-6">
+    <label for="runtime">Time</label>
+    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Requested time for SLURM reservation.">
+    <span class="fa fa-question-circle"></span>
+    </span>
+    <input id="runtime" name="runtime" class="form-control" size="15" type="text" placeholder="e.g. 01:00:00 for 1 hour"></input>
+</div>
+</div>
+<div class="form-group row">
+<div class="col-sm-6">
+    <label for="nprocs">Number of tasks</label>
+    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Number of tasks per CPU in SLURM reservation.">
+    <span class="fa fa-question-circle"></span>
+    </span>
+    <input id="nprocs" name="nprocs" class="form-control" size="15" type="number" min="1"></input>
+</div>
+<div class="col-sm-6">
+    <label for="gres">Number of GPUs</label>
+    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Number of GPUs per node in SLURM reservation.">
+    <span class="fa fa-question-circle"></span>
+    </span>
+    <input id="gres" name="gres" class="form-control" size="15" type="text" placeholder="e.g. gpu:1"></input>
+</div>
+</div>
+<div class="form-group row">
+<div class="col-sm-6">
+<label for="options">Extra SBATCH directives (one per line)</label>
+<span class="help-icon" data-toggle="tooltip" data-placement="top" title="Any extra SLURM #SBATCH directives the user wishes to use.">
+    <span class="fa fa-question-circle"></span>
+</span>
+<textarea id="options" name="options" class="form-control" placeholder="--exclusive"></textarea>
+</div>
+</div>
+"""
+c.Spawner.options_from_form = "simple"
+c.Spawner.apply_user_options = {
+    "account": "req_account", 
+    "runtime": "req_runtime",
+    "partition": "req_partition",
+    "nprocs": "req_nprocs",
+    "gres": "req_gres",
+    "options": "req_options",
+}
+{% if jupyterhub_internal_tls %}
+from batchspawner import SlurmSpawner
+from traitlets import Unicode, Dict
+
+class CustomSlurmSpawner(SlurmSpawner):
+    user_spawner_env = Dict(
+        key_trait=Unicode(),
+        value_trait=Unicode(),
+    )
+
+    def get_env(self):
+        """get environment"""
+        env = super().get_env()
+        env.update(self.user_spawner_env)
+        return env
+
+    async def move_certs(self, paths):
+        """This method takes cert paths, moves to a path where user
+        can read them and sets ownership for them. Typically this can
+        be HOME of the user. However, we cannot access HOME directory
+        of the user from the host where JupyterHub is running.
+
+        So we "mock" this method as if we moved the certificates but
+        in reality we only set paths where certificates can be found
+        in the user HOME directory. We then read the certificates and
+        save them into env variables. We export these env variables to
+        user environment. When we spawn the SLURM job, we
+        create the certificates within the SLURM job at the same path
+        we return with this method using the env variables that we set
+        here.
+        Arguments:
+            paths (dict): a list of paths for key, cert, and CA
+        Returns:
+            dict: a list (potentially altered) of paths for key, cert,
+            and CA
+        """
+
+        local_key = paths['keyfile']
+        local_cert = paths['certfile']
+        local_ca = paths['cafile']
+
+        user = self.user.name
+        server_name = self.name
+        if not server_name:
+            server_name = 'default'
+
+        # By default SlurmSpawner changes the CWD to home
+        out_dir = f'{self.req_homedir}/.jupyter/tls/{server_name}'
+
+        self.log.info(
+            'Internal SSL certs for user %s will be moved to %s' % (user, out_dir)
+        )
+
+        # Store certificate contents in user_cert_contents to be used
+        # later to inject into user env variables
+        with open(local_key, 'r') as f:
+            self.user_spawner_env['JUPYTERHUB_SSL_KEYFILE_CERT'] = f.read()
+        with open(local_cert, 'r') as f:
+            self.user_spawner_env['JUPYTERHUB_SSL_CERTFILE_CERT'] = f.read()
+        with open(local_ca, 'r') as f:
+            self.user_spawner_env['JUPYTERHUB_SSL_CLIENT_CA_CERT'] = f.read()
+
+        remote_key = os.path.join(out_dir, os.path.basename(local_key))
+        remote_cert = os.path.join(out_dir, os.path.basename(local_cert))
+        remote_ca = os.path.join(out_dir, os.path.basename(local_ca))
+        return {'keyfile': remote_key, 'certfile': remote_cert, 'cafile': remote_ca}
+
+c.JupyterHub.spawner_class = CustomSlurmSpawner
+
+c.CustomSlurmSpawner.req_prologue = """
+CERTDIR=$(dirname "${JUPYTERHUB_SSL_KEYFILE}")
+mkdir -p ${CERTDIR}
+echo -e "${JUPYTERHUB_SSL_KEYFILE_CERT}" > ${JUPYTERHUB_SSL_KEYFILE}
+echo -e "${JUPYTERHUB_SSL_CERTFILE_CERT}" > ${JUPYTERHUB_SSL_CERTFILE}
+echo -e "${JUPYTERHUB_SSL_CLIENT_CA_CERT}" > ${JUPYTERHUB_SSL_CLIENT_CA}
+
+unset JUPYTERHUB_SSL_KEYFILE_CERT JUPYTERHUB_SSL_CERTFILE_CERT JUPYTERHUB_SSL_CLIENT_CA_CERT CERTDIR
+
+export PATH={{ jupyterhub_env_bin_path }}:$PATH
+export SLURM_EXPORT_ENV=ALL
+"""
+{% else %}
+c.JupyterHub.spawner_class = '{{ jupyterhub_spawner_class }}'
+c.SlurmSpawner.req_prologue = """
+export PATH={{ jupyterhub_env_bin_path }}:$PATH
+export SLURM_EXPORT_ENV=ALL
+"""
+{% endif %}
+{% else %}
+c.JupyterHub.spawner_class = '{{ jupyterhub_spawner_class }}'
+{% endif %}
+
+# Increase spawner timeout to be tolerant of longer queue wait times.
+c.Spawner.http_timeout = 300
+c.Spawner.start_timeout = 300
+
+## Maximum number of consecutive failures to allow before shutting down
+#  JupyterHub.
+#
+#  This helps JupyterHub recover from a certain class of problem preventing
+#  launch in contexts where the Hub is automatically restarted (e.g. systemd,
+#  docker, kubernetes).
+#
+#  A limit of 0 means no limit and consecutive failures will not be tracked.
+c.Spawner.consecutive_failure_limit = 10
+
+## Enable debug-logging of the single-user server
+c.Spawner.debug = True
+
+## The URL the single-user server should start in.
+#
+#  `{username}` will be expanded to the user's username
+#
+#  Example uses:
+#
+#  - You can set `notebook_dir` to `/` and `default_url` to `/tree/home/{username}` to allow people to
+#    navigate the whole filesystem from their notebook server, but still start in their home directory.
+#  - Start with `/notebooks` instead of `/tree` if `default_url` points to a notebook instead of a directory.
+#  - You can set this to `/lab` to have JupyterLab start by default, rather than Jupyter Notebook.
+c.Spawner.default_url = '/lab'
+
+## Path to the notebook directory for the single-user server.
+#
+#  The user sees a file listing of this directory when the notebook interface is
+#  started. The current interface does not easily allow browsing beyond the
+#  subdirectories in this directory's tree.
+#
+#  `~` will be expanded to the home directory of the user, and {username} will be
+#  replaced with the name of the user.
+#
+#  Note that this does *not* prevent users from accessing files outside of this
+#  path! They can do so with many other means.
+c.Spawner.notebook_dir = '~'
+
+## List of environment variables for the single-user server to inherit from the
+#  JupyterHub process.
+#
+#  This list is used to ensure that sensitive information in the JupyterHub
+#  process's environment (such as `CONFIGPROXY_AUTH_TOKEN`) is not passed to the
+#  single-user server's process.
+c.Spawner.env_keep = ['LANG', 'LC_ALL', 'JUPYTERHUB_SINGLEUSER_APP']
+
+#------------------------------------------------------------------------------
+# Authenticator(LoggingConfigurable) configuration
+#------------------------------------------------------------------------------
+
+## Base class for implementing an authentication provider for JupyterHub
+
+## Set of users that will have admin rights on this JupyterHub.
+#
+#  Note: As of JupyterHub 2.0, full admin rights should not be required, and more
+#  precise permissions can be managed via roles.
+#
+#  Admin users have extra privileges:
+#   - Use the admin panel to see list of users logged in
+#   - Add / remove users in some authenticators
+#   - Restart / halt the hub
+#   - Start / stop users' single-user servers
+#   - Can access each individual users' single-user server (if configured)
+#
+#  Admin access should be treated the same way root access is.
+#
+#  Defaults to an empty set, in which case no user has admin access.
+{% if jupyterhub_admin_users | length %}
+c.Authenticator.admin_users = {
+{%- for user in jupyterhub_admin_users[:-1] -%}
+'{{user}}',
+{%- endfor -%}
+'{{-jupyterhub_admin_users[-1]-}}'}
+{% else %}
+c.Authenticator.admin_users = set()
+{% endif %}
+
+## Enable persisting auth_state (if available).
+#
+#  auth_state will be encrypted and stored in the Hub's database. This can
+#  include things like authentication tokens, etc. to be passed to Spawners as
+#  environment variables.
+#
+#  Encrypting auth_state requires the cryptography package.
+#
+#  Additionally, the JUPYTERHUB_CRYPT_KEY environment variable must contain one
+#  (or more, separated by ;) 32B encryption keys. These can be either base64 or
+#  hex-encoded.
+#
+#  If encryption is unavailable, auth_state cannot be persisted.
+#
+#  New in JupyterHub 0.8
+c.Authenticator.enable_auth_state = True
+
+## Allow all users
+c.Authenticator.allow_all = True
+
+c.JupyterHub.load_roles = []
+
+{% if install_mon_stack == true %}
+#------------------------------------------------------------------------------
+# Prometheus metrics configuration
+#------------------------------------------------------------------------------
+
+# Create a service to scrape prometheus metrics
+c.JupyterHub.services = [
+    {
+        "name": "service-prometheus",
+        "api_token": os.environ.get('JUPYTERHUB_PROM_METRIC_TOKEN'),
+    },
+]
+
+# Add a service role to scrape prometheus metrics
+c.JupyterHub.load_roles += [
+    {
+        "name": "service-metrics-role",
+        "description": "access metrics",
+        "scopes": [
+            "read:metrics",
+        ],
+        "services": [
+            "service-prometheus",
+        ],
+    }
+]
+{% endif %}
+
+# Extra config
+{{ jupyterhub_extra_config }}

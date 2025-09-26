@@ -26,12 +26,12 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 @pytest.mark.parametrize("packages",
                          ['git', 'htop', 'nano', 'tree', 'net-tools', 
-                          'conda', 'python3-psycopg2'])
+                          'python3-psycopg2'])
 def test_package(host, packages):
     p = host.package(packages)
     assert p.is_installed
 
 
-def test_conda_config(host):
-    f = host.file('/opt/conda/.condarc')
+def test_micromamba(host):
+    f = host.file('/usr/local/bin/micromamba')
     assert f.is_file

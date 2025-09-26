@@ -20,17 +20,7 @@ import yaml
 import testinfra.utils.ansible_runner
 
 # We run tests against these hosts
-testinfra_hosts = ['slurmcontroller']
-
-# Directories that are expected to exist
-expected_dirs = ['/etc/node_exporter', '/etc/node_exporter/ssl']
-
-# Systemd service files that are expected to exist
-expected_cfg_files = ['/etc/node_exporter/config.yaml']
-
-# Expected cert files
-expected_tls_files = ['/etc/node_exporter/ssl/cert/slurmcontroller.crt',
-                      '/etc/node_exporter/ssl/private/slurmcontroller.key']
+testinfra_hosts = ['slurmcluster']
 
 # System services that are expected to run
 expected_services = ['node_exporter']
@@ -43,27 +33,6 @@ expected_ports = ['9100']
 # hostvars = ansible_vars['hostvars']['slurmcontroller']
 
 
-@pytest.mark.parametrize("dirs", expected_dirs)
-def test_directories(host, dirs):
-    d = host.file(dirs)
-    assert d.is_directory
-    assert d.exists
-
-
-@pytest.mark.parametrize("cfg_files", expected_cfg_files)
-def test_config_files(host, cfg_files):
-    f = host.file(cfg_files)
-    assert f.is_file
-    assert f.exists
-    
-
-@pytest.mark.parametrize("cert_files", expected_tls_files)
-def test_cert_files(host, cert_files):
-    f = host.file(cert_files)
-    assert f.is_file
-    assert f.exists
-
-
 @pytest.mark.parametrize("services", expected_services)
 def test_service(host, services):
     s = host.service(services)
@@ -73,7 +42,6 @@ def test_service(host, services):
 
 @pytest.mark.parametrize("ports", expected_ports)
 def test_ports(host, ports):
-    ip_addr = host.check_output('hostname -I').strip()
     s = host.socket(
-        f'tcp://{ip_addr}:{ports}')
+        f'tcp://127.0.0.1:{ports}')
     assert s.is_listening

@@ -1,0 +1,21 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify it
+# List of env variables that will be used in systemd service for JupyterHub
+
+[Service]
+# JupyterHub cookie secret
+Environment="JUPYTERHUB_COOKIE_SECRET={{ jupyterhub_cookie_secret }}"
+
+# Crypt keys that hub will rotate
+Environment="JUPYTERHUB_CRYPT_KEY={{ jupyterhub_crypt_key }}"
+
+# Prometheus metrics token
+Environment="JUPYTERHUB_PROM_METRIC_TOKEN={{ jupyterhub_prometheus_metrics_token }}"
+
+# Config proxy auth token. This must be same as the one defined in jupyterhub config
+Environment="CONFIGPROXY_AUTH_TOKEN={{ chproxy_auth_token }}"
+
+{% if use_postgresql_db == true %}
+# JupyterHub DB password
+Environment="JUPYTERHUB_DB_USER={{ jupyterhub_system_user }}"
+Environment="JUPYTERHUB_DB_PASSWORD={{ jupyterhub_db_passwd }}"
+{% endif %}

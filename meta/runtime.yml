@@ -14,4 +14,4 @@
 
 ---
 
-requires_ansible: ">=2.1"
+requires_ansible: ">=2.15.0"

@@ -15,13 +15,13 @@
 ---
 # This playbook validates the ansible version in environment
 
-- name: check if ansible version >= 2.1
+- name: Check if ansible version >= 2.1
   delegate_to: localhost
-  assert:
+  ansible.builtin.assert:
     that: (ansible_version.major, ansible_version.minor) >= (2, 1)
     msg: "require ansible >= 2.1, found {{ ansible_version.full }}"
 
-- name: make sure we are running on CentOS 8/RHEL 8/ Debian 11/ Ubuntu 20
-  assert:
-    that: (ansible_os_family, ansible_distribution_major_version) in [('RedHat', '8'), ('Debian', '11'), ('Debian', '22')]
-    msg: "This ansible setup only work on CentOS 8/RHEL 8/Debian 11/Ubuntu 22"
+- name: Make sure we are running on CentOS {8,9}/RHEL {8,9}/ Debian {11,12}/ Ubuntu {22,24}
+  ansible.builtin.assert:
+    that: (ansible_os_family, ansible_distribution_major_version) in [('RedHat', '8'), ('RedHat', '9'), ('Debian', '11'), ('Debian', '12'), ('Debian', '22'), ('Debian', '24')]
+    msg: "This ansible setup only work on CentOS {8,9}/RHEL {8,9}/ Debian {11,12}/ Ubuntu {22,24}"

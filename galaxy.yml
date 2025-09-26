@@ -16,16 +16,14 @@
 
 namespace: mahendrapaipuri
 name: ansible_jupyterhub_hpc
-version: "1.0.0"
+version: "2.0.0"
 readme: "README.md"
 authors:
   - "Mahendra Paipuri <mahendra.paipuri@cnrs.fr>"
 description: |
-    Installs JupyterHub along with batchspawner on HPC platforms. 
-    The role additionally can deploy node exporter, Prometheus and 
-    Grafana stack to monitor the jupyterhub deployment. Besides, it
-    will also install Promtail and Grafana Loki to analyse logs of 
-    nginx reverse proxy.
+  Installs JupyterHub along with batchspawner on HPC platforms.
+  The role additionally can deploy node exporter, Prometheus and
+  Grafana stack to monitor the Jupyterhub deployment.
 license:
   - "Apache-2.0"
 tags:
@@ -35,8 +33,9 @@ tags:
   - monitoring
   - prometheus
   - grafana
-  - loki
-dependencies: {}
+dependencies:
+  "prometheus.prometheus": "0.27.3"
+  "grafana.grafana": "6.0.3"
 repository: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc"
 documentation: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/tree/main/docs"
 issues: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/issues"

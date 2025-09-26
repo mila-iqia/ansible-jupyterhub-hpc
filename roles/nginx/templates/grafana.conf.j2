@@ -1,0 +1,28 @@
+# WARNING: This file is {{ ansible_managed }}, do not modify.
+
+server {
+    listen {{ (nginx_https_port | int) + 3000 }} ssl;
+    client_max_body_size 50M;
+    server_name {{ jupyterhub_service_name }};
+    
+    location / {
+        proxy_pass http://{{ grafana_http_addr }}:{{ grafana_http_port }};
+
+        proxy_set_header X-Real-IP $remote_addr;
+    {% if nginx_https_port == '443' %}
+        proxy_set_header Host $host;
+    {% else %}
+        proxy_set_header Host $http_host;
+    {% endif %}
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-NginX-Proxy true;
+
+        # websocket headers
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header X-Scheme $scheme;
+
+        proxy_buffering off;
+    }
+}

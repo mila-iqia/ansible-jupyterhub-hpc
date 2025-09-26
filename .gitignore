@@ -25,6 +25,10 @@
 # Ignore encryption folder
 **/encryption
 **/admin
+/secrets.yml
+/secrets.yaml
+/playbooks/secrets.yml
+/playbooks/secrets.yaml
 
 # Ignore pytest logs
 pytestdebug.log
@@ -44,3 +48,7 @@ ansible-lint.xml
 
 # Ignore template ansible config file
 /ansible.cfg.template
+/.ansible
+
+# Ignore build files
+/mahendrapaipuri*

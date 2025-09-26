@@ -1,0 +1,83 @@
+# Copyright 2022 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# Create all the directories necessary for configuring JupyterHub
+
+- name: Make sure sys.prefix/etc/jupyterhub exists
+  ansible.builtin.file:
+    path: "{{ jupyterhub_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Make sure sys.prefix/etc/jupyter/templates exists
+  ansible.builtin.file:
+    path: "{{ jupyter_templates_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Make sure sys.prefix/etc/jupyter exists
+  ansible.builtin.file:
+    path: "{{ jupyter_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Make sure sys.prefix/etc/ipython exists
+  ansible.builtin.file:
+    path: "{{ ipython_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+# First we check if the path exists and we will touch the directory
+# only if the path does not exist. The reason is that this directory
+# will have ACL permissions for prometheus user to access JupyterHub
+# internal certificats. The file task with owner and group will remove
+# these ACL permissions and that will result in failed API requests by
+# Prometheus
+- name: Check if /srv/jupyterhub exists
+  ansible.builtin.stat:
+    path: "{{ jupyterhub_srv_dir }}"
+  register: jh_srv_dir
+  become: true
+
+- name: Make sure /srv/jupyterhub exists
+  ansible.builtin.file:
+    path: "{{ jupyterhub_srv_dir }}"
+    state: directory
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_group }}"
+    mode: "0700"
+  become: true
+  when: not jh_srv_dir.stat.exists
+
+- name: Make sure /var/log/jupyterhub exists
+  ansible.builtin.file:
+    path: "{{ jupyterhub_log_dir }}"
+    state: directory
+    owner: "{{ jupyterhub_system_user }}"
+    group: "{{ jupyterhub_system_user }}"
+    mode: "0755"
+  become: true

@@ -15,19 +15,14 @@
 ---
 # This role checks for necessary files, generate certs and install root CA in all hosts
 
-- name: Include config variables
-  include_vars: ../../../config.yml
-
-- import_tasks: checks.yml
-
-- import_tasks: encryption.yml
-
-- import_tasks: passwords.yml
-
-- include_tasks: tokens.yml
+- name: Gather variables for each operating system
+  ansible.builtin.include_vars: "{{ item }}"
   with_items:
-    - "cookie_secret"
-    - "proxy_auth_token"
-    - "metrics_token"
-    - "db_passwd"
-    - "crypt_key"
+    - "{{ ansible_os_family }}.yml"
+
+- name: TLS related tasks
+  ansible.builtin.import_tasks: tls.yml
+
+- name: Generate secrets
+  ansible.builtin.import_tasks: secrets.yml
+  delegate_to: localhost

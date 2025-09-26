@@ -1,0 +1,75 @@
+# Copyright 2025 IDRIS / jupyter
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+# ---------------------------------------------------
+# HPC platform related configuration
+# ---------------------------------------------------
+
+# Path to SLURM binaries like sbatch, squeue, scancel
+# We run the jupyterhub service as a normal system user without any sudo
+# rights by default. However we need to use sudo to change the context for
+# submitting jobs as different user. So we need add SLURM commands to list of
+# commands that service account can use without password prompt.
+# More details can be found here:
+# https://jupyterhub.readthedocs.io/en/stable/reference/config-sudo.html
+#
+# We need to add these binaries to jupyter service user sudoers entry so that
+# jupyter service user can spawn jupyter servers on the behalf of the users
+# If SLURM commands like sbatch is located at /usr/bin/sbatch we need to
+# set this variable as /usr/bin
+# Although we can use Ansible find module to get this dynamically it might
+# pose few issues depending on platforms.
+#
+slurm_bin_path: "/usr/bin"
+
+# Name of the service domain at which JupyterHub will be running
+# This can be hostname or CNAME given to the user
+# If there is not service name, set it to {{ inventory_hostname }}
+jupyterhub_service_name: "{{ inventory_hostname }}"
+
+# ---------------------------------------------------
+# TLS configuration
+# ---------------------------------------------------
+#
+# Use self signed certificates for all services in the
+# deployment. Ideal for testing purposes and playbook will
+# generate certificates for all hosts.
+#
+# If set to false, playbook expects certificates signed by external CA
+# at /etc/ssl/certs and /etc/ssl/key for Debian flavoured OS. For RedHat
+# flavoured OS the certificate and key must be installed at
+# /etc/pki/tls/certs and /etc/pki/tls/key folders.
+#
+# Both certificate and key must be under the name configured in
+# `jupyterhub_service_name`. For eg, if `jupyterhub_service_name` is
+# `jupyterhub.example.com`, then certificate must be named as
+# `jupyterhub.example.com.crt` and key as `jupyterhub.example.com.key`.
+#
+self_signed_certs: true
+
+#
+# ---------------------------------------------------
+# Monitoring
+# ---------------------------------------------------
+#
+# Bool to set if monitoring stack will be installed
+# This will install node exporter, prometheus and grafana stack
+# on the host where jupyterhub is installed
+# This will also install grafana loki and promtail to monitor
+# nginx reverse proxy. In the future support for jupyterhub
+# logs might be added to this stack
+# If the user wants to install Prometheus and Grafana on a different
+# node it can be configured in the hostfile
+install_mon_stack: true
