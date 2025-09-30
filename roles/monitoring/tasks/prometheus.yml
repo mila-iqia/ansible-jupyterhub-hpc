@@ -78,7 +78,7 @@
 
 - name: Get resultant prometheus config from existing one and generated one
   ansible.builtin.set_fact:
-    prometheus_scrape_configs: "{{ (_jh_prometheus_scrape_configs + _node_prometheus_scrape_configs) | merge_prometheus_config(_existing_prometheus_scrape_configs | default({})) }}"
+    prometheus_scrape_configs: "{{ (_jh_prometheus_scrape_configs + _node_prometheus_scrape_configs) | mahendrapaipuri.ansible_jupyterhub_hpc.merge_prometheus_config(_existing_prometheus_scrape_configs | default({})) }}"
 
 - name: Set prometheus basic auth configuration
   ansible.builtin.set_fact:

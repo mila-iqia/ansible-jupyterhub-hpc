@@ -17,13 +17,15 @@ a virtual environment on the Ansible controller machine to install ansible.
 First install Python prerequisites in the created virtual environment.
 
 ```bash
-pip install -r https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/raw/main/requirements.txt
+wget -O /tmp/requirements.txt https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/raw/main/requirements.txt
+pip install -r /tmp/requirements.txt
 ```
 
 Next install Ansible prerequisites including the collection itself.
 
 ```bash
-ansible-galaxy role install -r https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/raw/main/requirements.yml
+wget -O /tmp/requirements.yml https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/raw/main/requirements.yml
+ansible-galaxy role install -r /tmp/requirements.yml
 ansible-galaxy collection install git+https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc.git,main
 ```
 
