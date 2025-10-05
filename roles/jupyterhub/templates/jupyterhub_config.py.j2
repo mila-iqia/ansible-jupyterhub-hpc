@@ -168,57 +168,30 @@ The following fields are used in SLURM batch script submission.
 </p>
 </strong>
 <br>
+{% set ns = namespace(ielement=0, nelements = jupyterhub_spawner_form_fields | length) -%}
+{% for _ in range(100) if ns.ielement < ns.nelements %}
 <div class="form-group row">
-<div class="col-sm-6">
-    <label for="account">Account</label>
-    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Account on HPC platform.">
-    <span class="fa fa-question-circle"></span>
-    </span>
-    <input id="account" name="account" class="form-control" size="15" type="text"></input>
+{% for _ in range(2) if ns.ielement < ns. nelements  %}
+	<div class="col-sm-6">
+		<label for="{{ jupyterhub_spawner_form_fields[ns.ielement].label | lower | replace(' ', '') }}">{{ jupyterhub_spawner_form_fields[ns.ielement].label }}</label>
+		<span class="help-icon" data-toggle="tooltip" data-placement="top" title="{{ jupyterhub_spawner_form_fields[ns.ielement].description }}">
+			<span class="fa fa-question-circle"></span>
+		</span>
+		{{ jupyterhub_spawner_form_fields[ns.ielement].element }}
+	</div>
+{% set ns.ielement = ns.ielement + 1 -%}
+{% endfor %}
 </div>
-<div class="col-sm-6">
-    <label for="runtime">Time</label>
-    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Requested time for SLURM reservation.">
-    <span class="fa fa-question-circle"></span>
-    </span>
-    <input id="runtime" name="runtime" class="form-control" size="15" type="text" placeholder="e.g. 01:00:00 for 1 hour"></input>
-</div>
-</div>
-<div class="form-group row">
-<div class="col-sm-6">
-    <label for="nprocs">Number of tasks</label>
-    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Number of tasks per CPU in SLURM reservation.">
-    <span class="fa fa-question-circle"></span>
-    </span>
-    <input id="nprocs" name="nprocs" class="form-control" size="15" type="number" min="1"></input>
-</div>
-<div class="col-sm-6">
-    <label for="gres">Number of GPUs</label>
-    <span class="help-icon" data-toggle="tooltip" data-placement="top" title="Number of GPUs per node in SLURM reservation.">
-    <span class="fa fa-question-circle"></span>
-    </span>
-    <input id="gres" name="gres" class="form-control" size="15" type="text" placeholder="e.g. gpu:1"></input>
-</div>
-</div>
-<div class="form-group row">
-<div class="col-sm-6">
-<label for="options">Extra SBATCH directives (one per line)</label>
-<span class="help-icon" data-toggle="tooltip" data-placement="top" title="Any extra SLURM #SBATCH directives the user wishes to use.">
-    <span class="fa fa-question-circle"></span>
-</span>
-<textarea id="options" name="options" class="form-control" placeholder="--exclusive"></textarea>
-</div>
-</div>
+{% endfor %}
 """
 c.Spawner.options_from_form = "simple"
 c.Spawner.apply_user_options = {
-    "account": "req_account", 
-    "runtime": "req_runtime",
-    "partition": "req_partition",
-    "nprocs": "req_nprocs",
-    "gres": "req_gres",
-    "options": "req_options",
+{% for ff in jupyterhub_spawner_form_fields -%}
+{% set name = ff.element | regex_findall('name="(.*?)"') | first %}
+	"{{ name }}": "req_{{ name }}",
+{% endfor %}
 }
+
 {% if jupyterhub_internal_tls %}
 from batchspawner import SlurmSpawner
 from traitlets import Unicode, Dict

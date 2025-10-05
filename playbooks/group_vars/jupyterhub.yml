@@ -90,6 +90,31 @@ jupyterhub_internal_certs_dir: "{{ jupyterhub_srv_dir }}/internal-ssl"
 # List of node names that should be added to self signed TLS certificates. This
 # can be list of names or a wild card of the FQDN.
 jupyterhub_trusted_alt_names: []
+
+# Contents of spawner form. Each dict in the list must have three keys:
+# - `label`: Human readable label of the field
+# - `description`: A verbose description of the field that will be displayed in help text
+# - `element`: HTML element like `<input id="gres" name="gres" class="form-control" size="15" type="text" placeholder="e.g. gpu:1"></input>`
+#              The `name` in the element must be name of template string in the Spawner. For `BatchSpawner`, all the
+#              variables that start with `req_` are available in the template. Note that `id` should
+#              be WITHOUT `req_` prefix. For more info on all the existing variables
+#              consult https://github.com/jupyterhub/batchspawner/blob/main/batchspawner/batchspawner.py
+#              If a custom `batch_script` (https://github.com/jupyterhub/batchspawner/blob/451dcf171cff7883904845d5de8c5e5e250b64d9/batchspawner/batchspawner.py#L676)
+#              is used, ensure that fields used in the form content are set in `batch_script`.
+jupyterhub_spawner_form_fields:
+  - label: 'Time'
+    description: 'Requested time for SLURM job'
+    element: '<input id="runtime" name="runtime" class="form-control" size="15" type="text" placeholder="e.g. 01:00:00 for 1 hour"></input>'
+  - label: 'Number of tasks'
+    description: 'Number of tasks per CPU in SLURM job'
+    element: '<input id="nprocs" name="nprocs" class="form-control" size="15" type="number" min="1"></input>'
+  - label: 'Number of GPUs'
+    description: 'Number of GPUs per node in SLURM job'
+    element: '<input id="gres" name="gres" class="form-control" size="15" type="text" placeholder="e.g. gpu:1"></input>'
+  - label: 'Extra SBATCH directives'
+    description: 'Any extra SLURM #SBATCH directives the user wishes to use'
+    element: '<textarea id="options" name="options" class="form-control" placeholder="--exclusive"></textarea>'
+
 # JupyterHub extra config. This will be added at the end
 # of the JupyterHub config which overrides any default values
 # used.
