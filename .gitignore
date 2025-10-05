@@ -50,5 +50,14 @@ ansible-lint.xml
 /ansible.cfg.template
 /.ansible
 
+# Ignore dependent roles
+roles/evandam.conda
+roles/mambaorg.micromamba
+
 # Ignore build files
 /mahendrapaipuri*
+
+# Ignore local test files
+playbooks/test.*
+playbooks/*.j2
+playbooks/*.py
