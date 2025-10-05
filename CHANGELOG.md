@@ -8,3 +8,11 @@
 
 - Major refactoring of collections to simplify deployment
 - Removal of less critical components like Grafana loki and promtail
+
+## v2.0.1
+
+- Use FQDN for custom filters
+
+## v2.1.0
+
+- Make spawner form configurable
