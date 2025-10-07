@@ -35,7 +35,7 @@
 
     - name: Fail when TLS cert file for jupyterhub host does not exist on remote machine
       ansible.builtin.fail:
-        msg: "TLS cert cannot be found at {{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt."
+        msg: "TLS cert cannot be found at {{ __remote_tls_dir }}/certs/{{ jupyterhub_service_name }}.crt"
       when: not cert_path.stat.exists
 
 - name: Create self signed CA and certificates

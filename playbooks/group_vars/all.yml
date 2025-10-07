@@ -50,7 +50,7 @@ jupyterhub_service_name: "{{ inventory_hostname }}"
 # If set to false, playbook expects certificates signed by external CA
 # at /etc/ssl/certs and /etc/ssl/key for Debian flavoured OS. For RedHat
 # flavoured OS the certificate and key must be installed at
-# /etc/pki/tls/certs and /etc/pki/tls/key folders.
+# /etc/pki/tls/certs and /etc/pki/tls/private folders.
 #
 # Both certificate and key must be under the name configured in
 # `jupyterhub_service_name`. For eg, if `jupyterhub_service_name` is
