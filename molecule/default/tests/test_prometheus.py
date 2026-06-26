@@ -28,7 +28,7 @@ expected_dirs = ['/etc/prometheus']
 # Systemd service files that are expected to exist
 expected_cfg_files = [
     '/etc/prometheus/prometheus.yml',
-    '/etc/prometheus/web-config.yml'
+    '/etc/prometheus/web_config.yml'
 ]
 
 # System services that are expected to run

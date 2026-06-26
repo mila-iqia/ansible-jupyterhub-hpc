@@ -23,7 +23,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = ['slurmcluster']
 
 # Systemd service files that are expected to exist
-expected_cfg_files = ['/etc/node_exporter/web-config.yml']
+expected_cfg_files = ['/etc/node_exporter/web_config.yml']
 
 # System services that are expected to run
 expected_services = ['node_exporter']
