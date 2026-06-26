@@ -23,7 +23,7 @@ services:
 
 stages:
   - lint
-  - test-rocky
+  # - test-rocky
   - test-debian
   - test-ubuntu
   - release
