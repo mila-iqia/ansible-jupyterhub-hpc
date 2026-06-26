@@ -50,6 +50,7 @@ stages:
   before_script:
     - *prepare_step
   script:
+    - sleep 30000
     - molecule --debug test --scenario-name=${OS_DIST}
   after_script:
     - ls -la build
