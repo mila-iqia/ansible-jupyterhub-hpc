@@ -1,7 +1,10 @@
 # List of pip requirements that need to be installed in the ansible host
-ansible>=5.0.1
-ansible-core>=2.12.1
+# Seems like ansible 2.21, libcrypt is being used instead of passlib and at the
+# moment libcrypt does not work for rounds < 10. Need to report upstream!
+ansible>=5.0.1,<14.0.0
+ansible-core>=2.12.1,<2.21.0
 ansible-lint>=6.0.2
+bcrypt==4.0.1 # to resolve passlib compatibility issues
 Jinja2>=3.0.3
 jmespath>=1.0.0
 MarkupSafe>=2.0.1

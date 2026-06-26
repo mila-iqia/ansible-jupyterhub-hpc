@@ -55,7 +55,7 @@ def test_config_files(host, cfg_files):
     assert f.exists
 
 
-@pytest.mark.skip(reason="This might fail on Ubuntu22")
+@pytest.mark.xfail(reason="This might fail on Ubuntu22")
 @pytest.mark.parametrize("services", expected_services)
 def test_service(host, services):
     s = host.service(services)
@@ -63,7 +63,7 @@ def test_service(host, services):
     assert s.is_running
 
 
-@pytest.mark.skip(reason="This might fail on Ubuntu22")
+@pytest.mark.xfail(reason="This might fail on Ubuntu22")
 @pytest.mark.parametrize("ports", expected_ports)
 def test_ports(host, ports):
     ip_addr = host.check_output('hostname -I').strip().split()[0]
