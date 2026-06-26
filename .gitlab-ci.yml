@@ -1,5 +1,5 @@
 ---
-image: docker:28.3.2
+image: docker:29.6.0
 
 variables:
   # When you use the dind service, you must instruct Docker to talk with
@@ -19,7 +19,7 @@ variables:
   DOCKER_TLS_CERTDIR: "/certs"
 
 services:
-  - docker:28.3.2-dind
+  - docker:29.6.0-dind
 
 stages:
   - lint
