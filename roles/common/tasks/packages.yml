@@ -74,7 +74,7 @@
         state: present
       when:
         - ansible_facts['distribution'] == 'Debian'
-        - (ansible_facts['distribution_major_version'] | int) >= 12)
+        - (ansible_facts['distribution_major_version'] | int) >= 12
 
     - name: Install other developer tools [Debian/Ubuntu]
       ansible.builtin.apt:
