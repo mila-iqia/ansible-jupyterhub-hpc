@@ -16,7 +16,7 @@
 
 namespace: mahendrapaipuri
 name: ansible_jupyterhub_hpc
-version: "2.1.0"
+version: "2.2.0"
 readme: "README.md"
 authors:
   - "Mahendra Paipuri <mahendra.paipuri@cnrs.fr>"
