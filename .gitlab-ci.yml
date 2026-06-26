@@ -23,7 +23,7 @@ services:
 
 stages:
   - lint
-  # - test-rocky
+  - test-rocky
   - test-debian
   - test-ubuntu
   - release
@@ -75,9 +75,9 @@ ansible-lint:
   except:
     - tags
 
-molecule-test-rockylinux9:
-  stage: test-rocky
-  extends: .job_template
+# molecule-test-rockylinux9:
+#   stage: test-rocky
+#   extends: .job_template
 
 # molecule-test-rockylinux8:
 #   stage: test-rocky
