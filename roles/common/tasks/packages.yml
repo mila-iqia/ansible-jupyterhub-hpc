@@ -68,13 +68,13 @@
         name: "build-essential"
         state: present
 
-    - name: Install python3-debian tools [Debian]
+    - name: Install python3-debian tools [Debian/Ubuntu]
       ansible.builtin.apt:
         name: "python3-debian"
         state: present
       when:
-        - ansible_facts['distribution'] == 'Debian'
-        - (ansible_facts['distribution_major_version'] | int) >= 12
+        - ansible_facts['distribution'] == 'Debian' or ansible_facts['distribution'] == 'Ubuntu'
+        - (ansible_facts['distribution_major_version'] | int) >= 12 or (ansible_facts['distribution_major_version'] | int) >= 24
 
     - name: Install other developer tools [Debian/Ubuntu]
       ansible.builtin.apt:

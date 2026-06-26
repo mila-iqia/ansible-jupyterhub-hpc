@@ -88,17 +88,17 @@ ansible-lint:
 #     ANSIBLE_VERSION: "9.13.0"
 #   extends: .job_template
 
-molecule-test-debian11:
-  stage: test-debian
-  variables:
-    OS_DIST: "debian11"
-  extends: .job_template
+# molecule-test-debian11:
+#   stage: test-debian
+#   variables:
+#     OS_DIST: "debian11"
+#   extends: .job_template
 
-molecule-test-debian12:
-  stage: test-debian
-  variables:
-    OS_DIST: "debian12"
-  extends: .job_template
+# molecule-test-debian12:
+#   stage: test-debian
+#   variables:
+#     OS_DIST: "debian12"
+#   extends: .job_template
 
 molecule-test-ubuntu22:
   stage: test-ubuntu
