@@ -89,6 +89,8 @@ jupyterhub_internal_certs_dir: "{{ jupyterhub_srv_dir }}/internal-ssl"
 
 # List of node names that should be added to self signed TLS certificates. This
 # can be list of names or a wild card of the FQDN.
+# For hostnames prefix `DNS:` must be added, eg, `DNS:compute-0.example.com`
+# For IP addresses prefix `IP:` must be added, eg, `IP:10.12.13.14`
 jupyterhub_trusted_alt_names: []
 
 # Contents of spawner form. Each dict in the list must have three keys:
