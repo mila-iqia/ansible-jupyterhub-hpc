@@ -51,6 +51,7 @@
       when: use_postgresql_db
       with_items:
         - "{{ postgressql_yum_pkgs }}"
+
 - name: Install common packages [Debian]
   become: true
   when: ansible_pkg_mgr == "apt"
