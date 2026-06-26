@@ -75,30 +75,30 @@ ansible-lint:
   except:
     - tags
 
-# molecule-test-rockylinux9:
-#   stage: test-rocky
-#   extends: .job_template
+molecule-test-rockylinux9:
+  stage: test-rocky
+  extends: .job_template
 
-# molecule-test-rockylinux8:
-#   stage: test-rocky
-#   variables:
-#     OS_DIST: "rockylinux8"
-#     # For RHEL 8 flavours, last supported Ansible is 2.16/9.13
-#     # Ref: https://www.jeffgeerling.com/blog/2024/newer-versions-ansible-dont-work-rhel-8
-#     ANSIBLE_VERSION: "9.13.0"
-#   extends: .job_template
+molecule-test-rockylinux8:
+  stage: test-rocky
+  variables:
+    OS_DIST: "rockylinux8"
+    # For RHEL 8 flavours, last supported Ansible is 2.16/9.13
+    # Ref: https://www.jeffgeerling.com/blog/2024/newer-versions-ansible-dont-work-rhel-8
+    ANSIBLE_VERSION: "9.13.0"
+  extends: .job_template
 
-# molecule-test-debian11:
-#   stage: test-debian
-#   variables:
-#     OS_DIST: "debian11"
-#   extends: .job_template
+molecule-test-debian11:
+  stage: test-debian
+  variables:
+    OS_DIST: "debian11"
+  extends: .job_template
 
-# molecule-test-debian12:
-#   stage: test-debian
-#   variables:
-#     OS_DIST: "debian12"
-#   extends: .job_template
+molecule-test-debian12:
+  stage: test-debian
+  variables:
+    OS_DIST: "debian12"
+  extends: .job_template
 
 molecule-test-ubuntu22:
   stage: test-ubuntu
