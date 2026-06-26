@@ -94,9 +94,9 @@ trusted_alt_names = [
 {% if jupyterhub_trusted_alt_names | length %}
 trusted_alt_names += [
 {%- for host in jupyterhub_trusted_alt_names[:-1] -%}
-'DNS:{{ host }}',
+'{{ host }}',
 {%- endfor -%}
-'DNS:{{-jupyterhub_trusted_alt_names[-1]-}}']
+'{{-jupyterhub_trusted_alt_names[-1]-}}']
 {% endif %}
 c.JupyterHub.trusted_alt_names = trusted_alt_names
 {% endif %}
