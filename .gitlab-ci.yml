@@ -79,6 +79,12 @@ molecule-test-rockylinux9:
   stage: test-rocky
   extends: .job_template
 
+molecule-test-rockylinux10:
+  stage: test-rocky
+  variables:
+    OS_DIST: "rockylinux10"
+  extends: .job_template
+
 # # Python 3.14 which is the base container requires Ansible >= 2.20. So stop testing it in CI 
 # molecule-test-rockylinux8:
 #   stage: test-rocky
