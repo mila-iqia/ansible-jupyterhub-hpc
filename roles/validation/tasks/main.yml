@@ -21,7 +21,7 @@
     that: (ansible_version.major, ansible_version.minor) >= (2, 1)
     msg: "require ansible >= 2.1, found {{ ansible_version.full }}"
 
-- name: Make sure we are running on CentOS {8,9}/RHEL {8,9}/ Debian {11,12}/ Ubuntu {22,24}
+- name: Make sure we are running on CentOS {8,9}/RHEL {8,9,10}/ Debian {11,12}/ Ubuntu {22,24}
   ansible.builtin.assert:
-    that: (ansible_os_family, ansible_distribution_major_version) in [('RedHat', '8'), ('RedHat', '9'), ('Debian', '11'), ('Debian', '12'), ('Debian', '22'), ('Debian', '24')]
+    that: (ansible_os_family, ansible_distribution_major_version) in [('RedHat', '8'), ('RedHat', '9'), ('RedHat', '10'), ('Debian', '11'), ('Debian', '12'), ('Debian', '22'), ('Debian', '24')]
     msg: "This ansible setup only work on CentOS {8,9}/RHEL {8,9}/ Debian {11,12}/ Ubuntu {22,24}"

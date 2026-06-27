@@ -62,4 +62,4 @@ Once the execution of playbook is finished successfully, it will create a
 `jupyterhub-admin-rc` file in the `/root` of the remote JupyterHub host with
 all the secrets used in the deployment.
 
-Currently, only RHEL 8/9, Rockylinux 8/9, Debian 11/12 and Ubunutu 22/24 are supported.
+Currently, only RHEL 8/9/10, Rockylinux 8/9/10, Debian 11/12 and Ubunutu 22/24 are supported.

@@ -19,7 +19,7 @@ dependency:
   options:
     role-file: ../../requirements.yml
 driver:
-  name: podman
+  name: docker
 # lint: |
 #   yamllint . || exit 0
 #   ansible-lint -c .ansible-lint --exclude meta --exclude ./.gitlab-ci.yml -p --nocolor | tee ansible-lint.txt || exit 0
@@ -29,13 +29,14 @@ platforms:
     image: registry.gitlab.com/idris-cnrs/ci-utilities/ci-service-containers/generic/slurm-cluster:rockylinux10
     command: ""
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
     published_ports:
       - 8443:443
       - 9443:9443
       - 3443:3443
     hostname: slurmcluster
     privileged: true
+    cgroupns_mode: host
     pre_build_image: true
     docker_networks:
       - name: "int"
@@ -108,4 +109,4 @@ verifier:
   name: testinfra
   directory: ../default/tests
   options:
-    junitxml: "build/reports/unit-tests-ubuntu22.xml"
+    junitxml: "build/reports/unit-tests-rockylinux10.xml"
