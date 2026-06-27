@@ -54,6 +54,8 @@ stages:
   after_script:
     - ls -la build
     - ls -la build/reports
+  retry:
+    max: 2
   artifacts:
     paths:
       - build/reports/
