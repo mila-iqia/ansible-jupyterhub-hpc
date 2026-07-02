@@ -15,7 +15,6 @@
 - name: Fetch JupyterHub internal TLS cert files
   become: true
   when: jupyterhub_internal_tls
-
   block:
     - name: Read JupyterHub internal TLS cert files
       ansible.builtin.slurp:
@@ -32,6 +31,7 @@
         __jh_certs_contents: "{{ (__jh_certs_contents | default({})) | combine({item.item[0] + '/' + item.item[1]: item.content | b64decode}) }}"
       no_log: true
       with_items: "{{ jupyterhub_certs.results }}"
+
 - name: Check if prometheus scrape config already exists
   ansible.builtin.stat:
     path: "/etc/prometheus/prometheus.yml"
@@ -41,7 +41,6 @@
 - name: Read the existing prometheus scrape config
   become: true
   when: prometheus_scrape_config.stat.exists
-
   block:
     - name: Slurp prometheus config file
       ansible.builtin.slurp:
@@ -51,6 +50,7 @@
     - name: Set fact for existing prometheus config file
       ansible.builtin.set_fact:
         _existing_prometheus_scrape_configs: "{{ slurpfile['content'] | b64decode | from_yaml }}"
+
 - name: Generate prometheus scrape configuration for node exporter targets
   ansible.builtin.set_fact:
     _node_prometheus_scrape_configs: "{{ _node_prometheus_scrape_configs | default([]) + [{'job_name': item + '_node_exporter', 'metrics_path': '/metrics', 'scheme': 'http', 'basic_auth': {'username': 'node_exporter',

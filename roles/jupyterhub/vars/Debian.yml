@@ -29,7 +29,7 @@ postgresql_init_cmd_matrix:
     "24": "/usr/lib/postgresql/16/bin/initdb -D {{ postgresql_data_dir }}"
 
 # Initialise DB
-postgresql_init_cmd: "{{ postgresql_init_cmd_matrix[ansible_distribution][ansible_distribution_major_version] }}"
+postgresql_init_cmd: "{{ postgresql_init_cmd_matrix[ansible_facts.distribution][ansible_facts.distribution_major_version] }}"
 
 # Postgresql service unit file name
 postgresql_service_unit_matrix:
@@ -40,4 +40,4 @@ postgresql_service_unit_matrix:
     "22": postgresql@14-main
     "24": postgresql@16-main
 
-postgresql_service_unit: "{{ postgresql_service_unit_matrix[ansible_distribution][ansible_distribution_major_version] }}"
+postgresql_service_unit: "{{ postgresql_service_unit_matrix[ansible_facts.distribution][ansible_facts.distribution_major_version] }}"

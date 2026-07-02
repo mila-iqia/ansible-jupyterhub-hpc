@@ -15,10 +15,12 @@
 """Embedded ansible filters used by the playbook"""
 
 import sys
-
+# from ansible.utils.display import Display
 
 if sys.version_info[0] < 3:
     raise Exception("Must be using Python 3")
+
+# display = Display()
 
 
 def get_type(var, **kwargs):
@@ -28,19 +30,14 @@ def get_type(var, **kwargs):
 
 def merge_prometheus_config(generated_cfg, existing_cfg):
     """Merge existing and generated configurations of Prometheus"""
-    new_cfg = []
+    new_cfg = generated_cfg
     if not existing_cfg or not existing_cfg['scrape_configs']:
-        return generated_cfg
-    all_scrape_cfgs = existing_cfg['scrape_configs'] + generated_cfg
-    job_names = []
-    for cfg in all_scrape_cfgs:
-        job_names.append(cfg['job_name'])
-    job_names = [*dict.fromkeys(job_names)]
-    for job_name in job_names:
-        for cfg in all_scrape_cfgs:
-            if cfg['job_name'] == job_name:
-                new_cfg.append(cfg)
-                break
+        return new_cfg
+    # Add any jobs that are in existing config but not in generated config
+    new_jobs = [c['job_name'] for c in generated_cfg]
+    for cfg in existing_cfg['scrape_configs']:
+        if cfg['job_name'] not in new_jobs:
+            new_cfg.append(cfg)
     return new_cfg
 
 

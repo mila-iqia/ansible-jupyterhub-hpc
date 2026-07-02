@@ -17,7 +17,7 @@
 
 - name: Install common packages [RHEL]
   become: true
-  when: ansible_pkg_mgr in ['yum', 'dnf']
+  when: ansible_facts.pkg_mgr in ['yum', 'dnf']
   tags:
     - install_dev_tools
 
@@ -54,7 +54,7 @@
 
 - name: Install common packages [Debian]
   become: true
-  when: ansible_pkg_mgr == "apt"
+  when: ansible_facts.pkg_mgr == "apt"
   tags:
     - install_dev_tools
   block:
@@ -73,8 +73,8 @@
         name: "python3-debian"
         state: present
       when:
-        - ansible_facts['distribution'] == 'Debian' or ansible_facts['distribution'] == 'Ubuntu'
-        - (ansible_facts['distribution_major_version'] | int) >= 12 or (ansible_facts['distribution_major_version'] | int) >= 24
+        - ansible_facts.distribution == 'Debian' or ansible_facts.distribution == 'Ubuntu'
+        - (ansible_facts.distribution_major_version | int) >= 12 or (ansible_facts.distribution_major_version | int) >= 24
 
     - name: Install other developer tools [Debian/Ubuntu]
       ansible.builtin.apt:
