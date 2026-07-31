@@ -22,3 +22,5 @@ dev_tools:
   - "tree"
   - "net-tools"
   - "rsync"
+  - "acl"
+  - "python3-packaging"

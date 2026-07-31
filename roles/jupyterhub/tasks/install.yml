@@ -70,22 +70,26 @@
         line: "{{ jupyterhub_system_user }} {{ ansible_hostname }}=(ALL, !root) NOPASSWD:SETENV: {{ slurm_cmds | map(attribute='name') | join(',') }}"
         validate: "visudo -cf %s"
 
-- name: setup conda environment and install jupyterhub core components
-  conda:
-    name: "{{ item }}"
-    environment: "{{ jupyterhub_env_prefix }}"
-    state: present
-    executable: "/usr/local/bin/micromamba"
-    channels:
-      - conda-forge
+- name: Ensure conda environment exists
+  ansible.builtin.command:
+    cmd: /usr/local/bin/micromamba create -p {{ jupyterhub_env_prefix }} -c conda-forge -y
+    creates: "{{ jupyterhub_env_prefix }}/conda-meta"
   become: true
-  with_items:
-    - "{{ jupyterhub_pkgs }}"
+
+- name: setup conda environment and install jupyterhub core components
+  ansible.builtin.command:
+    cmd: >
+      /usr/local/bin/micromamba install -p {{ jupyterhub_env_prefix }}
+      -c conda-forge {{ item }} -y
+  become: true
+  loop: "{{ jupyterhub_pkgs }}"
+  register: micromamba_install
+  changed_when: "'All requested packages already installed' not in micromamba_install.stdout"
   tags:
     - molecule-idempotence-notest
 
 - name: install jupyterhub dependencies from pip
-  pip:
+  ansible.builtin.pip:
     executable: "{{ jupyterhub_env_prefix }}/bin/pip"
     name: "{{ item }}"
     extra_args: "--no-cache-dir"
@@ -100,7 +104,7 @@
     - molecule-idempotence-notest
 
 - name: install jupyterlab extensions from PyPI
-  pip:
+  ansible.builtin.pip:
     executable: "{{ jupyterhub_env_prefix }}/bin/pip"
     name: "{{ item }}"
     extra_args: "--no-cache-dir"

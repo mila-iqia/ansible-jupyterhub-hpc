@@ -14,12 +14,13 @@
 
 ---
 
-namespace: mahendrapaipuri
+namespace: mila
 name: ansible_jupyterhub_hpc
-version: "2.2.0"
+version: "2.2.1"
 readme: "README.md"
 authors:
   - "Mahendra Paipuri <mahendra.paipuri@cnrs.fr>"
+  - "ahmed.mamlouk"
 description: |
   Installs JupyterHub along with batchspawner on HPC platforms.
   The role additionally can deploy node exporter, Prometheus and
@@ -33,9 +34,6 @@ tags:
   - monitoring
   - prometheus
   - grafana
-dependencies:
-  "prometheus.prometheus": "0.30.0"
-  "grafana.grafana": "6.1.0"
 repository: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc"
 documentation: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/tree/main/docs"
 issues: "https://gitlab.com/idris-cnrs/jupyter/ansible-jupyterhub-hpc/-/issues"

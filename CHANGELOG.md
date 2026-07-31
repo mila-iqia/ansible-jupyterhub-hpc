@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.2.1
+
+### Changed
+- **Namespace Rename**: Updated the role's namespace to conform with new naming conventions.
+- **Variable Restructuring**: Moved all user-configurable variables to `defaults/main.yml` and cleaned up `vars/main.yml` to allow proper overriding via `group_vars` and `host_vars`.
+
+### Removed
+- **Deprecated Ansible `conda` Module**: Replaced the native `conda:` module with direct `micromamba` execution (`ansible.builtin.command`) to speed up dependency resolution and improve installation reliability.
+
+### Fixed
+- Fixed a variable evaluation failure on Debian 13 .
+
 ## v2.2.0
 
 - Fix bug on configuring alternative subject names for JupyterHub

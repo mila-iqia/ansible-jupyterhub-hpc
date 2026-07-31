@@ -14,6 +14,23 @@
 ---
 
 # ---------------------------------------------------
+# Grafana configuration
+# ---------------------------------------------------
+
+# Grafana related config
+grafana_http_port: "3000"
+grafana_http_addr: "127.0.0.1"
+
+# ---------------------------------------------------
+# Node exporter configuration
+# ---------------------------------------------------
+
+node_exporter_version: "1.9.1"
+
+# Node exporter URL
+node_exporter_http_port: "9100"
+node_exporter_http_address: "localhost"
+# ---------------------------------------------------
 # Prometheus configuration
 # ---------------------------------------------------
 
