@@ -14,13 +14,13 @@
 
 ---
 
-namespace: mila
-name: ansible_jupyterhub_hpc
-version: "2.2.1"
+namespace: mila-iqia
+name: jupyterhub_hpc
+version: "2.2.2"
 readme: "README.md"
 authors:
   - "Mahendra Paipuri <mahendra.paipuri@cnrs.fr>"
-  - "ahmed.mamlouk"
+  -  "Mila"
 description: |
   Installs JupyterHub along with batchspawner on HPC platforms.
   The role additionally can deploy node exporter, Prometheus and
